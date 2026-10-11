@@ -114,15 +114,17 @@ sec-filings-tone/
   PLAN.md
   README.md
   pyproject.toml
-  fetch.py
-  ingest.py
-  retrieve.py
-  sentiment.py
-  diff.py
-  answer.py
+  src/sec_filings_tone/      # run as: uv run python -m sec_filings_tone.<module>
+    fetch.py
+    ingest.py
+    retrieve.py
+    sentiment.py
+    diff.py
+    answer.py
   events.csv
   data/
-    companies.csv
+    companies.csv            # S&P 500 list, fixed once fetched
+    filings.csv              # one row per filing: dates, accession, section lengths, ok flag
   eval/
     tests.jsonl
     eval.py
@@ -136,7 +138,7 @@ sec-filings-tone/
 
 ## Risks
 
-- **Section extraction breaks on some filings:** the Phase 1 length check catches it. With about 3,500 filings, fixing them by hand won't scale, so report the failure rate and leave those filings out.
+- **Section extraction breaks on some filings:** the Phase 1 length check catches it. Seen in the pilot: Intel's 10-Ks use their own layout with no "Item 7" heading, so its MD&A comes back empty while Item 1A is fine. Ingest should skip individual sections that are too short, not whole filings. With about 3,500 filings, fixing them by hand won't scale, so report the failure rate and leave those filings out.
 - **Survivorship bias:** using today's S&P 500 list leaves out companies that dropped out or went bankrupt, which leans the sample toward companies that did well. Say so in the limitations.
 - **Fiscal years don't line up across companies:** NVDA's fiscal year ends in January. Use the filing date for charts and event windows, and note this in the README.
 - **The LLM labels may lean the same way as the LLM scorer:** use different model families for labeling and scoring, and treat only the human-verified gold set as the final test.
