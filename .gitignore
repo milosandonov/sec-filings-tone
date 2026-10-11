@@ -4,3 +4,4 @@ __pycache__/
 .ipynb_checkpoints/
 data/cache/
 vector_db/
+*.log
