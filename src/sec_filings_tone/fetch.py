@@ -1,8 +1,9 @@
-"""Phase 1: download 10-K Item 1A and Item 7 text into data/cache/.
+"""Phase 1: download 10-K Item 1A and Item 7, and 10-Q MD&A, text into data/cache/.
 
 Usage:
-    uv run python -m sec_filings_tone.fetch NVDA AMD    # specific tickers
-    uv run python -m sec_filings_tone.fetch             # every company in data/companies.csv
+    uv run python -m sec_filings_tone.fetch NVDA AMD          # 10-Ks for specific tickers
+    uv run python -m sec_filings_tone.fetch                   # 10-Ks for every company in data/companies.csv
+    uv run python -m sec_filings_tone.fetch --10q [TICKERS]   # 10-Q MD&A (Part I, Item 2) instead
 """
 
 import os
@@ -19,11 +20,14 @@ from edgar import Company, set_identity
 DATA = Path("data")
 CACHE = DATA / "cache"
 COMPANIES = DATA / "companies.csv"
-MANIFEST = DATA / "filings.csv"
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 FIRST_FY = 2019
 MIN_CHARS = 5_000  # shorter than this means extraction failed
-ITEMS = {"1A": "risk_factors", "7": "management_discussion"}
+# form -> (manifest, {item: how to get it from the parsed report})
+FORMS = {
+    "10-K": (DATA / "filings.csv", {"1A": lambda r: r.risk_factors, "7": lambda r: r.management_discussion}),
+    "10-Q": (DATA / "filings_10q.csv", {"mdna": lambda r: r["Part I, Item 2"]}),
+}
 
 
 def load_companies() -> pd.DataFrame:
@@ -41,13 +45,16 @@ def load_companies() -> pd.DataFrame:
     return pd.read_csv(COMPANIES).drop_duplicates("cik")
 
 
+# "Management Discussion" (IBM), "...Management's Financial Discussion" (ETR), "Financial Review" (WFC),
+# "s Discussion and Analysis" when the heading breaks at the apostrophe (JBHT)
+MDNA = (r"(.{0,60}\b)?(management'?s? (financial )?discussion( and analysis)?|'?s discussion and analysis)"
+        r"( of .{0,80})?|financial review")
+
 # Fallback section boundaries, matched against whole heading lines (see heading())
 STARTS = {
     "1A": r"(item 1\W*a\W*)?risk factors( \(continued\))?",  # "Item 1(a)" (HAL), page headers (BNY)
-    # "Management Discussion" (IBM), "...Management's Financial Discussion" (ETR), "Financial Review" (WFC),
-    # "s Discussion and Analysis" when the heading breaks at the apostrophe (JBHT)
-    "7": r"(item 7\W*)?(.{0,60}\b)?(management'?s? (financial )?discussion( and analysis)?|'?s discussion and analysis)"
-         r"( of .{0,80})?|financial review",
+    "7": rf"(item 7\W*)?({MDNA})",
+    "mdna": rf"(item 2\W*)?({MDNA})",  # 10-Q Part I, Item 2
 }
 ENDS = {
     "1A": r"(item 1\W*b|item 1\W*c|item 2)\b.*|unresolved staff comments|cybersecurity|properties"
@@ -56,6 +63,8 @@ ENDS = {
          r"|financial statements and supplementary data|report of independent registered public accounting firm"
          r"|management's report on internal control over financial reporting|report of management"
          r"|risk factors( and other key information)?",
+    "mdna": r"(item 3|item 4|part ii)\b.*|quantitative and qualitative disclosures? about market risk"
+            r"|controls and procedures|legal proceedings|risk factors",
 }
 
 
@@ -91,29 +100,32 @@ def find_section(text: str, item: str) -> str:
 
 
 def full_text(filing) -> str:
-    """Main 10-K document plus any Exhibit 13 or 99, where companies like WFC (13) and
+    """Main document plus any Exhibit 13 or 99, where companies like WFC (13) and
     CLX (99) put the sections they "incorporate by reference"."""
     parts = [filing.markdown()]
     parts += [a.markdown() or "" for a in filing.attachments if (a.document_type or "").startswith(("EX-13", "EX-99"))]
     return "\n".join(parts)
 
 
-def fetch_ticker(ticker: str, sector: str) -> list[dict]:
+def fetch_ticker(ticker: str, sector: str, form: str) -> list[dict]:
+    items = FORMS[form][1]
     rows, seen = [], set()
     # EDGAR uses BRK-B where Wikipedia uses BRK.B
-    for filing in Company(ticker.replace(".", "-")).get_filings(form="10-K", amendments=False):
+    for filing in Company(ticker.replace(".", "-")).get_filings(form=form, amendments=False):
         fy = int(filing.report_date[:4])
         if fy < FIRST_FY:
             break  # filings come newest first
-        if fy in seen:
-            continue  # keep the latest 10-K for a fiscal year
-        seen.add(fy)
+        # one 10-K per fiscal year; 10-Qs are named by period end since they have no FY label
+        key = fy if form == "10-K" else filing.report_date
+        if key in seen:
+            continue  # keep the latest filing for a period
+        seen.add(key)
 
-        paths = {item: CACHE / f"{ticker}_{fy}_{item}.txt" for item in ITEMS}
+        paths = {item: CACHE / f"{ticker}_{key}_{item}.txt" for item in items}
         if not all(p.exists() for p in paths.values()):
-            tenk, full = filing.obj(), None
-            for item, attr in ITEMS.items():
-                text = str(getattr(tenk, attr) or "")
+            report, full = filing.obj(), None
+            for item, get in items.items():
+                text = str(get(report) or "")
                 if len(text) < MIN_CHARS:  # parser missed it or it's incorporated by reference
                     full = full or full_text(filing)
                     text = find_section(full, item) or text
@@ -131,8 +143,11 @@ def main() -> None:
     set_identity(os.environ["SEC_USER_AGENT"])
     CACHE.mkdir(parents=True, exist_ok=True)
 
+    args = sys.argv[1:]
+    form = "10-Q" if "--10q" in args else "10-K"
+    manifest = FORMS[form][0]
     companies = load_companies()
-    if tickers := sys.argv[1:]:
+    if tickers := [a for a in args if a != "--10q"]:
         companies = companies[companies.ticker.isin(tickers)]
         if missing := set(tickers) - set(companies.ticker):
             sys.exit(f"Not in {COMPANIES}: {sorted(missing)}")
@@ -140,7 +155,7 @@ def main() -> None:
     rows = []
     for i, (ticker, sector) in enumerate(zip(companies.ticker, companies.sector), 1):
         try:
-            got = fetch_ticker(ticker, sector)
+            got = fetch_ticker(ticker, sector, form)
             rows += got
             print(f"[{i}/{len(companies)}] {ticker}: {len(got)} filings, {sum(not r['ok'] for r in got)} short")
         except Exception as e:  # one bad company shouldn't stop a 500-company run
@@ -148,13 +163,13 @@ def main() -> None:
             rows.append({"ticker": ticker, "sector": sector, "ok": False})
 
     new = pd.DataFrame(rows)
-    if MANIFEST.exists():  # replace this run's tickers, keep the rest
-        old = pd.read_csv(MANIFEST)
+    if manifest.exists():  # replace this run's tickers, keep the rest
+        old = pd.read_csv(manifest)
         new = pd.concat([old[~old.ticker.isin(new.ticker)], new])
-    new.sort_values(["ticker", "fy"]).to_csv(MANIFEST, index=False)
+    new.sort_values(["ticker", "report_date"]).to_csv(manifest, index=False)
 
     bad = new[~new.ok]
-    print(f"\n{len(new)} rows in {MANIFEST}, {len(bad)} failed or short:")
+    print(f"\n{len(new)} rows in {manifest}, {len(bad)} failed or short:")
     if len(bad):
         print(bad.to_string(index=False))
 
