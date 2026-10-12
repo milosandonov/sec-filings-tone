@@ -53,6 +53,13 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 - Write about 30 test questions with keywords and reference answers, in the same format as `week5/evaluation/tests.jsonl`, spread across sectors. Examples: "What supply chain risks did NVDA cite in FY2023?" and "How did JPM describe deposit outflows in FY2023 MD&A?"
 - Score with MRR, nDCG and keyword coverage. `week5/evaluation/eval.py` can be reused almost unchanged.
 - Measure a baseline (vector search only), then hybrid, then hybrid plus reranking. The before/after table goes into the README.
+- **Then, before the full-scale embed, run the chunking and embedding experiment on the pilot**, scored with this eval:
+  - target chunk size: 300, 500 or 800 tokens
+  - overlap in the embedded text: none or one sentence
+  - context header: on or off
+  - embedding model: OpenAI `text-embedding-3-large` (current) vs Gemini Embedding 001, and Voyage-4-large if we add a key
+
+  Each variant goes in its own Chroma collection and costs about $0.50 to embed for the pilot. Keep the winner and embed the full set once.
 
 ### 5. Sentiment scoring (`sentiment.py`)
 Run three scorers on the same retrieved passages:
