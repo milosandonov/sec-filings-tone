@@ -5,3 +5,5 @@ __pycache__/
 data/cache/
 vector_db/
 *.log
+data/chunks.parquet
+data/ingest_skipped.csv

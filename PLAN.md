@@ -22,7 +22,7 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 - A full 10-K HTML file is roughly 2–10 MB, mostly inline XBRL markup. Item 1A plus Item 7 as plain text is roughly 100–300 KB per filing.
 - 3,500 filings come to about 350 MB–1 GB of extracted text. That's too much to hold in memory at once, so process one filing at a time.
 - **Decision:** keep the raw HTML in memory only, and save just the extracted section text to `data/cache/{ticker}_{year}_{item}.txt`. That avoids re-downloading about 3,500 filings on every run and keeps runs reproducible. The cache is gitignored, and `ingest.py` rebuilds it from scratch.
-- Embeddings: about 350k chunks. At the full 3,072 dimensions that's about 4 GB, so request 1,024 dimensions from `text-embedding-3-large` (about 1.4 GB). Store in a local Chroma database (`vector_db/`, also gitignored). Embedding is roughly 100–250M tokens in total, so check the current price before running the full set.
+- Embeddings: the pilot (10 companies, 10-K + 10-Q) gave 9,766 chunks, median 337 tokens, with 91% of the raw text kept after cleaning. Scaled to all 498 companies, that's about 800k chunks and about 300M tokens. Request 1,024 dimensions from `text-embedding-3-large`: about 3 GB of vectors, about 6–7 GB in Chroma (`vector_db/`, gitignored). Check the current price before the full run, and use the Batch API.
 - The LLM scorer runs only on retrieved topic passages and the labeled sets, not on every sentence. Scoring every sentence would be about 5M LLM calls.
 
 ## Phases
