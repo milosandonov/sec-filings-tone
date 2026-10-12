@@ -35,7 +35,7 @@ Work in progress. The filing download is done. The other stages are planned but 
 
 ## Setup
 
-Requires Python 3.13 and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.13 or newer (`requires-python = ">=3.13"` in `pyproject.toml`) and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
