@@ -12,9 +12,10 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 
 - **Companies:** current S&P 500 constituents (about 500 companies, 11 GICS sectors). Sector comes from the S&P 500 list on Wikipedia.
 - **Pilot first:** build and check every phase on 10 semiconductor companies (NVDA, AMD, INTC, QCOM, AVGO, TXN, MU, AMAT, LRCX, KLAC), then scale to the full list. Nothing in the code should assume one sector.
-- **Filings:** 10-K only, FY2019 onward (about 7 per company, about 3,500 in total). Starting at FY2019 gives a pre-COVID baseline for the event checks.
-- **Sections:** Item 1A (Risk Factors) and Item 7 (MD&A).
-- **Out of scope for now:** 10-Qs, earnings call transcripts (paywalled or unclear licensing), and any claim that tone predicts returns.
+- **Filings:** FY2019 onward. Starting at FY2019 gives a pre-COVID baseline for the event checks.
+  - **10-K:** Item 1A (Risk Factors) and Item 7 (MD&A). About 7 per company, about 3,450 in total.
+  - **10-Q:** MD&A only (Part I, Item 2). About 23 per company, about 11,500 in total. A 10-K comes out only once a year, so an event like SVB (March 2023) wouldn't appear in most banks' 10-Ks until early 2024. The 10-Qs show it by May 2023 and give four tone readings a year instead of one.
+- **Out of scope for now:** 10-Q risk factors (Part II, Item 1A, usually just "no material changes"), 8-K earnings press releases (a possible next source), earnings call transcripts (paywalled or unclear licensing), and any claim that tone predicts returns.
 
 ## Data size and storage
 
@@ -124,7 +125,8 @@ sec-filings-tone/
   events.csv
   data/
     companies.csv            # S&P 500 list, fixed once fetched
-    filings.csv              # one row per filing: dates, accession, section lengths, ok flag
+    filings.csv              # one row per 10-K: dates, accession, section lengths, ok flag
+    filings_10q.csv          # same for 10-Q MD&A
   eval/
     tests.jsonl
     eval.py

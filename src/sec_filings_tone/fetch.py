@@ -46,15 +46,16 @@ def load_companies() -> pd.DataFrame:
 
 
 # "Management Discussion" (IBM), "...Management's Financial Discussion" (ETR), "Financial Review" (WFC),
-# "s Discussion and Analysis" when the heading breaks at the apostrophe (JBHT)
-MDNA = (r"(.{0,60}\b)?(management'?s? (financial )?discussion( and analysis)?|'?s discussion and analysis)"
-        r"( of .{0,80})?|financial review")
+# "s Discussion and Analysis" / "ement's Discussion..." when the heading breaks mid-word (JBHT, ZBH)
+MDNA = (r"(.{0,60}\b)?(management'?s? (financial )?discussion( and analysis)?|\w*'?s discussion and analysis)"
+        r"( of\b.{0,80})?|financial review")
 
 # Fallback section boundaries, matched against whole heading lines (see heading())
 STARTS = {
     "1A": r"(item 1\W*a\W*)?risk factors( \(continued\))?",  # "Item 1(a)" (HAL), page headers (BNY)
     "7": rf"(item 7\W*)?({MDNA})",
-    "mdna": rf"(item 2\W*)?({MDNA})",  # 10-Q Part I, Item 2
+    # 10-Q Part I, Item 2; BNY titles it "Items 2. and 3. MD&A...; Quantitative and Qualitative..."
+    "mdna": rf"(items? 2\W*(and 3\W*)?)?({MDNA})(; .*)?",
 }
 ENDS = {
     "1A": r"(item 1\W*b|item 1\W*c|item 2)\b.*|unresolved staff comments|cybersecurity|properties"
@@ -78,7 +79,7 @@ def heading(line: str) -> str | None:
             return None
         s = " ".join(cells)
     s = re.sub(r"\s+", " ", re.sub(r"[#*\\]", "", s)).strip(" .:").lower()
-    return s if 0 < len(s) < 150 else None
+    return s if 0 < len(s) < 200 else None
 
 
 def find_section(text: str, item: str) -> str:
