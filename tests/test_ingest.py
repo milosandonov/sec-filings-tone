@@ -90,3 +90,18 @@ assert drop_risk_factors(MDNA + "Risk Factors\n\nYou should consider each of the
 stub = MDNA + "Risk Factors \n\nRisk factors are disclosed within Item 1A. Risk Factors of the 2022 Form 10-K.\n\nLiquidity\n"
 assert drop_risk_factors(stub) == stub
 print("ok")
+
+# an MD&A that runs on into the financial statements is cut there; a table of contents near the top isn't a cut point
+from sec_filings_tone.ingest import drop_financial_statements  # noqa: E402
+
+toc = "Consolidated Statements of Income 45\n" + "Overview of the year.\n\n" * 120
+body = "Results of Operations\n\nNet interest income rose.\n\n" * 50
+fin = "CONSOLIDATED STATEMENTS OF INCOME\n\n| Interest income | 100 |\n"
+assert drop_financial_statements(toc + body + fin) == toc + body
+assert drop_financial_statements(toc + body) == toc + body
+print("ok")
+q = "Notes to Condensed Consolidated Financial Statements (unaudited) |\n"
+assert drop_financial_statements(body + q + "Note 1.") == body
+cite = "Notes to Consolidated Financial Statements are referenced throughout this report for more detail.\n"
+assert drop_financial_statements(body + cite + body) == body + cite + body  # a sentence, not a heading
+print("ok")

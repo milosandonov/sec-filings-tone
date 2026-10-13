@@ -3,6 +3,7 @@
 Usage:
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD          # chunk only (local, free)
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD --embed  # chunk, then embed (costs money)
+    uv run python -m sec_filings_tone.ingest --embed --budget 30         # everything; stops first if over $30
     uv run python -m sec_filings_tone.ingest                             # chunk everything
 """
 
@@ -22,8 +23,10 @@ SKIPPED = DATA / "ingest_skipped.csv"
 VECTOR_DB = "vector_db"
 EMBED_MODEL = "text-embedding-3-large"
 EMBED_DIMS = 1024
-EMBED_PRICE_PER_M = 0.13  # USD per 1M tokens, from memory: check before the full run
-MAX_SECTION_CHARS = 400_000  # longer means fetch.py ran past the section (Citi 10-Q at 1.28M)
+EMBED_PRICE_PER_M = 0.13  # USD per 1M tokens (OpenAI pricing page, checked 2026-10-12)
+COLLECTION = "filings_v2"  # v1 embedded a context header and overlap; Phase 4 found both hurt (eval/FINDINGS.md)
+CUT_STATEMENTS_OVER = 400_000  # an MD&A longer than this is checked for run-on financial statements (Citi 10-Q at 1.28M)
+MAX_SECTION_CHARS = 500_000  # still longer after that cut means extraction went wrong; JPM's real 10-K MD&A is about 404k
 MAX_MEDIAN_RATIO = 3
 HEADING_MIN_TOKENS = 100  # a heading starts a new chunk only once the current one is this big
 MIN_TAIL_TOKENS = 50  # a smaller last chunk of a section joins the one before it
@@ -82,6 +85,35 @@ def is_furniture(heading: str) -> bool:
     to Fiscal 2019")."""
     return (re.search(r"\s\d{1,3}$", heading) is not None or "$" in heading
             or len(re.findall(r"\d[\d,.]*", heading)) >= 3)
+
+
+FIN_STATEMENTS = re.compile(
+    r"^[ \t#*|]*((condensed )?consolidated (statements?|balance sheets?) of (income|operations|financial condition|comprehensive income)"
+    r"|report of independent registered public accounting firm|notes to (the )?(condensed )?consolidated financial statements)\b"
+    r"[^\n]*$", re.I | re.M)
+
+
+def drop_financial_statements(text: str) -> str:
+    """Big banks' MD&A (C, COF, PNC, USB, FITB, JPM) often runs on into the financial statements. Cut at
+    the first statement heading at least a quarter of the way in. Only for sections over the size
+    limits: normal MD&As (PH, WTW) include summary tables titled "Consolidated Statement of Income",
+    and a cut there would delete most of the MD&A. Only heading-like lines count: short and not
+    ending in a period, so a sentence citing the notes doesn't."""
+    for m in FIN_STATEMENTS.finditer(text, len(text) // 4):
+        line = m.group(0).strip(" \t|*#")
+        if len(line) < 120 and not line.endswith("."):
+            return text[:m.start()]
+    return text
+
+
+def section_text(sec: dict) -> str:
+    """A cached section with the parts that aren't MD&A or risk factors cut off."""
+    text = (CACHE / f"{sec['ticker']}_{sec['key']}_{sec['item']}.txt").read_text()
+    if sec["item"] == "mdna":
+        text = drop_risk_factors(text)
+    if sec.get("cut_statements"):
+        text = drop_financial_statements(text)
+    return text
 
 
 def drop_risk_factors(text: str) -> str:
@@ -161,10 +193,16 @@ def sections(tickers: list[str] | None) -> tuple[list[dict], list[dict]]:
                 sec = {"ticker": row.ticker, "sector": row.sector, "form": form, "item": item, "fy": fy,
                        "report_date": row.report_date, "filing_date": row.filing_date,
                        "accession": row.accession, "key": key, "chars": int(getattr(row, col))}
-                reason = ("short" if sec["chars"] < MIN_CHARS
-                          else f"over {MAX_SECTION_CHARS:,} chars" if sec["chars"] > MAX_SECTION_CHARS
-                          else f"over {MAX_MEDIAN_RATIO}x ticker median" if sec["chars"] > MAX_MEDIAN_RATIO * med
-                          else None)
+                def why(chars):
+                    return ("short" if chars < MIN_CHARS
+                            else f"over {MAX_SECTION_CHARS:,} chars" if chars > MAX_SECTION_CHARS
+                            else f"over {MAX_MEDIAN_RATIO}x ticker median" if chars > MAX_MEDIAN_RATIO * med
+                            else None)
+                if item in ("7", "mdna") and (sec["chars"] > CUT_STATEMENTS_OVER or sec["chars"] > MAX_MEDIAN_RATIO * med):
+                    # too long may only mean it ran on into the financial statements: judge the cut text
+                    sec["cut_statements"] = True
+                    sec["chars"] = len(section_text(sec))
+                reason = why(sec["chars"])
                 (skipped if reason else keep).append({**sec, "reason": reason} if reason else sec)
     return keep, skipped
 
@@ -174,9 +212,7 @@ def build_chunks(tickers: list[str] | None = None, max_tokens: int = 800, target
     keep, skipped = sections(tickers)
     rows = []
     for sec in keep:
-        text = (CACHE / f"{sec['ticker']}_{sec['key']}_{sec['item']}.txt").read_text()
-        if sec["item"] == "mdna":
-            text = drop_risk_factors(text)
+        text = section_text(sec)
         for seq, c in enumerate(chunk_section(text, max_tokens, target_tokens, heading_min_tokens)):
             rows.append({"chunk_id": f"{sec['ticker']}_{sec['form']}_{sec['key']}_{sec['item']}_{seq:04d}",
                          **{k: sec[k] for k in ("ticker", "sector", "form", "item", "fy",
@@ -203,9 +239,10 @@ def build_chunks(tickers: list[str] | None = None, max_tokens: int = 800, target
 
 def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences: int = 1,
                header: str = "full") -> list[str]:
-    """What gets embedded: context header + the previous chunk's last sentence(s), capped at
-    overlap_tokens + text. header is "full", "no_heading" (company, form, period, item) or "none".
-    The stored text stays clean, so scorers never see the header or count overlap twice."""
+    """Context header + the previous chunk's last sentence(s), capped at overlap_tokens + text.
+    header is "full", "no_heading" (company, form, period, item) or "none". The reranker reads
+    passages in this format; filings_v1 embedded it, but Phase 4 found the header and overlap
+    hurt vector search, so embed_chunks now embeds the plain text."""
     out, prev = [], {}
     for r in chunks.itertuples():
         when = f"FY{r.fy}" if r.form == "10-K" else f"quarter ending {r.report_date}"
@@ -222,13 +259,14 @@ def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences
     return out
 
 
-def embed_chunks(chunks: pd.DataFrame, collection: str = "filings_v1", overlap_tokens: int = 60) -> None:
-    """Embed into Chroma. Chunk ids already in the collection are skipped, so it can be stopped and rerun."""
+def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 5.0) -> None:
+    """Embed each chunk's plain text into Chroma. Chunk ids already in the collection are skipped,
+    so it can be stopped and rerun. Stops before any request if the estimate is over budget (USD)."""
     import chromadb
     from openai import OpenAI
 
     chunks = chunks.sort_values(["ticker", "form", "item", "report_date", "seq"])
-    docs = embed_text(chunks, overlap_tokens)
+    docs = chunks.text.tolist()
     col = chromadb.PersistentClient(VECTOR_DB).get_or_create_collection(
         collection, configuration={"hnsw": {"space": "cosine"}}, embedding_function=None)
 
@@ -238,10 +276,12 @@ def embed_chunks(chunks: pd.DataFrame, collection: str = "filings_v1", overlap_t
         done |= set(col.get(ids=ids[i:i + 5000], include=[])["ids"])
     todo = [i for i, cid in enumerate(ids) if cid not in done]
     tokens = [n_tokens(docs[i]) for i in todo]
-    print(f"{len(todo)} of {len(ids)} chunks to embed, {sum(tokens):,} tokens, "
-          f"about ${sum(tokens) / 1e6 * EMBED_PRICE_PER_M:.2f} at ${EMBED_PRICE_PER_M}/M (check current price)")
+    cost = sum(tokens) / 1e6 * EMBED_PRICE_PER_M
+    print(f"{len(todo)} of {len(ids)} chunks to embed, {sum(tokens):,} tokens, about ${cost:.2f} at ${EMBED_PRICE_PER_M}/M")
+    if cost > budget:
+        raise SystemExit(f"estimated ${cost:.2f} is over the ${budget:.2f} budget; rerun with --budget {cost * 1.1:.0f}")
 
-    client = OpenAI()
+    client = OpenAI(timeout=60, max_retries=3)  # a stuck request fails instead of hanging
     meta_cols = ["ticker", "sector", "form", "item", "fy", "report_date", "filing_date",
                  "accession", "period_quarter", "heading", "seq", "n_tokens"]
     batch, batch_tokens = [], 0
@@ -266,12 +306,13 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--tickers", nargs="*")
     p.add_argument("--embed", action="store_true")
+    p.add_argument("--budget", type=float, default=5.0, help="USD; embedding stops before starting if over it")
     args = p.parse_args()
     chunks = build_chunks(args.tickers)
     if args.embed:
         if not os.environ.get("OPENAI_API_KEY"):
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")
-        embed_chunks(chunks)
+        embed_chunks(chunks, budget=args.budget)
 
 
 if __name__ == "__main__":

@@ -18,48 +18,19 @@ import argparse
 import json
 import math
 import re
-import time
 from pathlib import Path
 
 import pandas as pd
 
 from sec_filings_tone import retrieve
+from sec_filings_tone.budget import Cap, CapReached, call_usd
 from sec_filings_tone.retrieve import STAGES, chunks, search, subset
 
 TESTS = Path(__file__).parent / "tests.jsonl"
 K = 10
-HAIKU_PRICE = (0.10, 0.50)  # USD per 1M input and output tokens, claude-haiku-5-5 (checked 2026-10-12)
-
-
-class CapReached(RuntimeError):
-    pass
-
-
-class Cap:
-    """Stops a run before a paid call would push spending past `usd`, or once `minutes` have passed.
-    Reranker spend comes from the API's token counts; callers add anything else with charge()."""
-
-    def __init__(self, usd: float = float("inf"), minutes: float = float("inf")):
-        self.usd, self.deadline, self.other = usd, time.monotonic() + minutes * 60, 0.0
-
-    def spent(self) -> float:
-        u = retrieve.usage
-        return self.other + (u["input_tokens"] * HAIKU_PRICE[0] + u["output_tokens"] * HAIKU_PRICE[1]) / 1e6
-
-    def charge(self, usd: float) -> None:
-        self.other += usd
-
-    def check(self, next_usd: float = 0.0) -> None:
-        if self.spent() + next_usd > self.usd:
-            raise CapReached(f"cost cap: ${self.spent():.2f} spent, the next call (up to ${next_usd:.3f}) "
-                             f"would pass ${self.usd:.2f}")
-        if time.monotonic() > self.deadline:
-            raise CapReached(f"time cap reached, ${self.spent():.2f} spent")
-
-
 def rerank_call_usd(n_input_tokens: float) -> float:
     """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
-    return (n_input_tokens * HAIKU_PRICE[0] + 8000 * HAIKU_PRICE[1]) / 1e6
+    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
 
 
 def contains(text: str, keyword: str) -> bool:

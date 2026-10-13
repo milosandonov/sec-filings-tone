@@ -15,6 +15,7 @@ Usage:
     uv run python eval/experiment.py                          # embed what's missing, rank, score
     uv run python eval/experiment.py --variants base gemini2  # some variants only
     uv run python eval/experiment.py --score-only             # metrics from saved rankings, no API calls
+    uv run python eval/experiment.py --multi                  # pilot + one company per other sector, more questions
     uv run python eval/experiment.py --budget 6 --max-minutes 60   # caps (defaults: $8 of new spend, 90 minutes)
 """
 
@@ -35,6 +36,9 @@ from sec_filings_tone import retrieve
 from sec_filings_tone.ingest import build_chunks, embed_text, n_tokens
 
 PILOT = ["AMAT", "AMD", "AVGO", "INTC", "KLAC", "LRCX", "MU", "NVDA", "QCOM", "TXN"]
+# --multi: one large company from each other sector (BAC for Financials: JPM's 10-K MD&A is over ingest's size cap)
+EXTRA = ["AMZN", "BAC", "CAT", "GOOGL", "LIN", "NEE", "PG", "PLD", "UNH", "XOM"]
+MULTI_VARIANTS = ["combo_head", "combo_head_small", "overlap_none"]  # winner, small model, header on without overlap
 BASE = {"target": 500, "headings": True, "overlap_sentences": 1, "overlap_tokens": 60, "header": "full",
         "model": "text-embedding-3-large"}
 # Headings set most chunk boundaries (median ~350 tokens at any target), so size is tested with
@@ -51,12 +55,24 @@ VARIANTS = {
     "header_no_heading": {"header": "no_heading"},
     "oai_small": {"model": "text-embedding-3-small"},
     "gemini2": {"model": "gemini-embedding-2"},
+    # combinations of the single-factor winners (no header, no overlap), with heading splits on and off
+    # and with both models: decides the heading question for topic-level tone, and large vs small
+    "combo_flat": {"headings": False, "header": "none", "overlap_tokens": 0},
+    "combo_flat_small": {"headings": False, "header": "none", "overlap_tokens": 0, "model": "text-embedding-3-small"},
+    "combo_head": {"header": "none", "overlap_tokens": 0},
+    "combo_head_small": {"header": "none", "overlap_tokens": 0, "model": "text-embedding-3-small"},
+    # open models with the production text (plain, heading-aligned chunks)
+    "oss_qwen3": {"header": "none", "overlap_tokens": 0, "model": "Qwen/Qwen3-Embedding-0.6B"},
+    "oss_bge_m3": {"header": "none", "overlap_tokens": 0, "model": "BAAI/bge-m3"},
 }
 # full size saved, sizes scored, USD per 1M input tokens (checked 2026-10-12)
 MODELS = {
     "text-embedding-3-large": {"dims": 3072, "score_dims": [256, 1024, 3072], "price": 0.13},
     "text-embedding-3-small": {"dims": 1536, "score_dims": [512, 1024, 1536], "price": 0.02},
     "gemini-embedding-2": {"dims": 3072, "score_dims": [768, 1024, 3072], "price": 0.20},
+    # open models, run locally (free apart from compute time); both take inputs well past our 800 tokens
+    "Qwen/Qwen3-Embedding-0.6B": {"dims": 1024, "score_dims": [256, 1024], "price": 0.0, "local": True},
+    "BAAI/bge-m3": {"dims": 1024, "score_dims": [1024], "price": 0.0, "local": True},  # not trained for truncation
 }
 MAIN_DIMS = 1024  # what Chroma stores; variants are compared here
 DEPTH = 50  # ranks saved per stage, so recall@k is computable up to 50
@@ -102,6 +118,16 @@ def batches(texts: list[str], model: str) -> list[list[int]]:
 
 
 @cache
+def local_model(name: str):
+    from sentence_transformers import SentenceTransformer
+    import torch
+
+    m = SentenceTransformer(name, device="mps" if torch.backends.mps.is_available() else "cpu")
+    m.max_seq_length = 1024  # chunks are at most 800 cl100k tokens
+    return m
+
+
+@cache
 def gemini():
     """One client for the run: a client that's garbage-collected closes its connection mid-request."""
     from google import genai
@@ -119,6 +145,11 @@ def embed(texts: list[str], model: str, query: bool = False) -> np.ndarray:
 
         data = OpenAI(timeout=API_TIMEOUT, max_retries=3).embeddings.create(model=model, input=texts).data
         vecs = [d.embedding for d in data]
+    elif MODELS[model].get("local"):
+        m = local_model(model)
+        # Qwen3 expects an instruction on queries (its "query" prompt); documents get none
+        prompt = "query" if query and "query" in m.prompts else None
+        vecs = m.encode(texts, batch_size=8, prompt_name=prompt, convert_to_numpy=True)
     else:
         from google.genai import types
 
@@ -151,8 +182,22 @@ def doc_vectors(name: str, df: pd.DataFrame, out: Path) -> np.ndarray:
     return np.concatenate(parts)
 
 
+def vectors(name: str, df: pd.DataFrame, out: Path) -> np.ndarray:
+    """In --multi, the pilot companies' chunks are identical to the pilot run's, so their saved vectors
+    are reused and only the other companies are embedded."""
+    if out.name != "multi":
+        return doc_vectors(name, df, out)
+    pilot = df.ticker.isin(PILOT).to_numpy()
+    ref = chunk_table(config(name)["table"], out.parent, PILOT)
+    assert ref.chunk_id.tolist() == df.chunk_id[pilot].tolist() and (ref.text.to_numpy() == df.text[pilot].to_numpy()).all()
+    E = np.empty((len(df), MODELS[config(name)["model"]]["dims"]), dtype=np.float32)
+    E[pilot] = doc_vectors(name, ref, out.parent)
+    E[~pilot] = doc_vectors(name, df[~pilot], out)
+    return E
+
+
 def query_vectors(model: str, questions: list[str], out: Path) -> np.ndarray:
-    path = out / f"queries_{model}.pkl"
+    path = out / f"queries_{model.replace('/', '_')}.pkl"
     cache = pickle.loads(path.read_bytes()) if path.exists() else {}
     if missing := [q for q in questions if q not in cache]:
         usd = sum(map(n_tokens, missing)) / 1e6 * MODELS[model]["price"]
@@ -252,7 +297,7 @@ def report(m: pd.DataFrame, names: list[str]) -> None:
     vec = main[main.stage == "vector"].set_index(["variant", "test"])
     for name in names:
         r = vec.loc[name][cols].mean()
-        ref = reference(name)
+        ref = reference(name) if reference(name) in names else "combo_head"
         if ref in names and ref != name:
             d = (vec.loc[name].mrr - vec.loc[ref].mrr).to_numpy()
             lo, hi = bootstrap(d)
@@ -295,6 +340,7 @@ def main() -> None:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--smoke", action="store_true")
     p.add_argument("--score-only", action="store_true")
+    p.add_argument("--multi", action="store_true")
     p.add_argument("--budget", type=float, default=8.0, help="USD of new spend; stop before a call would pass it")
     p.add_argument("--max-minutes", type=float, default=90)
     a = p.parse_args()
@@ -303,8 +349,13 @@ def main() -> None:
 
     # smoke: the smallest pilot company, so every code path runs for about $0.20
     tickers, out = (["TXN"], Path("data/experiment/smoke")) if a.smoke else (PILOT, Path("data/experiment"))
+    if a.multi:
+        tickers, out = PILOT + EXTRA, Path("data/experiment/multi")
+        if a.variants == list(VARIANTS):
+            a.variants = MULTI_VARIANTS
     out.mkdir(parents=True, exist_ok=True)
-    tests = [json.loads(line) for line in TESTS.read_text().splitlines() if line.strip()]
+    files = [TESTS] + ([TESTS.with_name("tests_multi.jsonl")] if a.multi else [])
+    tests = [json.loads(line) for f in files for line in f.read_text().splitlines() if line.strip()]
     if a.smoke:  # only questions answerable from TXN alone
         tests = [t for t in tests if t["filters"].get("ticker") == "TXN"]
     tables = {t: chunk_table(t, out, tickers) for t in sorted({config(n)["table"] for n in a.variants})}
@@ -328,13 +379,13 @@ def main() -> None:
 
     try:
         if a.smoke:
-            check_apis()
+            check_apis({config(n)["model"] for n in a.variants})
         for name in a.variants:
             path = out / f"runs_{name}.parquet"
             if path.exists() or a.score_only:
                 continue
             df = tables[config(name)["table"]]
-            E = doc_vectors(name, df, out)
+            E = vectors(name, df, out)
             Q = query_vectors(config(name)["model"], [t["question"] for t in tests], out)
             rank(name, df, E, Q, tests).to_parquet(path, index=False)
             print(f"{name}: ranked, saved {path} (spent so far ${CAP.spent():.2f})", flush=True)
@@ -350,19 +401,23 @@ def main() -> None:
     report(m, have)
 
 
-def check_apis() -> None:
+def check_apis(models: set[str]) -> None:
     """Cheap checks before the paid run: truncating a 3072 OpenAI vector equals asking for 1024,
-    and Gemini returns one separate vector per text."""
+    and Gemini returns one separate vector per text. Only for the providers in use."""
     from openai import OpenAI
 
     texts = ["Export controls restrict sales of our A100 and H100 chips to China.",
              "Demand for data center products grew strongly in fiscal 2024."]
+    if "text-embedding-3-large" not in models and "gemini-embedding-2" not in models:
+        return
     full = embed(texts, "text-embedding-3-large")
     small = np.array([d.embedding for d in OpenAI().embeddings.create(
         model="text-embedding-3-large", dimensions=1024, input=texts).data])
     cos = (unit(full, 1024) * unit(small, 1024)).sum(axis=1)
     print(f"check: OpenAI 3072 truncated to 1024 vs dimensions=1024, cosine {cos.round(4).tolist()}")
     assert (cos > 0.999).all()
+    if "gemini-embedding-2" not in models:
+        return
     g = embed(texts, "gemini-embedding-2")
     one = embed(texts[:1], "gemini-embedding-2")
     same, other = float(unit(g[0], 3072) @ unit(one[0], 3072)), float(unit(g[0], 3072) @ unit(g[1], 3072))

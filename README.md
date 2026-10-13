@@ -1,6 +1,6 @@
 # SEC Filings Tone
 
-This project tracks how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, and others) changes across their SEC filings, in every sector of the S&P 500. Retrieval (RAG) finds the passages about each topic, an LLM scores a tone profile toward each topic (polarity, uncertainty, severity, realization, specificity) with FinBERT and the Loughran-McDonald dictionary as baselines, and a Q&A layer lets users ask their own questions about any company or sector.
+This project tracks how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, and others) changes across their SEC filings, in every sector of the S&P 500. Retrieval (RAG) finds the passages about each topic, an LLM scores a tone profile toward each topic (polarity, magnitude, realization, uncertainty, specificity) with FinBERT and the Loughran-McDonald dictionary as baselines, and a Q&A layer lets users ask their own questions about any company or sector.
 
 ## Research questions
 
@@ -18,7 +18,7 @@ Work in progress. The filing download is done, and chunking, embedding and retri
 | 1. Fetch and parse filings (`fetch.py`) | Done |
 | 2. Chunk and embed (`ingest.py`) | Done for the pilot |
 | 3. Retrieval: metadata filter, hybrid search, reranking (`retrieve.py`) | Done for the pilot |
-| 4. Retrieval eval (`eval/`) | Eval done for the pilot; chunking experiment next |
+| 4. Retrieval eval and chunking experiment (`eval/`) | Done for the pilot |
 | 5. Tone profile (LLM), with FinBERT and Loughran-McDonald baselines (`sentiment.py`) | Not started |
 | 6. Labeled benchmark (silver and gold sets) | Not started |
 | 7. Event validation (`events.csv`) | Not started |
@@ -32,12 +32,12 @@ Work in progress. The filing download is done, and chunking, embedding and retri
 
 | Stage | MRR | nDCG@10 | Keyword coverage |
 |---|---|---|---|
-| Vector search only | 0.673 | 0.669 | 98.9% |
-| BM25 only | 0.761 | 0.758 | 95.0% |
-| Hybrid (RRF) | 0.773 | 0.755 | 96.1% |
-| Hybrid + Claude rerank | 0.890 | 0.855 | 98.9% |
+| Vector search only | 0.866 | 0.802 | 98.9% |
+| BM25 only | 0.755 | 0.755 | 95.0% |
+| Hybrid (RRF) | 0.845 | 0.793 | 98.9% |
+| Hybrid + Claude rerank | 0.903 | 0.879 | 98.9% |
 
-BM25 is strongest on exact terms such as product names and dollar amounts. Vector search is stronger when the question is worded differently from the filing. The LLM reranker improves on both in every question category. Cross-sector questions will be added once all sectors are embedded.
+These scores come after the chunking and embedding experiment (`eval/experiment.py`, results in `eval/FINDINGS.md`). It tested chunk size, heading boundaries, overlap, a context header, two OpenAI embedding models and embedding sizes. The biggest finding: the context header and overlap that were prepended to each chunk before embedding made vector search worse, and removing them raised its MRR from 0.673 to 0.866. Chunks are now embedded as plain text. The LLM reranker gives the best result at every stage of the experiment. Cross-sector questions will be added once all sectors are embedded.
 
 ## Data
 

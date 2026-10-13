@@ -17,11 +17,10 @@ import pandas as pd
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS, EMBED_MODEL, VECTOR_DB, embed_text
+from sec_filings_tone.ingest import CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, VECTOR_DB, embed_text
 
 load_dotenv()
 
-COLLECTION = "filings_v1"
 RERANK_MODEL = "claude-haiku-5-5"
 RERANK_TIMEOUT = 60  # seconds per call, so a stuck request fails instead of hanging (the SDK retries twice)
 CANDIDATES = 20  # each search's top n; the fused top n goes to the reranker

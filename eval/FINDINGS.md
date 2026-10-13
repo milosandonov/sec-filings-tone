@@ -1,8 +1,8 @@
-# Phase 4: code review, data check and experiment design
+# Phase 4: code review, data check, experiment design and results
 
-Written 2026-10-12, before the paid chunking and embedding experiment. It covers what was checked,
-what was wrong, what was fixed, what is still open, and how the experiment is set up so that it
-runs once.
+Sections 1–5 were written on 2026-10-12, before the paid chunking and embedding experiment: what
+was checked, what was wrong, what was fixed, what is still open, and how the experiment was set up
+so it would run once. Section 6, added 2026-10-13, has the results and the setup now in production.
 
 ## Summary
 
@@ -20,13 +20,17 @@ runs once.
 - **The experiment was redesigned after a dry run.** Headings, not the size setting, decide most
   chunk boundaries (median about 350 tokens at any target), so the original size variants would
   barely have changed chunk sizes. Size is now tested with heading splits turned off.
-- **The experiment is ready but not run:** 11 variants, about $5.75, about 30 minutes. A smoke test
-  on TXN ran every code path end to end for about $0.20.
-
-**Important for anyone running the code now:** `data/chunks.parquet` and the Chroma collection
-`filings_v1` still use the old chunking and match each other. Running `ingest` now would rewrite
-`chunks.parquet` with the new chunking, and retrieval would then look up vector-search IDs that no
-longer exist. Rebuild and re-embed both together, once the experiment has picked a winner.
+- **Result (sections 6 and 7): embed the plain chunk text.** Removing the overlap, the context
+  header, or both made vector search clearly better. A wider check on 20 companies (section 7)
+  couldn't tell header-without-overlap apart from plain text; plain text is kept as the simpler
+  option. With both removed, heading-aligned 500-token chunks couldn't be told
+  apart from other sizes or flat chunking, nor `text-embedding-3-small` from `-large` (30 questions
+  only detect differences of about 0.08 MRR or more; see the verification below). Vector-search
+  MRR went from 0.673 to 0.866, hybrid from 0.773 to 0.845, and the final reranked result from
+  0.890 to 0.903. The reranker was already making up for most of the weaker vector search.
+- **In production now:** `data/chunks.parquet` is rebuilt with the fixed chunker (8,714 pilot
+  chunks), and the Chroma collection `filings_v2` holds their plain-text embeddings
+  (`text-embedding-3-large`, 1,024 dims). The old `filings_v1` is kept for reference.
 
 ## 1. Code review
 
@@ -272,6 +276,213 @@ reranking at 8 calls at a time.
 4. If two changes win separately, embed the combination once and confirm it.
 5. The winner becomes `filings_v2`: rebuild `chunks.parquet` and re-embed the pilot into Chroma.
    Then estimate the full 498-company cost from the winner's tokens per chunk.
+
+## 6. Results (run 2026-10-13)
+
+### Single changes
+
+Vector search at 1,024 dims, 30 questions. Δ is the MRR difference from the reference, with a 95%
+paired bootstrap interval over questions; **bold** means the interval excludes 0.
+
+| Variant | Vector MRR | nDCG@10 | Cov@2k tok | ΔMRR vs reference | Rerank MRR |
+|---|---|---|---|---|---|
+| `base` | 0.681 | 0.670 | 0.867 | reference | 0.895 |
+| `oai_small` | 0.843 | 0.794 | 0.922 | **+0.161 [+0.064, +0.263]** vs base | 0.883 |
+| `header_none` | 0.830 | 0.775 | 0.894 | **+0.149 [+0.059, +0.247]** vs base | 0.893 |
+| `flat_500` | 0.804 | 0.776 | 0.889 | **+0.123 [+0.032, +0.222]** vs base | 0.895 |
+| `overlap_none` | 0.792 | 0.750 | 0.894 | **+0.110 [+0.029, +0.190]** vs base | 0.901 |
+| `header_no_heading` | 0.718 | 0.701 | 0.900 | +0.037 [−0.019, +0.101] vs base | 0.888 |
+| `overlap_2` | 0.684 | 0.669 | 0.872 | +0.003 [−0.077, +0.091] vs base | 0.898 |
+| `flat_800` | 0.827 | 0.797 | 0.861 | +0.022 [−0.079, +0.124] vs flat_500 | 0.903 |
+| `flat_1200` | 0.809 | 0.798 | 0.717 | +0.005 [−0.083, +0.084] vs flat_500 | 0.928 |
+| `flat_300` | 0.723 | 0.704 | 0.906 | **−0.082 [−0.160, −0.010]** vs flat_500 | 0.867 |
+
+- **The context header hurt most,** and broadly: 14 questions better without it, 2 worse. The
+  likely reason, not proven: every query is filtered by company, form and period first, so inside a
+  filtered set every chunk starts with the same header, which can't help tell them apart. Dropping
+  only the heading part changed little, so the company, form and period part is what hurts. One
+  possible mechanism, that a fixed header favors short chunks, was checked and ruled out: the top
+  hits have the same length with and without the header (median 506 vs 504 tokens).
+- **Overlap hurt too** (15 questions better without it, 3 worse). This overlap isn't the usual kind.
+  Usually overlap is stored in the chunk, so a fact cut by a boundary appears whole in one chunk.
+  Here chunks already end at paragraph breaks, and the previous sentence is added only to the
+  embedding. That moves a chunk's vector toward content it doesn't contain: NVDA's chunk 0024 was
+  embedded starting with a sentence about networking-product licenses that belongs to chunk 0023.
+  The metric credits only a chunk's own text, so that costs rank. It was only tested with the header
+  on. Two sentences were no better than one.
+- **Heading splits only hurt with the header on;** see the combinations below. Why isn't
+  established.
+- **Size:** 300 tokens is too small; 500, 800 and 1,200 are within noise of each other. 1,200 covers
+  noticeably less text within a 2,000-token budget (0.72 vs 0.89), and its reranker calls cost
+  more than 2× as much (median chunk 1,241 tokens vs 543). 500–800 is the range to use.
+- **Embedding size barely matters:** 256, 1,024 and 3,072 dims score within about 0.05 of each other
+  for every variant.
+- **Gemini wasn't tested.** The `GOOGLE_API_KEY` is on Google's free tier, which allows 1,000
+  embedding requests a day for `gemini-embedding-2` and counts each text as one. It ran out after
+  900 of 8,714 chunks. We decided to skip it rather than enable billing; the OpenAI small model
+  already matches the large one here.
+- **The reranker is stable:** the mean per-question MRR difference between its two runs was 0.005.
+
+### Combinations of the winners
+
+All four use no header and no overlap.
+
+| Variant | Heading splits | Model | Vector MRR | Hybrid MRR | Rerank MRR |
+|---|---|---|---|---|---|
+| `combo_head` | on | large | 0.866 | 0.845 | 0.903 |
+| `combo_head_small` | on | small | 0.834 | 0.804 | 0.895 |
+| `combo_flat` | off | large | 0.820 | 0.840 | 0.901 |
+| `combo_flat_small` | off | small | 0.852 | 0.842 | 0.902 |
+
+Paired differences (95% intervals):
+
+| Comparison | Vector | Hybrid | Rerank |
+|---|---|---|---|
+| Heading splits on vs off (large) | +0.046 [−0.017, +0.119] | +0.005 [−0.058, +0.068] | +0.002 [−0.043, +0.047] |
+| Large vs small, splits on | +0.031 [−0.049, +0.104] | +0.042 [−0.023, +0.111] | +0.008 [0.000, +0.024] |
+| Large vs small, splits off | −0.032 [−0.110, +0.043] | −0.002 [−0.070, +0.068] | 0.000 [−0.032, +0.033] |
+| `combo_head` vs `base` | **+0.184 [+0.084, +0.292]** | +0.039 [−0.005, +0.090] | +0.008 [−0.015, +0.035] |
+
+- With the header and overlap gone, **heading splits no longer cost anything**, so chunks can stay
+  aligned with the filing's sections. That matters for Phase 5: a chunk spanning two subsections
+  would get one tone profile for two topics.
+- **Large vs small:** no consistent difference on these 30 questions; large is ahead with heading
+  splits and behind without them. That means the test can't tell them apart, not that they're
+  equal: 19 of 30 questions score the same with both, many at the 1.0 ceiling, and published
+  benchmarks put the large model only a few points ahead, well below what 30 questions can detect. Large was kept because the pilot covers one sector, the full run
+  will cover eleven, and the difference at full scale is about $18 (see below). Both sets of pilot
+  vectors are saved, so switching the pilot costs nothing.
+- **Gains don't add up.** The same seven questions (q10, q14, q16, q17, q18, q25, q28) account for
+  most of the gain from removing the header, from removing the overlap and from switching to the
+  small model. The changes fix the same failures, so combining them adds little. Why the baseline
+  failed those seven isn't established.
+
+### Decision and what's in production
+
+- **Chunking:** heading splits on, 500-token target, 800 maximum (unchanged), with the fixes from
+  section 3.
+- **Embedded text:** the chunk's plain text, with no header and no overlap. `ingest.embed_chunks`
+  now does this; `embed_text` (header and overlap) stays for the reranker's passage format and for
+  the experiment.
+- **Model:** `text-embedding-3-large` at 1,024 dims, in the Chroma collection `filings_v2`.
+  `retrieve.py` reads it. `filings_v1` is kept, unchanged.
+- **Check:** `filings_v2` was built through the normal `ingest --embed` path, and its vectors match
+  the experiment's `combo_head` vectors (cosine 1.000 on a sample). `eval/eval.py` on production
+  gives the same scores as the experiment:
+
+| Stage | `filings_v1` (start of Phase 4) | `filings_v2` |
+|---|---|---|
+| Vector | 0.673 | 0.866 |
+| BM25 | 0.761 | 0.755 |
+| Hybrid | 0.773 | 0.845 |
+| Hybrid + rerank | 0.890 | 0.903 |
+
+BM25 drops slightly (0.761 → 0.755) because the fixed chunker changed the chunks.
+
+**Hybrid is now level with vector alone:** −0.020 [−0.058, +0.006], within noise. With the old,
+weaker vectors it was clearly better (+0.125 [+0.029, +0.226]); fusion adds most when the two
+searches are comparably good, and BM25 is weak on paraphrased questions (MRR 0.54). Hybrid still
+does its main job slightly better: its top 20, which is what the reranker sees, holds 91.3% of the
+relevant chunks, against 90.0% for vector alone and 89.9% for BM25.
+
+### Verification (2026-10-13)
+
+The results were checked again, because several looked surprising:
+
+- **MRR:** recomputed for 4 variants and 3 stages with code written separately from `eval.py`; the
+  numbers match exactly.
+- **RRF:** recomputed by hand for one question; identical to the saved hybrid ranking. A chunk at
+  rank 1 in both lists scores 1/61 + 1/61 = 0.0328.
+- **The RRF constant (k = 60)** is the standard value from the original RRF paper (Cormack, Clarke
+  and Büttcher, 2009). Hybrid MRR for `combo_head` is 0.860, 0.850, 0.851, 0.845, 0.845 and 0.845
+  for k = 1, 5, 10, 20, 60 and 100. Weighting vector search double gives 0.864. k isn't the issue.
+- **Embedded text:** printed for one chunk in each variant; each matches its design.
+- **Effects are broad, not driven by one or two questions:** see the counts above. Removing the
+  header still gains +0.087, and removing the overlap +0.064, after dropping each one's three
+  biggest gains.
+
+### Cost
+
+| Item | Spent |
+|---|---|
+| Smoke test | about $0.20 |
+| Main run (10 OpenAI variants; Gemini's partial run was free) | about $5.30 |
+| Four combinations | $1.35 |
+| `filings_v2` (pilot re-embed) | $0.42 |
+| Production eval | $0.05 |
+| **Total** | **about $7.30** |
+
+The main run includes about $0.41 from a first attempt, stopped to add the cost caps; its saved
+batches were reused, not paid again.
+
+### For the full 498-company run
+
+- Scaling the pilot: about 434,000 chunks and 160M tokens, so about $21 with
+  `text-embedding-3-large` or about $3 with `-small`. Banks' long MD&As will push this up somewhat.
+- Vectors at 1,024 dims are about 1.8 GB (Chroma about 2× that). 256 dims scored the same on the
+  pilot and would be about 0.45 GB; worth checking on a few non-semiconductor questions first.
+- Run it with `ingest --embed --budget 30` (revised up in section 7). The budget check runs before the first request.
+
+### Free follow-ups (from saved vectors and rankings, no new embedding)
+
+- BM25's weight in the fusion, and stemming for BM25.
+- Adding the company and period to the query instead of the document.
+- More than 20 reranker candidates.
+
+## 7. Multi-sector check (2026-10-13)
+
+The pilot's 30 questions cover 10 semiconductor companies, and many sit at the 1.0 ceiling. Before
+the full embed, the winner was rechecked against two settings on a wider set: the pilot plus one
+large company from each other sector (AMZN, BAC, CAT, GOOGL, LIN, NEE, PG, PLD, UNH, XOM; BAC
+because JPM's 10-K MD&A is over ingest's size cap). That's 20 companies and 23,273 chunks. 20 new
+questions (`eval/tests_multi.jsonl`) were added, in three kinds:
+
+- **Year in the question, company filter only** (8): does the header's year help find the right
+  filing?
+- **Unfiltered** (6): no company filter across all 20 companies, where a company name in the
+  embedding might help.
+- **Sector vocabulary** (6): banking, insurance, energy, utilities, real estate and materials
+  terms.
+
+The pilot companies' vectors were reused (their chunks are identical); only the 10 new companies
+were embedded. Cost: $1.84.
+
+| Variant | Vector | Hybrid | Rerank |
+|---|---|---|---|
+| `combo_head` (plain text, large: production) | 0.804 | 0.828 | 0.908 |
+| `overlap_none` (header on, no overlap, large) | 0.772 | 0.806 | 0.921 |
+| `combo_head_small` (plain text, small) | 0.762 | 0.772 | 0.907 |
+
+Paired differences (95% intervals):
+
+| Comparison | Questions | Vector | Hybrid | Rerank |
+|---|---|---|---|---|
+| Header on − plain | old 30 | −0.074 [−0.182, +0.022] | −0.012 [−0.039, +0.010] | +0.004 [−0.019, +0.025] |
+| Header on − plain | new 20 | +0.033 [−0.078, +0.144] | −0.038 [−0.129, +0.046] | +0.025 [0.000, +0.075] |
+| Large − small | all 50 | +0.042 [−0.035, +0.120] | +0.057 [−0.002, +0.122] | +0.001 [−0.009, +0.012] |
+
+What changes:
+
+- **The header finding is weaker than section 6 says.** Removing the overlap, the header, or both
+  helped clearly. But once the overlap is gone, header on vs off can't be told apart. It leans
+  harmful on the filtered pilot questions and helpful on the unfiltered ones (0.850 vs 0.778, 6
+  questions). Plain text stays in production because it's simpler and the research pipeline always
+  filters, not because it's proven better than a header without overlap.
+- **Large vs small:** large is ahead in every comparison, though no single one is a clear
+  difference. That supports keeping `text-embedding-3-large`.
+- **Hybrid helps again** on the wider set (0.828 vs 0.804 for vector alone). Across 20 companies,
+  exact terms such as "Sakhalin" or "Rivian" matter more.
+- **The new questions are harder,** as intended: year-in-question MRR is 0.54–0.63, so they no
+  longer sit at the ceiling. A company filter alone doesn't find the right year well, with or
+  without the header. The Phase 10 query rewriter should extract the year as a filter.
+- **Embedding size still doesn't matter** (256, 1,024 and 3,072 within 0.01).
+- **Reranking makes every setup end up at 0.91–0.92,** so the choices above matter mostly for
+  vector and hybrid search on their own.
+
+**The full-run estimate goes up.** The 10 non-semiconductor companies produce 14,559 chunks against
+8,714 for the 10 semiconductor ones (banks' MD&As especially). Scaling all 20: about 580,000
+chunks and 200M tokens, about $26 with `text-embedding-3-large`, and about 2.4 GB of vectors at
+1,024 dims. Run it with `ingest --embed --budget 30`.
 
 ## How to reproduce
 

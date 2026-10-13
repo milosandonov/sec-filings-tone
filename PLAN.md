@@ -1,6 +1,6 @@
 # SEC Filings Tone: Plan
 
-Track how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, ...) changes across their 10-K filings, across every sector of the S&P 500. RAG finds the relevant passages, an LLM scores a tone profile toward each topic (polarity, uncertainty, severity, realization, specificity), FinBERT and the Loughran-McDonald dictionary serve as baselines, and a Q&A layer lets users ask their own questions about any company or sector.
+Track how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, ...) changes across their 10-K filings, across every sector of the S&P 500. RAG finds the relevant passages, an LLM scores a tone profile toward each topic (polarity, magnitude, realization, uncertainty, specificity), FinBERT and the Loughran-McDonald dictionary serve as baselines, and a Q&A layer lets users ask their own questions about any company or sector.
 
 **The questions we're answering:**
 1. How well do FinBERT, an LLM and the Loughran-McDonald dictionary score SEC filing text, both against labels and against real events? Does a tone profile with several dimensions measure anything that polarity alone misses?
@@ -22,7 +22,7 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 - A full 10-K HTML file is roughly 2–10 MB, mostly inline XBRL markup. Item 1A plus Item 7 as plain text is roughly 100–300 KB per filing.
 - 3,500 filings come to about 350 MB–1 GB of extracted text. That's too much to hold in memory at once, so process one filing at a time.
 - **Decision:** keep the raw HTML in memory only, and save just the extracted section text to `data/cache/{ticker}_{year}_{item}.txt`. That avoids re-downloading about 3,500 filings on every run and keeps runs reproducible. The cache is gitignored, and `ingest.py` rebuilds it from scratch.
-- Embeddings: the pilot (10 companies, 10-K + 10-Q) gave 9,766 chunks, median 337 tokens, with 91% of the raw text kept after cleaning. Scaled to all 498 companies, that's about 800k chunks and about 300M tokens. Request 1,024 dimensions from `text-embedding-3-large`: about 3 GB of vectors, about 6–7 GB in Chroma (`vector_db/`, gitignored). Check the current price before the full run, and use the Batch API.
+- Embeddings: the pilot (10 semiconductor companies) gives 8,714 chunks with the fixed chunker, median 348 tokens; one company from each other sector adds 14,559 more (banks' MD&As are long). Scaling those 20: about 580k chunks and 200M tokens for all 498 companies, about $26 with `text-embedding-3-large` at $0.13 per 1M tokens (checked 2026-10-12). At 1,024 dimensions that's about 2.4 GB of vectors, about 5 GB in Chroma (`vector_db/`, gitignored). 256 dimensions scored the same on both checks and would be 4× smaller. Run with `ingest --embed --budget 30`.
 - The LLM scorer runs only on retrieved topic passages and the labeled sets, not on every sentence. Scoring every sentence would be about 5M LLM calls.
 
 ## Phases
@@ -40,9 +40,9 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 ### 2. Chunk and ingest (`ingest.py`): done for the pilot
 - Cleans each cached section: drops figure rows, "Table of Contents" lines and Markdown left by the fetch fallbacks. Splits on paragraphs and packs them into chunks of up to 800 tokens, aiming for 500. A heading starts a new chunk once the current one has 100 tokens. Headings are stored in metadata, not in the chunk text.
 - `data/chunks.parquet` (gitignored, rebuilt in seconds) is the source of truth, with one row per chunk. Fields: `chunk_id`, `ticker`, `sector`, `form`, `item` (`1A`, `7`, `mdna`), `fy` (int, calendar year of the period end), `report_date`, `filing_date`, `accession`, `period_quarter`, `seq`, `heading`, `n_tokens`, `text`.
-- Embedded with `text-embedding-3-large` at 1,024 dimensions into Chroma `vector_db/`, collection `filings_v1`, cosine distance. The embedded string is a context header, then the last sentence of the previous chunk (capped at 60 tokens), then the text. Chroma stores only the clean `text`.
-- Pilot: 10 semiconductor companies, 9,766 chunks, median 337 tokens. Re-running `--embed` adds nothing.
-- Fixed in `ingest.py` on 2026-10-12, but not yet in `chunks.parquet` or `filings_v1`; both get rebuilt together after the Phase 4 experiment. Bullet points that end without punctuation ("•the demand for cryptocurrency mining; or") were read as headings, which also **deleted their text from the chunk** (0.33% of the text, 814 paragraphs), not just the `heading` field. Page footers and table rows used as headings, tiny last chunks, and the Risk Factors that QCOM, MCD and BEN put inside their 10-Q MD&A are fixed too. Details in `eval/FINDINGS.md`. Don't run `ingest` before that rebuild: it would rewrite `chunks.parquet` without updating `filings_v1`.
+- Embedded with `text-embedding-3-large` at 1,024 dimensions into Chroma `vector_db/`, collection `filings_v2`, cosine distance. The embedded string is the chunk's plain text: Phase 4 found that the context header and the overlap used in `filings_v1` made vector search worse. Chroma stores the same `text`. `embed_chunks` stops before the first request if the estimate is over `--budget`.
+- Pilot: 10 semiconductor companies, 8,714 chunks, median 348 tokens. Re-running `--embed` adds nothing. `filings_v1` (9,766 chunks, old chunker, header and overlap) is kept for reference.
+- Chunker fixes from the Phase 4 review (2026-10-12). Bullet points that end without punctuation ("•the demand for cryptocurrency mining; or") were read as headings, which also **deleted their text from the chunk** (0.33% of the text, 814 paragraphs), not just the `heading` field. Page footers and table rows used as headings, tiny last chunks, and the Risk Factors that QCOM, MCD and BEN put inside their 10-Q MD&A are fixed too. Details in `eval/FINDINGS.md`.
 
 ### 3. Retrieval (`retrieve.py`): done for the pilot
 **What BM25 is:** keyword search with smart scoring. It doesn't understand meaning; it scores each chunk on how well its words match the query:
@@ -54,7 +54,7 @@ Vector search finds passages with the same meaning in different words. BM25 is p
 
 **Build:**
 - **Metadata filter first, for both searches** (`ticker`, `sector`, `form`, `item`, `fy`, `filing_date` range). This is the most important step for financial documents.
-  - Vector: Chroma `where` on collection `filings_v1`, with the query embedded the same way as the chunks (`text-embedding-3-large`, 1,024 dimensions).
+  - Vector: Chroma `where` on collection `filings_v2`, with the query embedded the same way as the chunks (`text-embedding-3-large`, 1,024 dimensions).
   - BM25: filter the `chunks.parquet` rows with pandas, then score inside that subset.
 - **BM25 with `bm25s`** (new dependency), not `rank_bm25`. Both are fine on the pilot, but `rank_bm25` is too slow at full scale (about 800k chunks). Index `text`, lowercase, and use English stopwords.
 - **Combine with Reciprocal Rank Fusion (RRF):** each search returns its top 20 or so. A chunk scores `sum(1 / (60 + rank))` across both lists. RRF uses ranks only, so BM25 scores and cosine distances don't need to be on the same scale.
@@ -66,33 +66,39 @@ Vector search finds passages with the same meaning in different words. BM25 is p
   - Result: vector, BM25, hybrid and rerank all rank the export-control chunks (`NVDA_10-K_2023_1A_0023`, `_0024`) first or second. For "H20" across NVDA, all of BM25's top 20 contain the term, against 10 of vector's top 20, and 11 BM25 hits aren't in vector's top 20 (mostly 2025–26 10-Q MD&A).
   - `uv run python tests/test_retrieve.py` checks the filters, BM25 masking, RRF and the rerank-order guard offline.
 
-### 4. Retrieval eval (`eval/`): eval done for the pilot; experiment built and smoke-tested, not yet run
+### 4. Retrieval eval (`eval/`): done for the pilot
 - Write about 30 test questions with keywords and reference answers, in the same format as `week5/evaluation/tests.jsonl`, spread across sectors. Examples: "What supply chain risks did NVDA cite in FY2023?" and "How did JPM describe deposit outflows in FY2023 MD&A?"
 - Score with MRR, nDCG and keyword coverage. `week5/evaluation/eval.py` can be reused almost unchanged.
 - Measure a baseline (vector search only), then hybrid, then hybrid plus reranking. The before/after table goes into the README.
 - **Done for the pilot:** `eval/tests.jsonl` has 30 questions on the 10 semiconductor companies (cross-sector questions wait for the full embed). Each row also has `filters` for `search()`. Categories: `direct_fact` (12), `paraphrase` (10, worded without the keywords), `broad` (5, ticker-only filter) and `cross_company` (3, including one filing-date range). Keywords were copied from the passages that answer each question.
   - `eval/eval.py` changes two things from the course version: keywords match case-sensitively as whole words (substrings made "Arm" match "harm"), and nDCG's ideal counts every chunk in the filtered subset that contains the keyword.
-  - Results (top 10, run 2026-10-12; the full run takes about 70 seconds and costs about $0.03):
+  - Results (top 10; the full eval takes about 70 seconds and costs about $0.05), before and after the Phase 4 experiment:
 
-    | Stage | MRR | nDCG@10 | Keyword coverage |
+    | Stage | MRR, `filings_v1` | MRR, `filings_v2` | nDCG@10, `filings_v2` |
     |---|---|---|---|
-    | Vector search only | 0.673 | 0.669 | 98.9% |
-    | BM25 only | 0.761 | 0.758 | 95.0% |
-    | Hybrid (RRF) | 0.773 | 0.755 | 96.1% |
-    | Hybrid + Claude rerank | 0.890 | 0.855 | 98.9% |
+    | Vector search only | 0.673 | 0.866 | 0.802 |
+    | BM25 only | 0.761 | 0.755 | 0.755 |
+    | Hybrid (RRF) | 0.773 | 0.845 | 0.793 |
+    | Hybrid + Claude rerank | 0.890 | 0.903 | 0.879 |
 
-  - These numbers use the old chunks. The experiment's `base` variant measures the same setup on the fixed chunks.
-  - BM25 wins on exact terms (direct_fact MRR 0.94 vs 0.72 for vector search), and vector search does better on paraphrased questions. Hybrid lands between the two, and the reranker beats every stage in every category. The rerank numbers vary a little between runs, because the LLM's ordering isn't deterministic.
-- **Experiment harness: `eval/experiment.py`.** The design, the pre-run code review and the data check are in `eval/FINDINGS.md`. It runs 11 one-factor variants for about $5.75: heading splits off; sizes 300, 500, 800 and 1,200 with heading splits off (headings set most boundaries, so size can't be tested with them on); overlap none or 2 sentences; header off or without the heading; `text-embedding-3-small`; `gemini-embedding-2` (`gemini-embedding-001` is deprecated). Vectors are saved at full size, so 256 to 3,072 dims are scored with no extra cost. A smoke test on TXN passed.
-- **Then, before the full-scale embed, run the chunking and embedding experiment on the pilot**, scored with this eval (the original list, superseded by the harness above):
-  - target chunk size: 300, 500 or 800 tokens
-  - overlap in the embedded text: none or one sentence
-  - context header: on or off
-  - embedding model: OpenAI `text-embedding-3-large` (current) vs Gemini Embedding 001, and Voyage-4-large if we add a key
+  - On `filings_v1`, BM25 won on exact terms and vector search on paraphrased questions. On `filings_v2`, hybrid is level with vector search (−0.02, within noise; BM25 MRR on paraphrased questions is 0.54), but its top 20 holds slightly more of the relevant chunks, which is what the reranker sees. Reranking gives the best result either way, and its two runs differ by only 0.005 MRR.
+- **Experiment: done** (`eval/experiment.py`; design, pre-run review and full results in `eval/FINDINGS.md`). It ran 10 one-factor variants plus 4 combinations, for about $7.30 in total including the re-embed and checks.
+  - **Winner, now in production as `filings_v2`:** heading-aligned chunks (500-token target, 800 maximum), embedded as plain text with no context header and no overlap, `text-embedding-3-large` at 1,024 dims.
+  - **Removing the header or the overlap each helped clearly:** +0.15 and +0.11 MRR, with 14 and 15 of 30 questions better. But a multi-sector check (20 companies, 50 questions, `eval/FINDINGS.md` section 7) couldn't tell header-without-overlap from plain text; plain text stays as the simpler option, not a proven winner. The likely reason for the header, not proven: every query is filtered first, so the header is the same for every chunk in the filtered set. Our overlap was added only to the embedding, not the stored chunk, so it moved vectors toward the previous chunk's content. That's not the usual kind of overlap.
+  - **Once the header and overlap were gone,** heading splits, chunk sizes of 500 to 1,200, the large vs small model, and 256 to 3,072 dims all made no measurable difference. 300-token chunks were worse. "No measurable difference" means within what 30 questions can detect (about 0.08 MRR); many questions sit at the 1.0 ceiling.
+  - **Large was kept over small:** no measurable difference on the pilot, but ahead in every comparison on the multi-sector check (hybrid +0.057 [−0.002, +0.122]). It costs about $22 more at full scale.
+  - **Gemini was skipped:** the Google key is on the free tier (1,000 embedding requests a day). `gemini-embedding-001` is deprecated anyway.
+  - **Free follow-ups from saved vectors and rankings:** BM25's weight in the fusion, BM25 stemming, the company and period in the query, and more reranker candidates.
 
-  Each variant goes in its own Chroma collection and costs about $0.50 to embed for the pilot. Keep the winner and embed the full set once.
-
-### 5. Sentiment scoring (`sentiment.py`)
+### 5. Sentiment scoring (`sentiment.py`): tone-profile scorer built and pilot-checked; baselines not yet built
+- **Built (2026-10-13):** `sentiment.py` scores a (passage, topic) pair with structured output, quoting `labels/guidelines.md` word for word, with every safeguard below: evidence before each score, contrasting examples, one combined call or shuffled order or one call per dimension, rule-based cross-checks, cost cap. `sentiment.py pilot` samples about 100 passage–topic pairs from the pilot, scores them in all three modes (plus a second combined run), and reports per dimension: score spread, run-to-run agreement, combined vs separate agreement, the correlations between dimensions in each mode, and the rule-based cross-checks. With `claude-haiku-5-5` it costs about $0.50; `tests/test_sentiment.py` checks the schema, prompt and metrics offline.
+- **Pilot check (2026-10-13, `claude-haiku-5-5`, 100 passage–topic pairs, 800 calls, $0.20):**
+  - Consistent: 88–94% of scores identical between two runs (weighted kappa 0.89–0.97). 16% of the sampled passages were flagged off topic.
+  - No halo from scoring all five in one call: mean correlation between dimensions is 0.34 combined, 0.32 shuffled and 0.34 with one call per dimension. So Phase 9 uses one combined call, 5× cheaper. Combined and separate scores agree with kappa 0.76–0.96.
+  - No dimensions to merge: no pair above 0.8. The strongest are polarity–uncertainty (−0.64) and magnitude–specificity (+0.55).
+  - Warning on specificity: 69% of passages get the top score, and it barely tracks the rule-based detail count (+0.08; uncertainty tracks its hedge count at +0.70). It may be too lenient. The gold set must check it, and its anchors may need sharpening.
+  - Consistency isn't correctness: only the gold set shows whether the scores are right.
+- **First check, the 10 practice items vs my reference key:** 84% of scores exact, 96% within one point, off-topic item caught, evidence quoted correctly; $0.005. The misses were mostly magnitude rated too high, including 2 for pure boilerplate, which is the failure the guidelines warn about. That's one rater on 10 items, so it's only a first signal; the pilot check and the gold set will measure it properly.
 A single polarity score is too thin for filings: risk factors are negative by design, so polarity barely moves from year to year. The project's measure is a **tone profile** with several dimensions. The standard scorers stay as baselines for the dimensions they can measure, and as the evidence for whether the profile adds anything. Some dimensions may turn out too noisy to use; Phase 6 measures that.
 
 **Baselines,** run on the same retrieved passages:
@@ -103,31 +109,45 @@ A single polarity score is too thin for filings: risk factors are negative by de
 
 **Tone profile (LLM):** one structured-output call per (passage, topic) pair. Each dimension is scored toward the topic the passage was retrieved for, not the passage as a whole, since one passage can be negative on China and positive on AI. Each point on each scale has a written definition. Small anchored scales are more reliable than a fine numeric one, which mostly adds noise.
 
-| Dimension | Scale | Anchors |
-|---|---|---|
-| Polarity toward the topic | −2 to +2 | −2: the topic clearly hurts the company; 0: neutral or mixed; +2: clearly helps |
-| Uncertainty | 0 to 3 | 0: stated as fact; 3: heavily hedged ("may", "could", "cannot predict") |
-| Severity | 0 to 3 | 0: no impact stated; 2: called material or significant; 3: impact quantified (dollar amounts, share of revenue) |
-| Realization | 0 to 2 | 0: a hypothetical risk; 1: under way or developing; 2: has happened, with effects reported |
-| Specificity | 0 to 2 | 0: boilerplate any company could write; 1: specific to this company; 2: concrete (named products, dates, amounts) |
+The dimensions don't need to be statistically independent, since some correlate naturally (realized risks tend to be stated more specifically). But each must capture something the others don't. They sit at three levels, which the prompt and the analysis keep apart:
+
+| Level | Dimension | Scale | Anchors | What it is not |
+|---|---|---|---|---|
+| Evaluative | Polarity toward the topic | −2 to +2 | −2: the topic clearly hurts the company; 0: neutral or mixed; +2: clearly helps | Not how big the effect is |
+| Evaluative | Magnitude | 0 to 3 | 0: no effect stated; 1: minor; 2: significant for a business line or region; 3: major for the whole company | Not the direction (a large gain is high magnitude), and not whether a number is given. Words like "material" in boilerplate alone don't count |
+| Epistemic | Realization | 0 to 2 | 0: a hypothetical risk; 1: under way or developing; 2: has happened, with effects reported | Not how hedged the wording is |
+| Epistemic | Uncertainty | 0 to 3 | 0: the effects are stated as known; 3: the company says it can't predict or estimate the effects | Not whether the event happened: "the rules took effect in October 2022; we cannot yet estimate their impact" is realized and uncertain |
+| Disclosure | Specificity | 0 to 2 | 0: boilerplate any company could write; 1: specific to this company; 2: concrete (named products, dates, amounts) | Not whether it happened: "if H20 exports are restricted, we could lose $X billion of China revenue" is hypothetical and specific |
+
+Magnitude replaces the earlier "severity", whose top anchor ("impact quantified") overlapped with specificity. It's the dimension most likely to fail: boilerplate calls nearly everything material.
 
 - The output also has an "off topic" flag, so a passage that retrieval got wrong doesn't count, and a one-line reason.
 - Example of what polarity can't see: NVDA's China risk text goes from "export controls could restrict sales" to named chips (A100, H100, H20), dates and a $4.5 billion charge. Realization and specificity rise sharply; polarity was negative before and after.
 - **Model:** from a different family than the Phase 6 labelers, picked by cost and quality on the pilot. Score a sample twice to measure how much the scores change between runs.
 - **Cost caps:** a budget and a time limit per run, using the `Cap` from `eval/eval.py`, plus a 60-second timeout per call.
-- **Correlation between dimensions:** if two dimensions move together almost perfectly (severity and realization might), merge them.
+- **Evidence first:** for each dimension, the model quotes the phrase that justifies the score before giving it. That limits the halo effect (one overall impression leaking into every score) and makes errors easy to audit.
+- **Contrasting examples in the prompt,** where the dimensions disagree: realized but uncertain, hypothetical but specific, negative but minor.
+- **Pilot check before scaling (about 100 passages):** score them twice, and also once with one call per dimension and once with the dimension order shuffled. If correlations between dimensions drop when they're scored separately, the combined call is leaking, so score them separately.
+- **Rule-based cross-checks:** specificity against a count of numbers, dates and names in the passage; uncertainty against the LM uncertainty word share; realization against cues such as "recorded" and "incurred".
 
 ### 6. Labels and benchmark
 The benchmark needs ground truth: without labels we can only measure whether scorers agree with each other, not which one is right. LLMs do most of the labeling, and a human checks a small set.
 - **Silver set (LLM-labeled, about 3,000 sentences):** sample sentences evenly across sectors, years and items. Label each with two LLMs from different model families than the Phase 5 LLM scorer. Labels: positive, negative, neutral. If the scorer and the labeler were the same model, the LLM would win the benchmark automatically.
 - **Silver tone profiles (about 1,000 passage–topic pairs):** the same two labeling LLMs score the five dimensions with the Phase 5 anchors.
-- **Gold set (human-verified, about 150 sentences):** every sentence where the two labeling LLMs disagree, plus a random sample of ones where they agree. A human accepts or corrects each label, which is a few hours of work instead of labeling from scratch. The gold set is the final test set.
-- **Gold tone profiles (about 100 passage–topic pairs):** to keep the human work manageable, verify only polarity, realization and specificity, the dimensions the Phase 2 hypothesis rests on. Uncertainty and severity are checked against the silver labels, the LM word lists and the Phase 7 events only.
-- Write the labeling rules in `labels/guidelines.md` before starting, including the anchors for every dimension, and use the same rules in the LLM labeling prompt.
+- **Gold polarity sentences (human-labeled, about 50):** only the sentences where the two labeling LLMs disagree, which is where a person adds most. Where they agree, their shared label stands. Together these are the polarity test set.
+- **Gold tone profiles (about 40 passage–topic pairs, all five dimensions):** the 10 practice items plus about 30 drawn after the full S&P 500 embed, so they span every sector, not just the pilot's semiconductor companies. All five dimensions are needed, because the halo check compares the LLM's correlations between dimensions with the human ones, and magnitude, the dimension most at risk, has to be among them. 40 still separates a reliable dimension (kappa about 0.85) from an unreliable one (below 0.6). Priority: specificity, which the pilot check flagged as possibly too lenient.
+- **How people label (`labels/HOW_TO_LABEL.md`):** in a spreadsheet, blind first, then adjudicate. Pre-filled LLM scores would pull the human labels toward the LLM's, and then the halo check would compare the LLM with itself, so the gold sheets show no LLM scores. The labeler reads each passage once and scores all five dimensions. Scoring one dimension at a time down the sheet would limit a human halo effect, but means reading every passage six times; since the pilot check found little halo in the LLM's combined calls, the time isn't worth it. Any human halo makes the halo check slightly conservative. Afterwards the labeler reviews only the items where they and the LLM disagree. Both versions are kept: the blind labels for agreement and the halo check, the adjudicated ones as the final gold set.
+- **Total human time: about 1.5–2 hours** (practice 30–45 minutes, 30 more profiles about an hour, 50 sentences about 20 minutes, a 10-item re-check a week later about 15 minutes).
+- **Practice first:** `labels/practice.csv` has 10 real passages chosen to separate the dimensions (realized but uncertain, hypothetical but concrete, a large positive effect, one off-topic item). Labeled blind before opening `labels/practice_key.csv`, they count as the first 10 gold items; they're flagged as hand-picked, not random. The key gives reference scores with reasons. Disagreements with it show where the rules are unclear; fix the rules before the rest of the gold set, then freeze them.
+- **The gold labels test the tone scorer, not retrieval.** Retrieval is tested by the retrieval eval (Phase 4); the `off_topic` labels add a small human check of whether topic queries return on-topic passages. If the scorer does badly on gold, the fixes are in scoring, in this order: clearer guidelines and examples, then a bigger model, and only then fine-tuning an open model, which needs many hundreds of labeled examples. None of these need a re-embed.
+- The labeling rules are in `labels/guidelines.md`: topics, the anchors for every dimension, what each one is not, and how to score passages that mix situations (the most advanced stage, the largest stated effect, the most concrete detail). The LLM scorer and labeler prompts quote the same file.
 - Report accuracy, macro-F1 and a confusion matrix for each scorer on the gold set, and how often the human agreed with the LLM labels. Use the silver set to show results by sector and item.
 - **For each tone dimension:** agreement between the two labeling LLMs and with the human (weighted kappa, since the scales are ordered), the scorer's error against gold, and how much its scores change between runs. Compare uncertainty with the LM uncertainty word share, and profile polarity with FinBERT and LM polarity. A dimension that people and LLMs can't score consistently is reported as unreliable and left out of Phases 7–9.
+- **Halo check:** compare the correlation matrix between dimensions for the LLM scorer with the one for the gold labels. LLM correlations clearly above the human ones (say 0.85 vs 0.5) mean halo, not signal; fix the prompt, or score dimensions in separate calls.
+- **Multitrait-multimethod matrix:** the five dimensions (traits), each measured by the LLM, by people, and by a dictionary or rule where one exists (LM uncertainty words, FinBERT polarity, the rule-based specificity count). A dimension is valid if it agrees with itself across methods more than with other dimensions within a method. Confirmatory factor analysis doesn't fit: it needs several items per dimension, and there's one.
+- **Rules fixed before seeing results:** drop a dimension if weighted kappa with people is below 0.6 or run-to-run agreement is below 0.8. Merge two dimensions if they correlate above 0.8 **in the human labels**; high correlation only in the LLM's scores is halo, not a reason to merge.
 - Expected finding: FinBERT rates neutral risk-factor boilerplate as negative. Check whether that's true.
-- Ideally a second person checks 100 gold sentences, so we can report agreement between people (Cohen's kappa). Reviewers will ask for it.
+- Ideally a second person labels about 20 of the same gold profiles, so we can report agreement between people (weighted Cohen's kappa). Reviewers will ask for it.
 
 ### 7. Event validation (`events.csv`)
 A test that doesn't depend on our labels: tone should move where a known event hit, and stay flat where it didn't.
@@ -140,7 +160,7 @@ A test that doesn't depend on our labels: tone should move where a known event h
   - Tariffs (2025): Industrials, Consumer Discretionary, IT; topic: tariffs.
 - For each event, compare the change in topic tone in the affected sectors with the change in unaffected sectors over the same years (difference-in-differences).
 - For each scorer, report whether it detects each event, in the expected direction, and how strongly. A scorer that fits the labels but misses the events is the more interesting result.
-- **Do it for each tone dimension too,** with an expected direction per dimension. Export controls on China: realization, specificity and severity up, polarity down. COVID: uncertainty and realization up. SVB: severity and realization up for deposits and liquidity. AI boom: polarity and specificity up in MD&A. Tariffs (2025): uncertainty up first, realization later. This tests the Phase 2 hypothesis: realization and specificity should react more clearly than polarity.
+- **Do it for each tone dimension too,** with an expected direction per dimension. Export controls on China: realization, specificity and magnitude up, polarity down. COVID: uncertainty and realization up. SVB: magnitude and realization up for deposits and liquidity. AI boom: polarity and specificity up in MD&A. Tariffs (2025): uncertainty up first, realization later. This tests the Phase 2 hypothesis: realization and specificity should react more clearly than polarity.
 
 ### 8. Boilerplate vs new text (`diff.py`)
 - For each ticker, match each year's Item 1A and Item 7 sentences against the previous year's. A sentence counts as carried over if it closely matches a sentence from last year (`difflib.SequenceMatcher` ratio above about 0.9). Everything else counts as new.
@@ -193,7 +213,9 @@ sec-filings-tone/
     tests.jsonl
     eval.py
   labels/
-    guidelines.md
+    guidelines.md            # rules, shared by people and LLM prompts
+    HOW_TO_LABEL.md          # walkthrough for human labelers
+    practice.csv             # 10 practice items; practice_key.csv has reference scores
     silver.csv
     gold.csv
   notebooks/
@@ -206,18 +228,18 @@ sec-filings-tone/
 - **Survivorship bias:** using today's S&P 500 list leaves out companies that dropped out or went bankrupt, which leans the sample toward companies that did well. Say so in the limitations.
 - **Fiscal years don't line up across companies:** NVDA's fiscal year ends in January. Use the filing date for charts and event windows, and note this in the README.
 - **The LLM labels may lean the same way as the LLM scorer:** use different model families for labeling and scoring, and treat only the human-verified gold set as the final test.
-- **Tone dimensions may be noisy or overlap:** LLM scores on ordered scales vary between runs and models, and dimensions such as severity and realization may measure the same thing. Measure reliability for each dimension (Phase 6) and correlations between them, and drop or merge the ones that don't hold up instead of reporting them.
-- **One person verifying the gold set introduces bias:** write the guidelines first, re-check a 50-sentence sample a week later, and get a second person for 100 sentences if possible.
+- **Tone dimensions may be noisy or overlap:** LLM scores on ordered scales vary between runs and models. A model scoring several dimensions in one call can make them look more alike than they are (halo). Some dimensions may also really overlap: realization, uncertainty and specificity move together in risk-factor text. Phase 6 measures reliability for each dimension, compares LLM and human correlations to separate halo from real overlap, and drops or merges dimensions by rules set in advance.
+- **One person labeling the gold set introduces bias:** the guidelines are written first, the labeler re-checks 10 profiles a week later, and a second person labels about 20 if possible.
 - **Cost and runtime at full scale:** check embedding and LLM costs on the pilot, then estimate the full run before starting it.
 
 ## Open items (as of 2026-10-12)
 
-- **Status:** Phase 1 is done for 10-Ks (3,446 filings, 0.6% with a short section) and 10-Q MD&A (11,101 filings, 0.2% short), across 498 companies. Phases 2 and 3 are done for the pilot. Phase 4's eval is done (30 semiconductor questions). Its experiment is built and smoke-tested, and waits for a go-ahead to spend about $5.75 (see `eval/FINDINGS.md`).
+- **Status:** Phase 1 is done for 10-Ks (3,446 filings, 0.6% with a short section) and 10-Q MD&A (11,101 filings, 0.2% short), across 498 companies. Phases 2–4 are done for the pilot. The Phase 4 experiment's winner is in production as `filings_v2` (see `eval/FINDINGS.md`). Next, in order: finish the open embedding model comparison; the full 498-company embed (about $26; the big-bank sections it would have skipped are now fixed); then draw the gold sample from all sectors. The practice labeling sheet (`labels/practice.csv`) can be done any time. The full 498-company embed (about $26) can run any time.
 - **The project folder was renamed** from `sec-filings-tone` to `Sec Filling Tone`. If `uv run` fails, rebuild the environment: `rm -rf .venv && uv sync`.
 - **`.python-version` was deleted** in commit 949ddcb ("Pulling 10-Q data too"). uv used it to pin Python 3.13. Restore it unless the deletion was on purpose.
 - **Known extraction issues**, which the Phase 4 chunking experiment should fix in `fetch.py` before the full-scale embed:
   - Deere's 10-K MD&A is missing in every year: the heading doesn't appear as text anywhere in the filing.
   - Waste Management (7 10-Qs) and GE's 2020–21 10-Qs use custom layouts and are short.
   - BNY's 10-K Item 1A runs past the end of the section. QCOM's 2019–24 10-Q MD&A (and MCD's and BEN's) include a full Risk Factors section; ingest now cuts it (39 files), but the cache and the `len_mdna` manifest column still include it.
-  - Ingest skips any section over 400k characters or over 3× that company's median, which catches the worst cases, such as Citi's 10-Q MD&A at 1.28M characters.
+  - Big banks' MD&As often run on into the financial statements. Ingest checks any MD&A over 400k characters, or over 3× that company's median, for a financial-statement heading at least a quarter of the way in, and cuts there. That's 72 sections: all of Fifth Third's, Capital One's and PNC's, 13 of Citi's, and JPM's 10-Ks at 94%, which keeps its real 404k-character MD&A. A section still over 500k after that, or still over 3× the median, is skipped. Only 13 sections are skipped for size (0.07%), down from 123, which had cost Phase 7's bank-failure test most of Citi, Fifth Third, Capital One, PNC and JPM. The cut applies only to long sections, because normal MD&As (Parker-Hannifin, WTW) include summary tables titled "Consolidated Statement of Income", and a cut there would delete most of the MD&A. The pilot companies are unaffected.
 - **Running the fetcher:** it takes about 4.4 seconds per 10-Q, almost all of it parsing. For a full run, split the tickers across 4 parallel workers with `EDGAR_RATE_LIMIT_PER_SEC=2` each (8 requests per second in total, under the SEC's 10), then run once more without tickers to rebuild the manifest. In zsh, pass ticker lists as separate arguments; an unquoted `$VAR` is not split into words.

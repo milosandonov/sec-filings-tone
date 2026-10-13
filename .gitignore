@@ -8,3 +8,5 @@ vector_db/
 data/chunks.parquet
 data/ingest_skipped.csv
 data/experiment/
+data/sentiment/
+eval/labels

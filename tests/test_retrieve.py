@@ -55,12 +55,8 @@ assert list(res) == list(r.STAGES) and all(df.empty for df in res.values())
 assert list(r.search("anything", rerank=False, ticker="TSLA")) == list(r.STAGES[:3])
 print("ok")
 
-# cost and time caps (eval/eval.py): stop before a call would pass the budget, or after the deadline
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "eval"))
-from eval import Cap, CapReached  # noqa: E402
+# cost and time caps: stop before a call would pass the budget, or after the deadline
+from sec_filings_tone.budget import Cap, CapReached  # noqa: E402
 
 c = Cap(usd=0.01)
 c.check(0.005)
