@@ -7,3 +7,4 @@ vector_db/
 *.log
 data/chunks.parquet
 data/ingest_skipped.csv
+data/experiment/

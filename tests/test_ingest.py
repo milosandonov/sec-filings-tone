@@ -48,4 +48,45 @@ emb = embed_text(rows, overlap_tokens=20)
 assert emb[0].startswith("NVDA (IT) 10-K FY2024, Item 1A Risk Factors — Risks Related to Demand\n\n")
 assert emb[1].endswith(chunks[1]["text"]) and len(emb[1]) > len(chunks[1]["text"]) + 60  # has overlap
 assert embed_text(rows, overlap_tokens=0)[1].split("\n\n", 1)[1] == chunks[1]["text"]
+assert embed_text(rows, header="no_heading")[0].startswith("NVDA (IT) 10-K FY2024, Item 1A Risk Factors\n\n")
+assert embed_text(rows, overlap_tokens=0, header="none")[1] == chunks[1]["text"]
+two = embed_text(rows, overlap_tokens=200, overlap_sentences=2)[1]
+assert len(two) > len(emb[1]) and two.endswith(chunks[1]["text"])  # two sentences of overlap
+
+# list items aren't headings, so their text stays; page footers are dropped, not used as headings
+from sec_filings_tone.ingest import drop_risk_factors
+
+LIST = f"""\
+Risks Related to Demand
+
+{PARA}
+
+•our IP rights may be weak in some countries; or
+
+•we may have to write off goodwill; and
+
+Lam Research Corporation 2019 10-K 14
+
+Three Months Ended March 27, September 26, Change Cash and cash equivalents $7,173 $7,116
+
+{PARA}
+
+Fiscal Year 2020 Compared to Fiscal Year 2019
+
+{PARA}
+"""
+c = chunk_section(LIST, 300, 200)
+assert "our IP rights may be weak" in c[0]["text"] and "write off goodwill" in c[0]["text"]
+assert c[0]["heading"] == "Risks Related to Demand" and c[-1]["heading"] == "Fiscal Year 2020 Compared to Fiscal Year 2019"
+assert not any("10-K 14" in x["heading"] + x["text"] or "$7,173" in x["heading"] + x["text"] for x in c)
+
+# a tiny last chunk joins the one before it
+tail = chunk_section(f"{PARA}\n\n{PARA}\n\nItem 1B: Unresolved Staff Comments\n\nNone.\n", 300, 150)
+assert tail[-1]["text"].endswith("None.") and all(x["n_tokens"] >= 50 for x in tail)
+
+# a Risk Factors section inside a 10-Q MD&A is cut; a stub pointing to the 10-K's Item 1A is not
+MDNA = "Results of Operations\n\nRevenue grew.\n\n"
+assert drop_risk_factors(MDNA + "Risk Factors\n\nYou should consider each of the following factors.\n") == MDNA
+stub = MDNA + "Risk Factors \n\nRisk factors are disclosed within Item 1A. Risk Factors of the 2022 Form 10-K.\n\nLiquidity\n"
+assert drop_risk_factors(stub) == stub
 print("ok")

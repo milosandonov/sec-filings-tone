@@ -1,30 +1,43 @@
 # SEC Filings Tone
 
-This project tracks how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, and others) changes across their SEC filings, in every sector of the S&P 500. Retrieval (RAG) finds the passages about each topic, three scorers rate their sentiment, and a Q&A layer lets users ask their own questions about any company or sector.
+This project tracks how companies' tone on specific topics (supply chain, AI, China, interest rates, tariffs, and others) changes across their SEC filings, in every sector of the S&P 500. Retrieval (RAG) finds the passages about each topic, an LLM scores a tone profile toward each topic (polarity, uncertainty, severity, realization, specificity) with FinBERT and the Loughran-McDonald dictionary as baselines, and a Q&A layer lets users ask their own questions about any company or sector.
 
 ## Research questions
 
-1. How well do FinBERT, an LLM and the Loughran-McDonald dictionary score SEC filing text, both against labels and against real events?
-2. Does tone react to known shocks (export controls, the 2023 bank failures, tariffs) in the sectors and topics they hit, and which scorer picks that up?
+1. How well do FinBERT, an LLM and the Loughran-McDonald dictionary score SEC filing text, both against labels and against real events? Does a tone profile with several dimensions measure anything that polarity alone misses?
+2. Does tone react to known shocks (export controls, the 2023 bank failures, tariffs) in the sectors and topics they hit, and which scorer and which dimension picks that up?
 3. How much of a 10-K is boilerplate carried over from last year, and do scorers behave differently on boilerplate than on new text?
 4. Does tone move together within a sector more than across sectors?
 
 ## Status
 
-Work in progress. The filing download is done. The other stages are planned but not built yet. See [PLAN.md](PLAN.md) for the full design.
+Work in progress. The filing download is done, and chunking, embedding and retrieval run on a 10-company pilot. The other stages are planned but not built yet. See [PLAN.md](PLAN.md) for the full design.
 
 | Stage | Status |
 |---|---|
 | 1. Fetch and parse filings (`fetch.py`) | Done |
-| 2. Chunk and embed (`ingest.py`) | Not started |
-| 3. Retrieval: metadata filter, hybrid search, reranking (`retrieve.py`) | Not started |
-| 4. Retrieval eval (`eval/`) | Not started |
-| 5. Sentiment scorers: FinBERT, LLM, Loughran-McDonald (`sentiment.py`) | Not started |
+| 2. Chunk and embed (`ingest.py`) | Done for the pilot |
+| 3. Retrieval: metadata filter, hybrid search, reranking (`retrieve.py`) | Done for the pilot |
+| 4. Retrieval eval (`eval/`) | Eval done for the pilot; chunking experiment next |
+| 5. Tone profile (LLM), with FinBERT and Loughran-McDonald baselines (`sentiment.py`) | Not started |
 | 6. Labeled benchmark (silver and gold sets) | Not started |
 | 7. Event validation (`events.csv`) | Not started |
 | 8. Boilerplate vs new text (`diff.py`) | Not started |
 | 9. Topic tone over time and across sectors | Not started |
 | 10. Q&A layer (`answer.py`) | Not started |
+
+## Retrieval eval
+
+30 test questions on the 10 pilot semiconductor companies (`eval/tests.jsonl`), each with metadata filters, keywords taken from the passages that answer it, and a reference answer. Scores use the top 10 chunks per stage; a chunk counts as relevant to a keyword if it contains the keyword as a whole word.
+
+| Stage | MRR | nDCG@10 | Keyword coverage |
+|---|---|---|---|
+| Vector search only | 0.673 | 0.669 | 98.9% |
+| BM25 only | 0.761 | 0.758 | 95.0% |
+| Hybrid (RRF) | 0.773 | 0.755 | 96.1% |
+| Hybrid + Claude rerank | 0.890 | 0.855 | 98.9% |
+
+BM25 is strongest on exact terms such as product names and dollar amounts. Vector search is stronger when the question is worded differently from the filing. The LLM reranker improves on both in every question category. Cross-sector questions will be added once all sectors are embedded.
 
 ## Data
 
@@ -45,6 +58,8 @@ Create a `.env` file in the project root. The SEC rejects requests without a Use
 
 ```
 SEC_USER_AGENT="Your Name your.email@example.com"
+OPENAI_API_KEY=...       # embeddings (ingest --embed, retrieve)
+ANTHROPIC_API_KEY=...    # reranking (retrieve)
 ```
 
 ## Usage
@@ -54,6 +69,10 @@ uv run python -m sec_filings_tone.fetch NVDA AMD          # 10-Ks for specific t
 uv run python -m sec_filings_tone.fetch                   # 10-Ks for every company in data/companies.csv
 uv run python -m sec_filings_tone.fetch --10q [TICKERS]   # 10-Q MD&A instead
 uv run python tests/test_fetch.py                         # section-extraction test
+uv run python -m sec_filings_tone.retrieve "China export restrictions" --ticker NVDA --form 10-K --fy 2023 --item 1A
+uv run python tests/test_retrieve.py                      # retrieval test (offline)
+uv run python eval/eval.py                                # retrieval eval: all 30 questions, all stages
+uv run python eval/eval.py 3                              # one question, with first-hit ranks per stage
 ```
 
 Filings whose sections are already in `data/cache/` are skipped, so reruns only download what's missing. Each run updates the manifest CSV and lists the filings whose sections came out too short.

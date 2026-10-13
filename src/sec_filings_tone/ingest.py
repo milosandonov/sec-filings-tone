@@ -9,6 +9,7 @@ Usage:
 import argparse
 import os
 import re
+from pathlib import Path
 
 import pandas as pd
 import tiktoken
@@ -25,6 +26,7 @@ EMBED_PRICE_PER_M = 0.13  # USD per 1M tokens, from memory: check before the ful
 MAX_SECTION_CHARS = 400_000  # longer means fetch.py ran past the section (Citi 10-Q at 1.28M)
 MAX_MEDIAN_RATIO = 3
 HEADING_MIN_TOKENS = 100  # a heading starts a new chunk only once the current one is this big
+MIN_TAIL_TOKENS = 50  # a smaller last chunk of a section joins the one before it
 ITEM_NAMES = {"1A": "Item 1A Risk Factors", "7": "Item 7 MD&A", "mdna": "MD&A"}
 
 ENC = tiktoken.get_encoding("cl100k_base")
@@ -66,7 +68,30 @@ def paragraphs(text: str) -> list[str]:
 
 
 def is_heading(para: str) -> bool:
-    return len(para) < 150 and not re.search(r"[.!?:;,]$", para)
+    """Short and unpunctuated, but not a list item ("•our IP rights may be weak; or") or a sentence
+    fragment split by a page break ("in the", "reduce existing inventories of")."""
+    return (len(para) < 150 and not re.search(r"[.!?:;,]$", para)
+            and not re.match(r"[•◦▪■●+\-–—]|[a-z]", para)
+            and not re.search(r"\b(and|or|of|for|the|in|to|by|a|an|with|on|our|at|from|that|as)$", para))
+
+
+def is_furniture(heading: str) -> bool:
+    """A "heading" ending in a page number is a running header or footer ("Lam Research Corporation
+    2019 10-K 14", "Other Key Information 54"); one with a $ or 3+ numbers is a table caption or row
+    ("Three Months Ended March 27, ... $7,173"). Real headings have at most two ("Fiscal 2020 Compared
+    to Fiscal 2019")."""
+    return (re.search(r"\s\d{1,3}$", heading) is not None or "$" in heading
+            or len(re.findall(r"\d[\d,.]*", heading)) >= 3)
+
+
+def drop_risk_factors(text: str) -> str:
+    """QCOM (2019-24), MCD and BEN put a full Risk Factors section inside 10-Q Item 2, so the MD&A
+    ends at its heading. CAT, HBAN and JBHT have a stub there pointing to the 10-K's Item 1A,
+    and the MD&A goes on after it."""
+    m = re.search(r"^[ \t]*risk factors[ \t]*$", text, re.M | re.I)
+    if m and not re.search(r"item\s+1a", text[m.end():m.end() + 400], re.I):
+        return text[:m.start()]
+    return text
 
 
 def split_long(para: str, max_tokens: int) -> list[str]:
@@ -78,7 +103,8 @@ def split_long(para: str, max_tokens: int) -> list[str]:
     return pieces
 
 
-def chunk_section(text: str, max_tokens: int = 800, target_tokens: int = 500) -> list[dict]:
+def chunk_section(text: str, max_tokens: int = 800, target_tokens: int = 500,
+                  heading_min_tokens: int = HEADING_MIN_TOKENS) -> list[dict]:
     """Section text -> [{"heading", "text", "n_tokens"}]. Packs paragraphs until a chunk
     reaches target_tokens, never past max_tokens; headings go in metadata, not text."""
     chunks, cur, cur_tokens, heading, cur_heading = [], [], 0, "", ""
@@ -91,7 +117,9 @@ def chunk_section(text: str, max_tokens: int = 800, target_tokens: int = 500) ->
 
     for para in paragraphs(text):
         if is_heading(para):
-            if cur_tokens >= HEADING_MIN_TOKENS:
+            if is_furniture(para):
+                continue
+            if cur_tokens >= heading_min_tokens:
                 flush()
             heading = para
             if not cur:
@@ -108,6 +136,12 @@ def chunk_section(text: str, max_tokens: int = 800, target_tokens: int = 500) ->
             if cur_tokens >= target_tokens:
                 flush()
     flush()
+    # a section's last few lines ("Item 1B: Unresolved Staff Comments. None.") join the chunk before
+    if len(chunks) > 1 and chunks[-1]["n_tokens"] < MIN_TAIL_TOKENS:
+        merged = chunks[-2]["text"] + " " + chunks[-1]["text"]
+        if n_tokens(merged) <= max_tokens:
+            chunks.pop()
+            chunks[-1] |= {"text": merged, "n_tokens": n_tokens(merged)}
     return chunks
 
 
@@ -135,12 +169,15 @@ def sections(tickers: list[str] | None) -> tuple[list[dict], list[dict]]:
     return keep, skipped
 
 
-def build_chunks(tickers: list[str] | None = None) -> pd.DataFrame:
+def build_chunks(tickers: list[str] | None = None, max_tokens: int = 800, target_tokens: int = 500,
+                 out: Path = CHUNKS, heading_min_tokens: int = HEADING_MIN_TOKENS) -> pd.DataFrame:
     keep, skipped = sections(tickers)
     rows = []
     for sec in keep:
         text = (CACHE / f"{sec['ticker']}_{sec['key']}_{sec['item']}.txt").read_text()
-        for seq, c in enumerate(chunk_section(text)):
+        if sec["item"] == "mdna":
+            text = drop_risk_factors(text)
+        for seq, c in enumerate(chunk_section(text, max_tokens, target_tokens, heading_min_tokens)):
             rows.append({"chunk_id": f"{sec['ticker']}_{sec['form']}_{sec['key']}_{sec['item']}_{seq:04d}",
                          **{k: sec[k] for k in ("ticker", "sector", "form", "item", "fy",
                                                  "report_date", "filing_date", "accession")},
@@ -148,34 +185,40 @@ def build_chunks(tickers: list[str] | None = None) -> pd.DataFrame:
                          "period_quarter": (int(sec["report_date"][5:7]) - 1) // 3 + 1,
                          "seq": seq, **c})
     chunks = pd.DataFrame(rows)
-    chunks.to_parquet(CHUNKS, index=False)
-    pd.DataFrame(skipped).to_csv(SKIPPED, index=False)
+    chunks.to_parquet(out, index=False)
+    skipped_path = SKIPPED if out == CHUNKS else out.with_suffix(".skipped.csv")
+    pd.DataFrame(skipped).to_csv(skipped_path, index=False)
 
     raw = sum(s["chars"] for s in keep)
     kept = chunks.text.str.len().sum()
-    print(f"{len(keep)} sections -> {len(chunks)} chunks in {CHUNKS}; {len(skipped)} sections skipped ({SKIPPED})")
+    print(f"{len(keep)} sections -> {len(chunks)} chunks in {out}; {len(skipped)} sections skipped ({skipped_path})")
     print(f"tokens per chunk: {chunks.n_tokens.describe(percentiles=[.05, .5, .95]).round().to_dict()}")
     print(f"chunks per section: median {chunks.groupby(['ticker', 'form', 'item', 'report_date']).size().median():.0f}")
-    print(f"text kept after cleaning: {kept / raw:.0%} of raw characters (rest is tables, markup, headings)")
+    print(f"text kept after cleaning: {kept / raw:.0%} of raw characters (rest is tables, markup, headings, "
+          "risk factors inside 10-Q MD&A)")
     if skipped:
         print(pd.DataFrame(skipped).groupby("reason").size().to_string())
     return chunks
 
 
-def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60) -> list[str]:
-    """What gets embedded: context header + last sentence of the previous chunk (capped) + text.
+def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences: int = 1,
+               header: str = "full") -> list[str]:
+    """What gets embedded: context header + the previous chunk's last sentence(s), capped at
+    overlap_tokens + text. header is "full", "no_heading" (company, form, period, item) or "none".
     The stored text stays clean, so scorers never see the header or count overlap twice."""
     out, prev = [], {}
     for r in chunks.itertuples():
         when = f"FY{r.fy}" if r.form == "10-K" else f"quarter ending {r.report_date}"
-        header = f"{r.ticker} ({r.sector}) {r.form} {when}, {ITEM_NAMES[r.item]}" + (f" — {r.heading}" if r.heading else "")
+        head = f"{r.ticker} ({r.sector}) {r.form} {when}, {ITEM_NAMES[r.item]}"
+        if header == "full" and r.heading:
+            head += f" — {r.heading}"
         section = (r.ticker, r.form, r.item, r.report_date)
         overlap = ""
         if overlap_tokens and section in prev and prev[section][0] == r.seq - 1:
-            last = SENTENCE_END.split(prev[section][1])[-1]
+            last = " ".join(SENTENCE_END.split(prev[section][1])[-overlap_sentences:])
             overlap = ENC.decode(ENC.encode(last)[-overlap_tokens:]) + " "
         prev[section] = (r.seq, r.text)
-        out.append(f"{header}\n\n{overlap}{r.text}")
+        out.append(f"{overlap}{r.text}" if header == "none" else f"{head}\n\n{overlap}{r.text}")
     return out
 
 
