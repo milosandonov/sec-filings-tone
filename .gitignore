@@ -10,3 +10,7 @@ data/ingest_skipped.csv
 data/experiment/
 data/sentiment/
 eval/labels
+# working files from runs: rebuilt or resumed locally, never committed
+data/*.parquet
+data/*.skipped.csv
+data/embed_batches*/

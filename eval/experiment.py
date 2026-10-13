@@ -16,6 +16,7 @@ Usage:
     uv run python eval/experiment.py --variants base gemini2  # some variants only
     uv run python eval/experiment.py --score-only             # metrics from saved rankings, no API calls
     uv run python eval/experiment.py --multi                  # pilot + one company per other sector, more questions
+    uv run python eval/experiment.py --multi --variants oss_bge_m3 --no-rerank   # vector, BM25, hybrid only
     uv run python eval/experiment.py --budget 6 --max-minutes 60   # caps (defaults: $8 of new spend, 90 minutes)
 """
 
@@ -213,7 +214,7 @@ def unit(m: np.ndarray, dims: int) -> np.ndarray:
     return m / np.linalg.norm(m, axis=-1, keepdims=True)
 
 
-def rank(name: str, df: pd.DataFrame, E: np.ndarray, Q: np.ndarray, tests: list[dict]) -> pd.DataFrame:
+def rank(name: str, df: pd.DataFrame, E: np.ndarray, Q: np.ndarray, tests: list[dict], rerank: bool = True) -> pd.DataFrame:
     """Every stage's ranking for every test and scored size; rerank only at MAIN_DIMS."""
     retrieve.chunks = lambda: df  # filters, BM25 and rows() now use this variant's chunks
     retrieve.bm25_index.cache_clear()
@@ -239,7 +240,7 @@ def rank(name: str, df: pd.DataFrame, E: np.ndarray, Q: np.ndarray, tests: list[
             add(dims, ti, "vector", vec_ids, sims[top])
             add(dims, ti, "bm25", bm_ids, bm_scores)
             add(dims, ti, "hybrid", list(fused), list(fused.values()))
-            if dims == MAIN_DIMS:
+            if dims == MAIN_DIMS and rerank:
                 cands = retrieve.rows(list(fused)[:retrieve.CANDIDATES], list(fused.values())[:retrieve.CANDIDATES])
                 jobs += [(ti, rep, t["question"], cands) for rep in range(RERANK_REPEATS)]
     def rerank(job):
@@ -341,6 +342,7 @@ def main() -> None:
     p.add_argument("--smoke", action="store_true")
     p.add_argument("--score-only", action="store_true")
     p.add_argument("--multi", action="store_true")
+    p.add_argument("--no-rerank", action="store_true", help="skip the Claude reranking stage")
     p.add_argument("--budget", type=float, default=8.0, help="USD of new spend; stop before a call would pass it")
     p.add_argument("--max-minutes", type=float, default=90)
     a = p.parse_args()
@@ -387,7 +389,7 @@ def main() -> None:
             df = tables[config(name)["table"]]
             E = vectors(name, df, out)
             Q = query_vectors(config(name)["model"], [t["question"] for t in tests], out)
-            rank(name, df, E, Q, tests).to_parquet(path, index=False)
+            rank(name, df, E, Q, tests, not a.no_rerank).to_parquet(path, index=False)
             print(f"{name}: ranked, saved {path} (spent so far ${CAP.spent():.2f})", flush=True)
     except CapReached as e:
         raise SystemExit(f"stopped: {e}. Finished variants and embedded batches are saved; rerun to continue.")

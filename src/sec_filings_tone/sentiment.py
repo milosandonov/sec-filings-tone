@@ -34,6 +34,7 @@ GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
 OUT = Path("data/sentiment")
 MODEL = "claude-haiku-5-5"  # cheapest; the pilot shows whether a bigger model is needed
 TIMEOUT = 60  # seconds per call
+SELECTION = "reranked"  # how pilot passages are picked; in the file names, so results from different pickers don't mix
 
 # dimension -> allowed scores, in the guidelines' order (evaluative, epistemic, disclosure)
 DIMENSIONS = {
@@ -52,7 +53,13 @@ TOPICS = {  # topic -> search query used to find passages about it
     "Tariffs": "tariffs and trade investigations",
     "Government policy": "government regulation, subsidies, tax credits, CHIPS Act, antitrust",
     "Deposits and liquidity": "bank deposits, deposit flows and costs, liquidity and funding",
+    "Inflation and costs": "inflation, rising costs of materials, labor, energy and freight, and price increases",
+    "Geopolitics and war": "war, sanctions and geopolitical conflict, such as Russia and Ukraine or the Middle East",
+    "Cybersecurity": "cybersecurity incidents, cyberattacks, data breaches and protecting information systems",
+    "Labor and workforce": "labor shortages, wages, hiring, layoffs, strikes and unions",
+    "Energy transition and climate": "climate change, emissions regulation, renewable energy and clean energy incentives",
 }
+# Phase 9 scores every topic for every company, except deposits and liquidity, for Financials only
 PRACTICE = Path(__file__).parents[2] / "labels" / "practice.csv"  # never sampled, so it stays a clean test
 
 EXAMPLES = """\
@@ -141,9 +148,11 @@ def proxies(text: str) -> dict:
 
 # ---------- pilot reliability check ----------
 
-def sample(n: int, seed: int = 0) -> pd.DataFrame:
+def sample(n: int, cap: Cap, seed: int = 0) -> pd.DataFrame:
     """n (passage, topic) pairs: for each topic in turn, a random company, form and year, and the top
-    hybrid hit there. Banking topics are skipped when no bank is embedded."""
+    reranked hit there, as Phase 9 will pick passages. (An earlier pilot used hybrid's top hit;
+    reranking found an on-topic passage for half of the 16% it left off topic.) Banking topics are
+    skipped when no bank is embedded."""
     rng = random.Random(seed)
     df = retrieve.chunks()
     skip = set(pd.read_csv(PRACTICE).chunk_id) if PRACTICE.exists() else set()
@@ -155,7 +164,8 @@ def sample(n: int, seed: int = 0) -> pd.DataFrame:
         ticker = rng.choice(sorted(df.ticker.unique()))
         form = rng.choice(["10-K", "10-Q"])
         fy = rng.choice(sorted(df[(df.ticker == ticker) & (df.form == form)].fy.unique()))
-        hits = retrieve.search(TOPICS[topic], k=1, rerank=False, ticker=ticker, form=form, fy=int(fy))["hybrid"]
+        cap.check(rerank_call_usd(retrieve.CANDIDATES * 800))
+        hits = retrieve.search(TOPICS[topic], k=1, rerank=True, ticker=ticker, form=form, fy=int(fy))["rerank"]
         if len(hits) and (cid := hits.chunk_id.iloc[0]) not in seen | skip:
             seen.add(cid)
             out.append({"pid": len(out), "topic": topic, **hits.iloc[0].drop("score").to_dict()})
@@ -164,8 +174,8 @@ def sample(n: int, seed: int = 0) -> pd.DataFrame:
 
 def pilot(n: int, cap: Cap, model: str) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"pilot_sample_{n}.parquet"
-    items = pd.read_parquet(path) if path.exists() else sample(n)
+    path = OUT / f"pilot_sample_{n}_{SELECTION}.parquet"
+    items = pd.read_parquet(path) if path.exists() else sample(n, cap)
     items.to_parquet(path, index=False)
     dims = list(DIMENSIONS)
     rng = random.Random(1)
@@ -194,9 +204,14 @@ def pilot(n: int, cap: Cap, model: str) -> None:
                     print(f"  {k}/{len(jobs)} calls, ${cap.spent():.2f}", flush=True)
     except CapReached as e:
         print(f"stopped: {e}")
-    pd.DataFrame(rows).to_parquet(OUT / f"pilot_scores_{n}_{model}.parquet", index=False)
+    pd.DataFrame(rows).to_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet", index=False)
     print(f"spent ${cap.spent():.2f}; saved {len(rows)} results")
     report(n, model)
+
+
+def rerank_call_usd(n_input_tokens: float) -> float:
+    """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
+    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
 
 
 def kappa(a, b, labels) -> float:
@@ -212,8 +227,8 @@ def kappa(a, b, labels) -> float:
 
 
 def report(n: int, model: str) -> None:
-    items = pd.read_parquet(OUT / f"pilot_sample_{n}.parquet")
-    s = pd.read_parquet(OUT / f"pilot_scores_{n}_{model}.parquet")
+    items = pd.read_parquet(OUT / f"pilot_sample_{n}_{SELECTION}.parquet")
+    s = pd.read_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
     dims = list(DIMENSIONS)
     errors = s["error"].notna().sum() if "error" in s else 0
     comb = s[(s["mode"] == "combined") & s.get("error", pd.Series(index=s.index)).isna()]

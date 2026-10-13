@@ -26,6 +26,14 @@ else about it, it's still on topic, and most scores will be low.
 | Tariffs | Import and export tariffs and trade investigations that could lead to them (such as Section 232) |
 | Deposits and liquidity | Bank deposits, deposit flows and costs, liquidity and funding |
 | Government policy | Laws, regulation, subsidies and tax credits that affect the business (CHIPS Act, Inflation Reduction Act, antitrust) |
+| Inflation and costs | Rising or falling costs of materials, labor, energy and freight, and price increases in response |
+| Geopolitics and war | Wars, sanctions and conflict between countries (Russia and Ukraine, the Middle East). US–China trade and export issues count as China |
+| Cybersecurity | Cyberattacks, data breaches, and protecting systems and data |
+| Labor and workforce | Hiring, labor shortages, wages, layoffs, strikes and unions |
+| Energy transition and climate | Climate change, emissions rules, renewable energy, and clean-energy incentives |
+
+Topics can overlap. A passage on the Inflation Reduction Act's clean-energy credits is on topic for
+both government policy and energy transition. Score it separately for each topic it's paired with.
 
 ## Step 1: is it on topic?
 

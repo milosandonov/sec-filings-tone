@@ -484,6 +484,37 @@ What changes:
 chunks and 200M tokens, about $26 with `text-embedding-3-large`, and about 2.4 GB of vectors at
 1,024 dims. Run it with `ingest --embed --budget 30`.
 
+## 8. Open embedding models (2026-10-13)
+
+Two open models that run locally and take inputs longer than our 800-token chunks, scored on the
+same 20 companies and 50 questions as section 7, with the production text (plain, heading-aligned
+chunks). Embedding cost nothing; reranking cost $0.28.
+
+| Model | Vector | Hybrid | Rerank | Full 498-company run |
+|---|---|---|---|---|
+| `text-embedding-3-large` (production) | 0.804 | 0.828 | 0.908 | about $26, about an hour |
+| `BAAI/bge-m3` (open, 568M parameters) | 0.808 | 0.789 | 0.889 | free, about 30 hours on an Apple-silicon Mac |
+| `Qwen/Qwen3-Embedding-0.6B` (open) | 0.732 | 0.765 | 0.896 | free, about 30 hours |
+| `text-embedding-3-small` | 0.762 | 0.772 | 0.907 | about $3 |
+
+Paired differences from `text-embedding-3-large` (95% intervals):
+
+| Model | Vector | Hybrid | Rerank |
+|---|---|---|---|
+| bge-m3 | +0.004 [−0.053, +0.060] | −0.039 [−0.101, +0.015] | −0.019 [−0.048, +0.003] |
+| Qwen3-0.6B | −0.071 [−0.146, +0.003] | **−0.063 [−0.130, −0.005]** | −0.012 [−0.037, +0.005] |
+
+- **bge-m3 matches the OpenAI model on vector search.** It's better on sector vocabulary (0.875
+  vs 0.750), unfiltered questions (0.804 vs 0.778) and year questions (0.656 vs 0.631), and worse
+  on broad (0.673 vs 0.753) and paraphrased ones (0.780 vs 0.821). Hybrid and rerank lean toward
+  OpenAI but within noise. Phase 9 uses hybrid search without reranking, so the hybrid lean
+  matters more than the rerank one.
+- **Qwen3-0.6B is worse,** mainly on paraphrased (0.617) and year (0.422) questions.
+- **Speed:** about 5 chunks a second on the Mac's GPU, so about 30 hours for the full 580,000
+  chunks. The batch files make that resumable.
+- **Using bge-m3 in production** would also mean embedding queries locally (the 2.3 GB model loaded
+  in memory), and changing `ingest.embed_chunks` and `retrieve.vector_search`.
+
 ## How to reproduce
 
 ```bash

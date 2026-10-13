@@ -4,6 +4,7 @@ Usage:
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD          # chunk only (local, free)
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD --embed  # chunk, then embed (costs money)
     uv run python -m sec_filings_tone.ingest --embed --budget 30         # everything; stops first if over $30
+    uv run python -m sec_filings_tone.ingest --embed --batch --wait --budget 15 --no-rebuild  # Batch API: half price
     uv run python -m sec_filings_tone.ingest                             # chunk everything
 """
 
@@ -259,46 +260,168 @@ def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences
     return out
 
 
+META_COLS = ["ticker", "sector", "form", "item", "fy", "report_date", "filing_date",
+             "accession", "period_quarter", "heading", "seq", "n_tokens"]
+BATCHES = DATA / "embed_batches"  # Batch API state, request files and downloaded results
+BATCH_MAX_INPUTS = 50_000  # OpenAI's cap on embedding inputs per batch
+REQUEST_INPUTS = 100  # inputs per request line in a batch file
+
+
+def open_collection(name: str = COLLECTION):
+    import chromadb
+
+    return chromadb.PersistentClient(VECTOR_DB).get_or_create_collection(
+        name, configuration={"hnsw": {"space": "cosine"}}, embedding_function=None)
+
+
+def add_to_chroma(col, rows: pd.DataFrame, vectors) -> None:
+    for i in range(0, len(rows), 5000):  # Chroma caps how many rows one add takes
+        part = rows.iloc[i:i + 5000]
+        col.add(ids=part.chunk_id.tolist(), embeddings=list(vectors[i:i + 5000]), documents=part.text.tolist(),
+                metadatas=[{k: (v.item() if hasattr(v, "item") else v) for k, v in m.items()}
+                           for m in part[META_COLS].to_dict("records")])
+
+
+def not_embedded(col, ids: list[str]) -> list[str]:
+    done = set()
+    for i in range(0, len(ids), 5000):
+        done |= set(col.get(ids=ids[i:i + 5000], include=[])["ids"])
+    return [c for c in ids if c not in done]
+
+
 def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 5.0) -> None:
     """Embed each chunk's plain text into Chroma. Chunk ids already in the collection are skipped,
     so it can be stopped and rerun. Stops before any request if the estimate is over budget (USD)."""
-    import chromadb
     from openai import OpenAI
 
-    chunks = chunks.sort_values(["ticker", "form", "item", "report_date", "seq"])
-    docs = chunks.text.tolist()
-    col = chromadb.PersistentClient(VECTOR_DB).get_or_create_collection(
-        collection, configuration={"hnsw": {"space": "cosine"}}, embedding_function=None)
-
-    done = set()
-    ids = chunks.chunk_id.tolist()
-    for i in range(0, len(ids), 5000):
-        done |= set(col.get(ids=ids[i:i + 5000], include=[])["ids"])
-    todo = [i for i, cid in enumerate(ids) if cid not in done]
-    tokens = [n_tokens(docs[i]) for i in todo]
-    cost = sum(tokens) / 1e6 * EMBED_PRICE_PER_M
-    print(f"{len(todo)} of {len(ids)} chunks to embed, {sum(tokens):,} tokens, about ${cost:.2f} at ${EMBED_PRICE_PER_M}/M")
+    chunks = chunks.sort_values(["ticker", "form", "item", "report_date", "seq"]).set_index("chunk_id", drop=False)
+    col = open_collection(collection)
+    todo = chunks.loc[not_embedded(col, chunks.chunk_id.tolist())]
+    cost = todo.n_tokens.sum() / 1e6 * EMBED_PRICE_PER_M
+    print(f"{len(todo)} of {len(chunks)} chunks to embed, {todo.n_tokens.sum():,} tokens, about ${cost:.2f} at ${EMBED_PRICE_PER_M}/M")
     if cost > budget:
         raise SystemExit(f"estimated ${cost:.2f} is over the ${budget:.2f} budget; rerun with --budget {cost * 1.1:.0f}")
 
     client = OpenAI(timeout=60, max_retries=3)  # a stuck request fails instead of hanging
-    meta_cols = ["ticker", "sector", "form", "item", "fy", "report_date", "filing_date",
-                 "accession", "period_quarter", "heading", "seq", "n_tokens"]
     batch, batch_tokens = [], 0
-    for j, (i, t) in enumerate(zip(todo, tokens)):
-        batch.append(i)
+    for j, (cid, t) in enumerate(zip(todo.chunk_id, todo.n_tokens)):
+        batch.append(cid)
         batch_tokens += t
         # the API caps a request at 2,048 inputs and 300k tokens
         if len(batch) == 1000 or batch_tokens > 200_000 or j == len(todo) - 1:
-            resp = client.embeddings.create(model=EMBED_MODEL, dimensions=EMBED_DIMS, input=[docs[k] for k in batch])
-            rows = chunks.iloc[batch]
-            col.add(ids=rows.chunk_id.tolist(), embeddings=[d.embedding for d in resp.data],
-                    documents=rows.text.tolist(),
-                    metadatas=[{k: (v.item() if hasattr(v, "item") else v) for k, v in m.items()}
-                               for m in rows[meta_cols].to_dict("records")])
+            rows = todo.loc[batch]
+            resp = client.embeddings.create(model=EMBED_MODEL, dimensions=EMBED_DIMS, input=rows.text.tolist())
+            add_to_chroma(col, rows, [d.embedding for d in resp.data])
             print(f"  embedded {j + 1}/{len(todo)}")
             batch, batch_tokens = [], 0
     print(f"collection {collection}: {col.count()} chunks")
+
+
+def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 15.0,
+                  wait: bool = False, poll_minutes: float = 10, state_dir: Path = BATCHES) -> None:
+    """Embed through OpenAI's Batch API: half the price, results within 24 hours. Safe to stop and
+    rerun at any point: the state is in data/embed_batches/state.json, batches keep running on
+    OpenAI's side, finished ones are loaded into Chroma on the next run, and chunks from failed
+    batches or failed requests are resubmitted. Each account has a cap on queued tokens; if a batch
+    fails on it, fewer batches are kept in flight, or the batch size is halved."""
+    import base64
+    import json
+    import time
+
+    import numpy as np
+    from openai import OpenAI
+
+    client = OpenAI(timeout=300, max_retries=3)
+    col = open_collection(collection)
+    state_dir.mkdir(parents=True, exist_ok=True)
+    state_path = state_dir / "state.json"
+    state = (json.loads(state_path.read_text()) if state_path.exists()
+             else {"jobs": [], "max_inputs": BATCH_MAX_INPUTS, "max_inflight": 50})
+    by_id = chunks.set_index("chunk_id", drop=False)
+    half_price = EMBED_PRICE_PER_M / 2
+
+    def save():
+        state_path.write_text(json.dumps(state, indent=1))
+
+    def load(job):
+        """Download a finished batch's results and add them to Chroma; failed requests stay to do."""
+        out = state_dir / f"{job['name']}_out.jsonl"
+        b = client.batches.retrieve(job["batch_id"])
+        if b.output_file_id and not out.exists():
+            client.files.content(b.output_file_id).write_to_file(out)
+        ids, vecs = [], []
+        for line in out.read_text().splitlines() if out.exists() else []:
+            r = json.loads(line)
+            if r["response"] and r["response"]["status_code"] == 200:
+                i = int(r["custom_id"].rsplit("-", 1)[1])
+                part = job["ids"][i * REQUEST_INPUTS:(i + 1) * REQUEST_INPUTS]
+                data = sorted(r["response"]["body"]["data"], key=lambda d: d["index"])
+                ids += part
+                vecs += [np.frombuffer(base64.b64decode(d["embedding"]), dtype=np.float32) for d in data]
+        missing = set(not_embedded(col, ids))  # skip anything already loaded by an earlier, interrupted run
+        keep = [k for k, cid in enumerate(ids) if cid in missing]
+        if keep:
+            add_to_chroma(col, by_id.loc[[ids[k] for k in keep]], [vecs[k] for k in keep])
+        job["status"], job["loaded"] = "loaded", len(ids)
+        print(f"  {job['name']}: loaded {len(ids):,} of {len(job['ids']):,} chunks"
+              + (f" ({b.request_counts.failed} requests failed; their chunks will be resubmitted)" if b.request_counts.failed else ""))
+        out.unlink(missing_ok=True)
+        save()
+
+    while True:
+        # 1. check submitted batches
+        for job in [j for j in state["jobs"] if j["status"] == "submitted"]:
+            b = client.batches.retrieve(job["batch_id"])
+            if b.status == "completed":
+                load(job)
+            elif b.status in ("failed", "expired", "cancelled"):
+                codes = [e.code for e in (b.errors.data if b.errors else [])]
+                job["status"] = b.status
+                if "token_limit_exceeded" in codes:  # the account's queue cap
+                    if job["inflight_at_submit"] == 0:
+                        state["max_inputs"] = max(REQUEST_INPUTS, state["max_inputs"] // 2)
+                    state["max_inflight"] = max(1, job["inflight_at_submit"])
+                print(f"  {job['name']}: {b.status} {codes}; its chunks go back to the queue")
+                save()
+        inflight = [j for j in state["jobs"] if j["status"] == "submitted"]
+        queued = {cid for j in inflight for cid in j["ids"]}
+        todo = [c for c in not_embedded(col, by_id.chunk_id.tolist()) if c not in queued]
+        spent = sum(j["usd"] for j in state["jobs"] if j["status"] in ("submitted", "loaded"))
+        if not todo and not inflight:
+            print(f"done: {col.count():,} chunks in {collection}; Batch API spend about ${spent:.2f}")
+            return
+        # 2. submit more, within the budget and the queue cap
+        while todo and len(inflight) < state["max_inflight"]:
+            ids = todo[:state["max_inputs"]]
+            todo = todo[len(ids):]
+            rows = by_id.loc[ids]
+            usd = rows.n_tokens.sum() / 1e6 * half_price
+            if spent + usd > budget:
+                raise SystemExit(f"cost cap: about ${spent:.2f} submitted; the next batch (about ${usd:.2f}) would pass "
+                                 f"${budget:.2f}. Rerun with a higher --budget to continue.")
+            name = f"b{len(state['jobs']):03d}"
+            path = state_dir / f"{name}_in.jsonl"
+            with path.open("w") as f:
+                for i in range(0, len(ids), REQUEST_INPUTS):
+                    f.write(json.dumps({"custom_id": f"{name}-{i // REQUEST_INPUTS}", "method": "POST", "url": "/v1/embeddings",
+                                        "body": {"model": EMBED_MODEL, "dimensions": EMBED_DIMS, "encoding_format": "base64",
+                                                 "input": rows.text.iloc[i:i + REQUEST_INPUTS].tolist()}}) + "\n")
+            assert path.stat().st_size < 190e6, "batch file over OpenAI's 200 MB limit; lower BATCH_MAX_INPUTS"
+            file_id = client.files.create(file=path.open("rb"), purpose="batch").id
+            b = client.batches.create(input_file_id=file_id, endpoint="/v1/embeddings", completion_window="24h")
+            job = {"name": name, "batch_id": b.id, "file_id": file_id, "status": "submitted", "ids": ids,
+                   "usd": float(usd), "inflight_at_submit": len(inflight), "submitted": time.strftime("%Y-%m-%d %H:%M")}
+            state["jobs"].append(job)
+            inflight.append(job)
+            spent += usd
+            path.unlink()
+            save()
+            print(f"  submitted {name}: {len(ids):,} chunks, about ${usd:.2f} ({b.id})")
+        print(f"{time.strftime('%H:%M')} {len(inflight)} batches in flight, {len(todo):,} chunks waiting, "
+              f"{col.count():,} in {collection}, about ${spent:.2f} submitted", flush=True)
+        if not wait:
+            return
+        time.sleep(poll_minutes * 60)
 
 
 def main() -> None:
@@ -307,12 +430,18 @@ def main() -> None:
     p.add_argument("--tickers", nargs="*")
     p.add_argument("--embed", action="store_true")
     p.add_argument("--budget", type=float, default=5.0, help="USD; embedding stops before starting if over it")
+    p.add_argument("--batch", action="store_true", help="with --embed: use the Batch API (half price, within 24 hours)")
+    p.add_argument("--wait", action="store_true", help="with --batch: keep polling until every chunk is in")
+    p.add_argument("--no-rebuild", action="store_true", help="embed the existing chunks.parquet instead of rebuilding it")
     args = p.parse_args()
-    chunks = build_chunks(args.tickers)
+    chunks = pd.read_parquet(CHUNKS) if args.no_rebuild else build_chunks(args.tickers)
     if args.embed:
         if not os.environ.get("OPENAI_API_KEY"):
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")
-        embed_chunks(chunks, budget=args.budget)
+        if args.batch:
+            embed_batches(chunks, budget=args.budget, wait=args.wait)
+        else:
+            embed_chunks(chunks, budget=args.budget)
 
 
 if __name__ == "__main__":
