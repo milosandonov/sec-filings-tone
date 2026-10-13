@@ -265,6 +265,24 @@ META_COLS = ["ticker", "sector", "form", "item", "fy", "report_date", "filing_da
 BATCHES = DATA / "embed_batches"  # Batch API state, request files and downloaded results
 BATCH_MAX_INPUTS = 50_000  # OpenAI's cap on embedding inputs per batch
 REQUEST_INPUTS = 100  # inputs per request line in a batch file
+QUEUE_SHARE = 0.9  # use at most this share of the account's queued-token limit (20M for ours)
+
+
+def take(tokens: list[int], max_inputs: int, max_tokens: float) -> int:
+    """How many of the next chunks fit in one batch: at most max_inputs, with at most max_tokens in total."""
+    n = total = 0
+    for t in tokens[:max_inputs]:
+        if total + t > max_tokens:
+            break
+        total += t
+        n += 1
+    return n
+
+
+def queue_limit(messages: list[str]) -> int | None:
+    """The account's queued-token limit from a token_limit_exceeded error ("Limit: 20,000,000 enqueued tokens")."""
+    m = re.search(r"Limit: ([\d,]+) enqueued tokens", " ".join(messages))
+    return int(m.group(1).replace(",", "")) if m else None
 
 
 def open_collection(name: str = COLLECTION):
@@ -318,12 +336,14 @@ def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: flo
 
 
 def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 15.0,
-                  wait: bool = False, poll_minutes: float = 10, state_dir: Path = BATCHES) -> None:
+                  wait: bool = False, poll_minutes: float = 2, state_dir: Path = BATCHES) -> None:
     """Embed through OpenAI's Batch API: half the price, results within 24 hours. Safe to stop and
     rerun at any point: the state is in data/embed_batches/state.json, batches keep running on
     OpenAI's side, finished ones are loaded into Chroma on the next run, and chunks from failed
     batches or failed requests are resubmitted. Each account has a cap on queued tokens; if a batch
-    fails on it, fewer batches are kept in flight, or the batch size is halved."""
+    fails on it, the limit is read from the error, and from then on batches are sized and submitted
+    so the tokens in flight stay under 90% of it. OpenAI counts queued tokens as characters / 4, not
+    real tokens: b006 passed at 19.7M by that count (16.1M real), b014 failed alone at 25.7M (18.0M real)."""
     import base64
     import json
     import time
@@ -336,12 +356,18 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
     state_dir.mkdir(parents=True, exist_ok=True)
     state_path = state_dir / "state.json"
     state = (json.loads(state_path.read_text()) if state_path.exists()
-             else {"jobs": [], "max_inputs": BATCH_MAX_INPUTS, "max_inflight": 50})
+             else {"jobs": []})
+    state.setdefault("queue_tokens", None)  # learned from the first token_limit_exceeded error
     by_id = chunks.set_index("chunk_id", drop=False)
     half_price = EMBED_PRICE_PER_M / 2
 
     def save():
         state_path.write_text(json.dumps(state, indent=1))
+
+    queue_est = by_id.text.str.len() // 4  # OpenAI's queued-token count; billing uses real tokens
+
+    def job_tokens(job):
+        return int(queue_est.loc[job["ids"]].sum())
 
     def load(job):
         """Download a finished batch's results and add them to Chroma; failed requests stay to do."""
@@ -375,12 +401,14 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
             if b.status == "completed":
                 load(job)
             elif b.status in ("failed", "expired", "cancelled"):
-                codes = [e.code for e in (b.errors.data if b.errors else [])]
+                errors = b.errors.data if b.errors else []
+                codes = [e.code for e in errors]
                 job["status"] = b.status
-                if "token_limit_exceeded" in codes:  # the account's queue cap
-                    if job["inflight_at_submit"] == 0:
-                        state["max_inputs"] = max(REQUEST_INPUTS, state["max_inputs"] // 2)
-                    state["max_inflight"] = max(1, job["inflight_at_submit"])
+                if "token_limit_exceeded" in codes:  # the account's queue cap; such batches aren't billed
+                    limit = queue_limit([e.message or "" for e in errors])
+                    # a batch can fail under the stated limit if the estimate is off: then shrink below it,
+                    # rather than resubmit the same batch forever
+                    state["queue_tokens"] = min(limit or job_tokens(job) // 2, job_tokens(job))
                 print(f"  {job['name']}: {b.status} {codes}; its chunks go back to the queue")
                 save()
         inflight = [j for j in state["jobs"] if j["status"] == "submitted"]
@@ -391,9 +419,14 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
             print(f"done: {col.count():,} chunks in {collection}; Batch API spend about ${spent:.2f}")
             return
         # 2. submit more, within the budget and the queue cap
-        while todo and len(inflight) < state["max_inflight"]:
-            ids = todo[:state["max_inputs"]]
-            todo = todo[len(ids):]
+        todo_tokens = queue_est.loc[todo].tolist()
+        while todo:
+            room = (float("inf") if state["queue_tokens"] is None
+                    else QUEUE_SHARE * state["queue_tokens"] - sum(job_tokens(j) for j in inflight))
+            n = take(todo_tokens, BATCH_MAX_INPUTS, room)
+            if n == 0:
+                break  # the queue is full: wait for batches in flight to finish
+            ids, todo, todo_tokens = todo[:n], todo[n:], todo_tokens[n:]
             rows = by_id.loc[ids]
             usd = rows.n_tokens.sum() / 1e6 * half_price
             if spent + usd > budget:
@@ -410,7 +443,7 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
             file_id = client.files.create(file=path.open("rb"), purpose="batch").id
             b = client.batches.create(input_file_id=file_id, endpoint="/v1/embeddings", completion_window="24h")
             job = {"name": name, "batch_id": b.id, "file_id": file_id, "status": "submitted", "ids": ids,
-                   "usd": float(usd), "inflight_at_submit": len(inflight), "submitted": time.strftime("%Y-%m-%d %H:%M")}
+                   "usd": float(usd), "submitted": time.strftime("%Y-%m-%d %H:%M")}
             state["jobs"].append(job)
             inflight.append(job)
             spent += usd

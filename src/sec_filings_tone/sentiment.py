@@ -13,12 +13,15 @@ Usage:
     uv run python -m sec_filings_tone.sentiment pilot                     # reliability check, 100 passages
     uv run python -m sec_filings_tone.sentiment pilot --n 10 --budget 0.2 # a small first run
     uv run python -m sec_filings_tone.sentiment report                    # rescore the saved pilot, no API calls
+    uv run python -m sec_filings_tone.sentiment baselines                 # FinBERT and LM on the pilot, local
 """
 
 import argparse
 import random
 import re
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+from functools import cache
 from pathlib import Path
 from typing import Literal
 
@@ -133,7 +136,7 @@ def score(row, topic: str, dims: list[str], cap: Cap, model: str = MODEL, with_o
 # ---------- rule-based cross-checks (no model) ----------
 
 HEDGES = r"\b(may|might|could|would|possibly|potential(ly)?|uncertain(ty|ties)?|cannot (predict|estimate)|unable to (predict|estimate)|unpredictable|risk)\b"
-# ponytail: a short hedge list; swap for the Loughran-McDonald uncertainty list once the LM baseline is added
+# a short hedge list; on the pilot it tracks the LLM's uncertainty at least as well as LM's lists (+0.79 vs +0.69/+0.71)
 REALIZED = r"\b(recorded|incurred|recognized|resulted in|took effect|was (imposed|enacted|announced|completed)|we (lost|received|paid))\b"
 
 
@@ -144,6 +147,102 @@ def proxies(text: str) -> dict:
     return {"details_per_100w": 100 * details / words,
             "hedges_per_100w": 100 * len(re.findall(HEDGES, text, re.I)) / words,
             "realized_per_100w": 100 * len(re.findall(REALIZED, text, re.I)) / words}
+
+
+# ---------- baselines (local, free) ----------
+
+# Loughran-McDonald Master Dictionary 1993-2025, linked from sraf.nd.edu/loughranmcdonald-master-dictionary.
+# Free for academic use; kept out of git.
+LM_URL = "https://drive.google.com/uc?export=download&id=1iq2RUf8qGFEAk1g8wQntP3habOnR3fXF"
+LM_PATH = Path("data/lm/Loughran-McDonald_MasterDictionary_1993-2025.csv")
+LM_CATEGORIES = ["negative", "positive", "uncertainty", "litigious", "strong_modal", "weak_modal", "constraining"]
+FINBERT = "ProsusAI/finbert"
+
+
+@cache
+def lm_lists() -> tuple[frozenset, dict[str, frozenset]]:
+    """The LM master word list, and each category's words. In the file, a category column holds the year
+    a word was added, or minus the year it was removed."""
+    if not LM_PATH.exists():
+        LM_PATH.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve(LM_URL, LM_PATH)
+        if not LM_PATH.read_text()[:13] == "Word,Seq_num,":  # Drive returned a page, not the file
+            LM_PATH.unlink()
+            raise SystemExit(f"LM dictionary download failed; save the CSV from sraf.nd.edu to {LM_PATH}")
+    d = pd.read_csv(LM_PATH, keep_default_na=False)  # else the words NA and NULL become NaN
+    return frozenset(d.Word), {c: frozenset(d.Word[d[c.title()] > 0]) for c in LM_CATEGORIES}
+
+
+def lm(text: str) -> dict:
+    """Loughran-McDonald: each category's share of the words, and polarity = (positive - negative) / words.
+    Words are runs of letters found in the master dictionary, as LM count them."""
+    words, cats = lm_lists()
+    toks = [t for t in re.findall(r"[A-Z]+", text.upper()) if t in words]
+    n = max(1, len(toks))
+    out = {f"lm_{c}": sum(t in cats[c] for t in toks) / n for c in LM_CATEGORIES}
+    return {"lm_polarity": out["lm_positive"] - out["lm_negative"], **out}
+
+
+def sentences(text: str) -> list[str]:
+    # ponytail: regex split; "U.S. Government" splits in two. Fine for an average over a passage.
+    return [s for s in re.split(r"(?<=[.!?])\s+(?=[A-Z(\"“])|\n+", text) if s.strip()] or [text]
+
+
+def finbert(texts: list[str], batch_size: int = 64) -> pd.DataFrame:
+    """FinBERT per sentence, averaged per passage: polarity = P(positive) - P(negative), and the share of
+    sentences whose top label is negative or positive."""
+    import torch
+    from transformers import pipeline
+
+    clf = pipeline("text-classification", model=FINBERT, top_k=None, truncation=True,
+                   device="mps" if torch.backends.mps.is_available() else "cpu")
+    sents = [(i, s) for i, t in enumerate(texts) for s in sentences(t)]
+    rows = []
+    for (i, _), res in zip(sents, clf([s for _, s in sents], batch_size=batch_size)):
+        p = {r["label"]: r["score"] for r in res}
+        top = max(p, key=p.get)
+        rows.append({"i": i, "finbert_polarity": p["positive"] - p["negative"],
+                     "finbert_negative": top == "negative", "finbert_positive": top == "positive"})
+    return pd.DataFrame(rows).groupby("i").mean().reindex(range(len(texts))).reset_index(drop=True)
+
+
+def spearman_ci(a: pd.Series, b: pd.Series, n_boot: int = 2000, seed: int = 0) -> tuple[float, float, float]:
+    """Spearman correlation with a 95% bootstrap interval."""
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    rng = np.random.default_rng(seed)
+    r = pd.Series(a).corr(pd.Series(b), method="spearman")
+    boot = [pd.Series(a[k]).corr(pd.Series(b[k]), method="spearman")
+            for k in (rng.integers(0, len(a), len(a)) for _ in range(n_boot))]
+    lo, hi = np.nanpercentile(boot, [2.5, 97.5])
+    return r, lo, hi
+
+
+def baselines(n: int, model: str) -> None:
+    """Score the pilot passages with FinBERT and LM, and compare with the LLM's first combined run."""
+    items = pd.read_parquet(OUT / f"pilot_sample_{n}_{SELECTION}.parquet")
+    path = OUT / f"pilot_baselines_{n}_{SELECTION}.parquet"
+    if not path.exists():
+        b = pd.concat([finbert(items.text.tolist()), pd.DataFrame([lm(t) for t in items.text])], axis=1)
+        b.insert(0, "pid", items.pid.values)
+        b.to_parquet(path, index=False)
+    b = pd.read_parquet(path).set_index("pid")
+    s = pd.read_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
+    r1 = s[(s["mode"] == "combined") & (s.run == 1)].set_index("pid")
+    r1 = r1[r1.off_topic.eq(False)]  # errors have no off_topic and drop out too
+    x = b.loc[r1.index].join(r1[list(DIMENSIONS)].astype(float))
+    x = x.join(pd.DataFrame([proxies(t) for t in items.set_index("pid").loc[r1.index].text], index=r1.index))
+    print(f"\n{len(x)} on-topic pilot passages. LLM scores are toward the topic; the baselines score the whole passage.")
+    print("\n| LLM dimension | Baseline | Spearman [95% CI] |\n|---|---|---|")
+    for d, c in [("polarity", "finbert_polarity"), ("polarity", "lm_polarity"), ("uncertainty", "lm_uncertainty"),
+                 ("uncertainty", "lm_weak_modal"), ("uncertainty", "hedges_per_100w"), ("magnitude", "finbert_polarity"),
+                 ("specificity", "details_per_100w")]:
+        r, lo, hi = spearman_ci(x[d], x[c])
+        print(f"| {d} | {c} | {r:+.2f} [{lo:+.2f}, {hi:+.2f}] |")
+    print(f"\nFinBERT vs LM polarity: {spearman_ci(x.finbert_polarity, x.lm_polarity)[0]:+.2f}")
+    print("\nBy LLM polarity (does FinBERT call neutral text negative?):")
+    print(x.groupby("polarity").agg(n=("lm_polarity", "size"), finbert_polarity=("finbert_polarity", "mean"),
+                                    finbert_negative_share=("finbert_negative", "mean"),
+                                    lm_polarity_x100=("lm_polarity", lambda v: 100 * v.mean())).round(2).to_string())
 
 
 # ---------- pilot reliability check ----------
@@ -269,7 +368,7 @@ def report(n: int, model: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("command", choices=["pilot", "report"])
+    p.add_argument("command", choices=["pilot", "report", "baselines"])
     p.add_argument("--n", type=int, default=100)
     p.add_argument("--model", default=MODEL)
     p.add_argument("--budget", type=float, default=2.0, help="USD; stop before a call would pass it")
@@ -277,6 +376,8 @@ def main() -> None:
     a = p.parse_args()
     if a.command == "pilot":
         pilot(a.n, Cap(a.budget, a.max_minutes), a.model)
+    elif a.command == "baselines":
+        baselines(a.n, a.model)
     else:
         report(a.n, a.model)
 

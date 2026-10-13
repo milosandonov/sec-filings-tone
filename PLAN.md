@@ -23,7 +23,7 @@ Track how companies' tone on specific topics (supply chain, AI, China, interest 
 - 3,500 filings come to about 350 MB–1 GB of extracted text. That's too much to hold in memory at once, so process one filing at a time.
 - **Decision:** keep the raw HTML in memory only, and save just the extracted section text to `data/cache/{ticker}_{year}_{item}.txt`. That avoids re-downloading about 3,500 filings on every run and keeps runs reproducible. The cache is gitignored, and `ingest.py` rebuilds it from scratch.
 - Embeddings: all 498 companies give **673,902 chunks and 236.8M tokens** (median 321 tokens per chunk; built 2026-10-13). With `text-embedding-3-large` at $0.13 per 1M tokens that's $30.78 at the standard price, or **$15.39 with OpenAI's Batch API** (50% off, results within 24 hours), which is what the full run uses. At 1,024 dimensions that's about 2.8 GB of vectors, about 6 GB in Chroma (`vector_db/`, gitignored). 256 dimensions scored the same on both checks and would be 4× smaller.
-- **Batch embedding** (`ingest --embed --batch --wait --budget 17 --no-rebuild`) splits the work into 14 batches of up to 50,000 chunks (OpenAI's cap), submits them, polls, downloads base64 vectors, and loads them into `filings_v2`. It's safe to stop and rerun at any point: the state is in `data/embed_batches/state.json`, batches keep running on OpenAI's side, and chunks from failed batches or requests are resubmitted. If a batch fails on the account's queued-token cap, it keeps fewer batches in flight, or halves the batch size. A one-company test (XOM, 901 chunks, $0.02) loaded every chunk, and its vectors matched separately embedded ones (cosine 0.9997–1.0003).
+- **Batch embedding** (`ingest --embed --batch --wait --budget 17 --no-rebuild`) splits the work into 14 batches of up to 50,000 chunks (OpenAI's cap), submits them, polls, downloads base64 vectors, and loads them into `filings_v2`. It's safe to stop and rerun at any point: the state is in `data/embed_batches/state.json`, batches keep running on OpenAI's side, and chunks from failed batches or requests are resubmitted. OpenAI caps the tokens queued per model (20M for this account) and counts them as characters ÷ 4, about 1.4× the real tokens of filing text, so a 50,000-chunk batch is often over the cap on its own. Submitting all 14 at once on 2026-10-13 got 13 rejected (free: rejected batches aren't billed). Batches are now sized to 18M by OpenAI's count and run about one at a time; one rejected under the stated limit makes the next one smaller instead of being resubmitted as is. A one-company test (XOM, 901 chunks, $0.02) loaded every chunk, and its vectors matched separately embedded ones (cosine 0.9997–1.0003).
 - The LLM scorer runs only on retrieved topic passages and the labeled sets, not on every sentence. Scoring every sentence would be about 5M LLM calls.
 
 ## Phases
@@ -92,7 +92,7 @@ Vector search finds passages with the same meaning in different words. BM25 is p
   - **Open models (`eval/FINDINGS.md` section 8):** `BAAI/bge-m3`, run locally, matches `text-embedding-3-large` on vector search (0.808 vs 0.804 on 50 questions); hybrid and rerank lean toward OpenAI, within noise. The full run would be free but take about 30 hours of local computing instead of about $26. `Qwen3-Embedding-0.6B` is worse (hybrid −0.063, a clear difference).
   - **Free follow-ups from saved vectors and rankings:** BM25's weight in the fusion, BM25 stemming, the company and period in the query, and more reranker candidates.
 
-### 5. Sentiment scoring (`sentiment.py`): tone-profile scorer built and pilot-checked; baselines not yet built
+### 5. Sentiment scoring (`sentiment.py`): tone-profile scorer built and pilot-checked; FinBERT and LM baselines built
 - **Built (2026-10-13):** `sentiment.py` scores a (passage, topic) pair with structured output, quoting `labels/guidelines.md` word for word, with every safeguard below: evidence before each score, contrasting examples, one combined call or shuffled order or one call per dimension, rule-based cross-checks, cost cap. `sentiment.py pilot` samples about 100 passage–topic pairs from the pilot, scores them in all three modes (plus a second combined run), and reports per dimension: score spread, run-to-run agreement, combined vs separate agreement, the correlations between dimensions in each mode, and the rule-based cross-checks. With `claude-haiku-5-5` it costs about $0.50; `tests/test_sentiment.py` checks the schema, prompt and metrics offline.
 - **Pilot check (2026-10-13, `claude-haiku-5-5`, 100 passage–topic pairs, 800 calls, $0.20):**
   - Consistent: 88–94% of scores identical between two runs (weighted kappa 0.89–0.97).
@@ -110,6 +110,24 @@ A single polarity score is too thin for filings: risk factors are negative by de
 2. **Loughran-McDonald dictionary:** polarity as (positive − negative words) / total words. Also the shares of its uncertainty, weak-modal, strong-modal and litigious words, as a baseline for the uncertainty dimension.
 3. **LLM zero-shot polarity:** a structured output with label, score from −1 to 1, and a one-line reason. This keeps the benchmark comparable with earlier work.
 4. **Optional: FinBERT-FLS** (`yiyanghkust/finbert-fls`; check it's still available), which classifies forward-looking statements as specific or non-specific. A rough baseline for realization and specificity.
+
+**FinBERT and Loughran-McDonald: built (2026-10-13)** in `sentiment.py` (`finbert()`, `lm()`; `sentiment.py baselines` runs both on the pilot passages, locally, in under a minute). LM uses the Master Dictionary 1993–2025 (downloaded on first use to `data/lm/`, gitignored, free for academic use); words are runs of letters found in the dictionary, as LM count them. FinBERT splits passages into sentences with a regex and averages P(positive) − P(negative).
+- **First comparison, 90 on-topic pilot passages** (Spearman with the LLM's run 1 score, 95% bootstrap interval). The LLM scores tone toward the topic and the baselines score the whole passage, so these can't reach 1:
+
+  | LLM dimension | Baseline | Spearman [95% CI] |
+  |---|---|---|
+  | polarity | FinBERT polarity | +0.55 [+0.40, +0.68] |
+  | polarity | LM polarity | +0.59 [+0.44, +0.70] |
+  | uncertainty | LM uncertainty share | +0.69 [+0.55, +0.79] |
+  | uncertainty | LM weak-modal share | +0.71 [+0.59, +0.79] |
+  | uncertainty | our hedge list (`proxies`) | +0.79 [+0.66, +0.86] |
+  | magnitude | FinBERT polarity | −0.07 [−0.27, +0.13] |
+  | specificity | details per 100 words | +0.24 [+0.05, +0.41] |
+
+  FinBERT and LM polarity agree at +0.66. The three uncertainty measures can't be told apart (overlapping intervals). Magnitude is unrelated to FinBERT polarity, as it should be, since it is meant to ignore direction.
+- **"FinBERT calls neutral text negative":** only 7 passages got LLM polarity 0. FinBERT scored them −0.11 on average, with 34% of their sentences labeled negative, against −0.29 and 51% for the 43 at −1. That leans toward the expected finding but is far too few to claim it; the gold set and Phase 9 passages will test it.
+- Checked: `report` recomputes the same hedge and detail correlations from separate code (+0.79, +0.24), and FinBERT labels three obvious sentences correctly (+0.94 growth, −0.96 impairment, +0.01 "incorporated in Delaware").
+- Not built yet: the LLM zero-shot polarity baseline (paid; one cheap Haiku call per passage, best folded into the Phase 9 batch) and FinBERT-FLS (optional).
 
 **Tone profile (LLM):** one structured-output call per (passage, topic) pair. Each dimension is scored toward the topic the passage was retrieved for, not the passage as a whole, since one passage can be negative on China and positive on AI. Each point on each scale has a written definition. Small anchored scales are more reliable than a fine numeric one, which mostly adds noise.
 

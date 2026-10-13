@@ -105,3 +105,14 @@ assert drop_financial_statements(body + q + "Note 1.") == body
 cite = "Notes to Consolidated Financial Statements are referenced throughout this report for more detail.\n"
 assert drop_financial_statements(body + cite + body) == body + cite + body  # a sentence, not a heading
 print("ok")
+
+# Batch API sizing: batches stay under the queued-token limit, which is read from OpenAI's error message
+from sec_filings_tone.ingest import queue_limit, take  # noqa: E402
+
+assert take([400] * 10, max_inputs=100, max_tokens=1500) == 3  # 3 x 400 fits under 1,500, a 4th doesn't
+assert take([400] * 10, max_inputs=2, max_tokens=1e9) == 2
+assert take([400] * 10, max_inputs=100, max_tokens=300) == 0  # queue full: wait
+assert queue_limit(["Enqueued token limit reached for text-embedding-3-large in organization org-x. "
+                    "Limit: 20,000,000 enqueued tokens. Please try again"]) == 20_000_000
+assert queue_limit(["some other error"]) is None
+print("ok")

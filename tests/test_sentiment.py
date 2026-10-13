@@ -43,3 +43,14 @@ from sec_filings_tone.sentiment import user_prompt  # noqa: E402
 row = pd.Series({"ticker": "NVDA", "form": "10-K", "fy": 2023, "report_date": "2023-01-29", "item": "1A", "text": "Export rules."})
 assert "NVDA 10-K FY2023, Item 1A Risk Factors" in user_prompt(row, "China", ["polarity"])
 print("ok")
+
+# baselines: LM counts dictionary words only, by category; the sentence splitter keeps bullets apart
+from sec_filings_tone.sentiment import LM_PATH, lm, sentences  # noqa: E402
+
+assert sentences("Sales fell. Costs rose.\n• supply shortages\n• tariffs") == ["Sales fell.", "Costs rose.", "• supply shortages", "• tariffs"]
+if LM_PATH.exists():  # downloaded on first use
+    s = lm("We may lose customers, and litigation could adversely affect profitability. H20 X")
+    assert s["lm_negative"] > 0 and s["lm_uncertainty"] > 0 and s["lm_litigious"] > 0 and s["lm_polarity"] < 0
+    from sec_filings_tone.sentiment import lm_lists
+    assert "NULL" in lm_lists()[0]  # read as a word, not as a missing value
+    print("ok")
