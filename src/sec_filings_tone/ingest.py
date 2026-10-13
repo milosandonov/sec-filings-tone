@@ -336,7 +336,7 @@ def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: flo
 
 
 def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 15.0,
-                  wait: bool = False, poll_minutes: float = 2, state_dir: Path = BATCHES) -> None:
+                  wait: bool = False, poll_minutes: float = 1, state_dir: Path = BATCHES) -> None:
     """Embed through OpenAI's Batch API: half the price, results within 24 hours. Safe to stop and
     rerun at any point: the state is in data/embed_batches/state.json, batches keep running on
     OpenAI's side, finished ones are loaded into Chroma on the next run, and chunks from failed
@@ -395,11 +395,13 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
         save()
 
     while True:
-        # 1. check submitted batches
+        # 1. check submitted batches. A finished one frees OpenAI's queue at once, so the next batch is
+        # submitted (step 2) before the slow load into Chroma (step 3)
         for job in [j for j in state["jobs"] if j["status"] == "submitted"]:
             b = client.batches.retrieve(job["batch_id"])
             if b.status == "completed":
-                load(job)
+                job["status"] = "completed"
+                save()
             elif b.status in ("failed", "expired", "cancelled"):
                 errors = b.errors.data if b.errors else []
                 codes = [e.code for e in errors]
@@ -412,10 +414,11 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
                 print(f"  {job['name']}: {b.status} {codes}; its chunks go back to the queue")
                 save()
         inflight = [j for j in state["jobs"] if j["status"] == "submitted"]
-        queued = {cid for j in inflight for cid in j["ids"]}
+        finished = [j for j in state["jobs"] if j["status"] == "completed"]  # not loaded yet, maybe by an earlier run
+        queued = {cid for j in inflight + finished for cid in j["ids"]}
         todo = [c for c in not_embedded(col, by_id.chunk_id.tolist()) if c not in queued]
-        spent = sum(j["usd"] for j in state["jobs"] if j["status"] in ("submitted", "loaded"))
-        if not todo and not inflight:
+        spent = sum(j["usd"] for j in state["jobs"] if j["status"] in ("submitted", "completed", "loaded"))
+        if not todo and not inflight and not finished:
             print(f"done: {col.count():,} chunks in {collection}; Batch API spend about ${spent:.2f}")
             return
         # 2. submit more, within the budget and the queue cap
@@ -449,7 +452,10 @@ def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: fl
             spent += usd
             path.unlink()
             save()
-            print(f"  submitted {name}: {len(ids):,} chunks, about ${usd:.2f} ({b.id})")
+            print(f"  submitted {name}: {len(ids):,} chunks, about ${usd:.2f} ({b.id})", flush=True)
+        # 3. load finished batches; chunks of failed requests in them go to the queue on the next round
+        for job in finished:
+            load(job)
         print(f"{time.strftime('%H:%M')} {len(inflight)} batches in flight, {len(todo):,} chunks waiting, "
               f"{col.count():,} in {collection}, about ${spent:.2f} submitted", flush=True)
         if not wait:
