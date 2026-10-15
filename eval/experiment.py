@@ -356,8 +356,9 @@ def main() -> None:
         if a.variants == list(VARIANTS):
             a.variants = MULTI_VARIANTS
     out.mkdir(parents=True, exist_ok=True)
-    files = [TESTS] + ([TESTS.with_name("tests_multi.jsonl")] if a.multi else [])
-    tests = [json.loads(line) for f in files for line in f.read_text().splitlines() if line.strip()]
+    tests = [json.loads(line) for line in TESTS.read_text().splitlines() if line.strip()]
+    if not a.multi:  # the first 30 are the pilot's questions; the other 20 need --multi's companies
+        tests = tests[:30]
     if a.smoke:  # only questions answerable from TXN alone
         tests = [t for t in tests if t["filters"].get("ticker") == "TXN"]
     tables = {t: chunk_table(t, out, tickers) for t in sorted({config(n)["table"] for n in a.variants})}

@@ -435,7 +435,7 @@ The pilot's 30 questions cover 10 semiconductor companies, and many sit at the 1
 the full embed, the winner was rechecked against two settings on a wider set: the pilot plus one
 large company from each other sector (AMZN, BAC, CAT, GOOGL, LIN, NEE, PG, PLD, UNH, XOM; BAC
 because JPM's 10-K MD&A is over ingest's size cap). That's 20 companies and 23,273 chunks. 20 new
-questions (`eval/tests_multi.jsonl`) were added, in three kinds:
+questions (`eval/tests_multi.jsonl`, since merged into `eval/tests.jsonl` as rows 30–49) were added, in three kinds:
 
 - **Year in the question, company filter only** (8): does the header's year help find the right
   filing?

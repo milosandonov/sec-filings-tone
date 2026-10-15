@@ -14,6 +14,7 @@ Usage:
     uv run python -m sec_filings_tone.sentiment pilot --n 10 --budget 0.2 # a small first run
     uv run python -m sec_filings_tone.sentiment report                    # rescore the saved pilot, no API calls
     uv run python -m sec_filings_tone.sentiment baselines                 # FinBERT and LM on the pilot, local
+    uv run python -m sec_filings_tone.sentiment gold                      # draw labels/gold_profiles.csv, 30 items
 """
 
 import argparse
@@ -64,6 +65,7 @@ TOPICS = {  # topic -> search query used to find passages about it
 }
 # Phase 9 scores every topic for every company, except deposits and liquidity, for Financials only
 PRACTICE = Path(__file__).parents[2] / "labels" / "practice.csv"  # never sampled, so it stays a clean test
+GOLD = Path(__file__).parents[2] / "labels" / "gold_profiles.csv"
 
 EXAMPLES = """\
 Short examples where the dimensions disagree (scores in the order polarity, magnitude, realization,
@@ -108,10 +110,13 @@ def schema(dims: list[str], with_off_topic: bool = True):
     return create_model("Profile_" + "_".join(dims), **fields)
 
 
+def period(row) -> str:
+    return f"FY{row['fy']}" if row["form"] == "10-K" else f"quarter ending {row['report_date']}"
+
+
 def user_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
     # row["item"], not row.item: on a pandas row, .item is a method
-    when = f"FY{row['fy']}" if row["form"] == "10-K" else f"quarter ending {row['report_date']}"
-    return (f"Topic: {topic}\nFiling: {row['ticker']} {row['form']} {when}, {ITEM_NAMES[row['item']]}\n\n"
+    return (f"Topic: {topic}\nFiling: {row['ticker']} {row['form']} {period(row)}, {ITEM_NAMES[row['item']]}\n\n"
             f"Passage:\n{row['text']}\n\nScore: {', '.join(dims)}.")
 
 
@@ -308,6 +313,55 @@ def pilot(n: int, cap: Cap, model: str) -> None:
     report(n, model)
 
 
+# ---------- gold labeling sheet ----------
+
+def sheet(items: pd.DataFrame) -> pd.DataFrame:
+    """Labeling-sheet rows in practice.csv's columns, label columns empty. `items` are chunks.parquet
+    rows plus `topic`."""
+    return pd.DataFrame({
+        "topic": items.topic.values, "chunk_id": items.chunk_id.values, "company": items.ticker.values,
+        "form": items.form.values, "period": [period(r) for _, r in items.iterrows()],
+        "section": items["item"].map(ITEM_NAMES).values, "passage": items.text.values,
+        **dict.fromkeys(["off_topic", *DIMENSIONS, "notes"], "")})
+
+
+def gold(n: int, seed: int = 0) -> None:
+    """Write labels/gold_profiles.csv: n passage-topic pairs picked the way Phase 9 picks passages, so
+    the gold set tests the scorer on what it will score. Each item is a random filing from the next
+    sector in turn (about 1 in 6 a 10-Q, as Phase 9 scores 10-Qs in event windows) with the next topic
+    in turn, and one of hybrid search's top 3 there, at random. Off-topic hits are kept: Phase 9
+    scores them too. No LLM scores go in the sheet, so labeling stays blind. Costs only n query
+    embeddings."""
+    if GOLD.exists():
+        raise SystemExit(f"{GOLD} exists and may hold labels; move it before drawing again")
+    rng = random.Random(seed)
+    df = retrieve.chunks()
+    filings = df.drop_duplicates(["ticker", "form", "filing_date"])
+    skip = set(pd.read_csv(PRACTICE).chunk_id)
+    topics, sectors = list(TOPICS), sorted(df.sector.unique())
+    rng.shuffle(topics)
+    rng.shuffle(sectors)
+    out = []
+    while len(out) < n:
+        i = len(out)
+        topic = topics[i % len(topics)]
+        sector = "Financials" if topic == "Deposits and liquidity" else sectors[i % len(sectors)]
+        pool = filings[(filings.sector == sector) & (filings.form == ("10-Q" if rng.random() < 1 / 6 else "10-K"))]
+        f = pool.iloc[rng.randrange(len(pool))]
+        hits = retrieve.search(TOPICS[topic], k=3, rerank=False, ticker=f.ticker, form=f.form,
+                               date_from=f.filing_date, date_to=f.filing_date)["hybrid"]
+        hit = hits.iloc[rng.randrange(len(hits))]
+        if hit.chunk_id not in skip | {o["chunk_id"] for o in out}:
+            out.append({"topic": topic, **hit.drop("score").to_dict()})
+            print(f"{len(out):2} {sector:22} {topic:30} {hit.chunk_id}")
+    items = pd.DataFrame(out)
+    s = sheet(items)
+    s.insert(0, "item_id", [f"G{i:02}" for i in range(1, n + 1)])
+    s.to_csv(GOLD, index=False)
+    print(f"\nwrote {GOLD}: {n} items, {items.sector.nunique()} sectors, {items.topic.nunique()} topics, "
+          f"{(items.form == '10-Q').sum()} from 10-Qs")
+
+
 def rerank_call_usd(n_input_tokens: float) -> float:
     """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
     return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
@@ -368,18 +422,21 @@ def report(n: int, model: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("command", choices=["pilot", "report", "baselines"])
-    p.add_argument("--n", type=int, default=100)
+    p.add_argument("command", choices=["pilot", "report", "baselines", "gold"])
+    p.add_argument("--n", type=int, help="items; default 100 (pilot), 30 (gold)")
     p.add_argument("--model", default=MODEL)
     p.add_argument("--budget", type=float, default=2.0, help="USD; stop before a call would pass it")
     p.add_argument("--max-minutes", type=float, default=60)
     a = p.parse_args()
+    n = a.n or (30 if a.command == "gold" else 100)
     if a.command == "pilot":
-        pilot(a.n, Cap(a.budget, a.max_minutes), a.model)
+        pilot(n, Cap(a.budget, a.max_minutes), a.model)
     elif a.command == "baselines":
-        baselines(a.n, a.model)
+        baselines(n, a.model)
+    elif a.command == "gold":
+        gold(n)
     else:
-        report(a.n, a.model)
+        report(n, a.model)
 
 
 if __name__ == "__main__":

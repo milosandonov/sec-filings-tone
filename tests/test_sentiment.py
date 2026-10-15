@@ -44,6 +44,19 @@ row = pd.Series({"ticker": "NVDA", "form": "10-K", "fy": 2023, "report_date": "2
 assert "NVDA 10-K FY2023, Item 1A Risk Factors" in user_prompt(row, "China", ["polarity"])
 print("ok")
 
+# gold sheets come out in the practice sheet's columns and formats, so one loader reads both
+from sec_filings_tone.ingest import CHUNKS  # noqa: E402
+from sec_filings_tone.sentiment import PRACTICE, sheet  # noqa: E402
+
+if CHUNKS.exists():  # local build, gitignored
+    key = pd.read_csv(PRACTICE.with_name("practice_key.csv"))
+    items = pd.read_parquet(CHUNKS).set_index("chunk_id", drop=False).loc[key.chunk_id].assign(topic=key.topic.values)
+    s = sheet(items)
+    meta = ["topic", "chunk_id", "company", "form", "period", "section"]
+    assert s[meta].equals(key[meta]), s[meta].compare(key[meta])
+    assert ["item_id", *s.columns] == list(pd.read_csv(PRACTICE, nrows=0).columns)
+    print("ok")
+
 # baselines: LM counts dictionary words only, by category; the sentence splitter keeps bullets apart
 from sec_filings_tone.sentiment import LM_PATH, lm, sentences  # noqa: E402
 

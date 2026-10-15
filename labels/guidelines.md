@@ -55,8 +55,10 @@ different.
 | Disclosure | Specificity | How concrete is what's said about the topic? |
 
 When a passage mixes several situations (for example, a rule already in force and the risk of
-more rules), score **the most advanced stage, the largest stated effect and the most concrete
-detail** about the topic. For polarity, score the net direction.
+more rules), score **the most advanced stage, the largest stated effect, the highest uncertainty
+the company states about the effects, and the most concrete detail** about the topic. For
+polarity, score the net direction. One sentence is enough: score the strongest evidence about the
+topic anywhere in the passage, not the overall impression the paragraph gives.
 
 ### Polarity (−2 to +2)
 
@@ -69,7 +71,8 @@ detail** about the topic. For polarity, score the net direction.
 | +2 | Clearly helps: growth, gains, subsidies received |
 
 **Not:** how big the effect is (that's magnitude). A small, certain loss is −2 on polarity and 1
-on magnitude.
+on magnitude. Not the tone of the parts of the passage that aren't about the topic: growth in other
+products doesn't offset a China charge.
 
 ### Magnitude (0 to 3)
 
@@ -94,7 +97,8 @@ does.
 | 2 | Has happened, and the passage reports effects on the company |
 
 **Not:** how hedged the wording is (that's uncertainty). "New rules took effect in October 2022;
-we cannot yet estimate their impact" is realization 1 and uncertainty 3.
+we cannot yet estimate their impact" is realization 1 and uncertainty 3. A risk factor that also
+reports something that already happened is scored by that part.
 
 ### Uncertainty (0 to 3)
 
@@ -117,7 +121,8 @@ we cannot yet estimate their impact" is realization 1 and uncertainty 3.
 
 **Not:** whether it happened. "If H20 exports are restricted, we could lose $X billion of China
 revenue" is hypothetical (realization 0) and concrete (specificity 2). Details that aren't about
-the topic don't count.
+the topic don't count. A named rule, product, counterparty, date or amount about the topic is
+concrete even if every company in the industry faces it; 0 is for wording that names nothing.
 
 ## When you're unsure
 

@@ -12,15 +12,16 @@ retrieval, which has its own eval.
 | Sheet | Items | What you score | Time |
 |---|---|---|---|
 | Practice (`practice.csv`) | 10 passages | off topic + 5 dimensions | 30–45 minutes, plus 15 comparing with the key |
-| Gold tone profiles | about 30 more passages | off topic + 5 dimensions | about an hour |
+| Gold tone profiles (`gold_profiles.csv`) | 30 more passages | off topic + 5 dimensions | about an hour |
 | Gold polarity | about 50 sentences | positive, negative or neutral | about 20 minutes |
 | Re-check, a week later | 10 passages you already labeled | off topic + 5 dimensions | about 15 minutes |
 
 About 1.5–2 hours in total. Your practice labels count as the first 10 gold items, as long as you
 label them before opening the key.
 
-The practice sheet is ready now. The other sheets come after the full S&P 500 embed, so the
-passages cover every sector.
+The practice and gold tone-profile sheets are ready; the gold passages cover every sector. Label the
+gold sheet only after the rules are frozen (see "After the practice sheet"). Gold polarity comes after
+the silver set, and the re-check a week after the gold profiles.
 
 ## Before you start
 
@@ -31,7 +32,8 @@ passages cover every sector.
 ## Labeling a sheet
 
 **Only fill in these columns:** `off_topic`, `polarity`, `magnitude`, `realization`,
-`uncertainty`, `specificity` and `notes`. Don't edit the IDs or the passage text.
+`uncertainty`, `specificity` and `notes`. Don't edit the IDs or the passage text. Type `yes` or `no` in `off_topic`; some
+spreadsheets save TRUE/FALSE instead.
 
 For each item:
 
@@ -39,7 +41,8 @@ For each item:
 2. Decide `off_topic` (yes or no). If yes, leave that item's scores empty and move on.
 3. Score the five dimensions in column order: `polarity`, `magnitude`, `realization`,
    `uncertainty`, `specificity`. For each one, find the words in the passage that justify a score,
-   and pick the score whose definition fits them best. Ask each dimension's own question, and
+   and pick the score whose definition fits them best. One sentence is enough: score the strongest
+   evidence about the topic, not the paragraph's overall tone. Ask each dimension's own question, and
    check its "Not" rule in the guidelines. The dimensions often move together, but each asks
    something different, and a high score on one shouldn't pull up the next.
 4. If you're torn between two scores, pick your best guess and write why in `notes`. Never leave a
