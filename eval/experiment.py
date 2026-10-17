@@ -13,7 +13,7 @@ Usage:
     uv run python eval/experiment.py --dry-run                # chunks, tokens, cost, unreachable keywords
     uv run python eval/experiment.py --smoke                  # every variant on TXN only, plus API checks
     uv run python eval/experiment.py                          # embed what's missing, rank, score
-    uv run python eval/experiment.py --variants base gemini2  # some variants only
+    uv run python eval/experiment.py --variants base oai_small  # some variants only
     uv run python eval/experiment.py --score-only             # metrics from saved rankings, no API calls
     uv run python eval/experiment.py --multi                  # pilot + one company per other sector, more questions
     uv run python eval/experiment.py --multi --variants oss_bge_m3 --no-rerank   # vector, BM25, hybrid only
@@ -23,7 +23,6 @@ Usage:
 import argparse
 import hashlib
 import json
-import os
 import pickle
 from concurrent.futures import ThreadPoolExecutor
 from functools import cache
@@ -55,7 +54,6 @@ VARIANTS = {
     "header_none": {"header": "none"},
     "header_no_heading": {"header": "no_heading"},
     "oai_small": {"model": "text-embedding-3-small"},
-    "gemini2": {"model": "gemini-embedding-2"},
     # combinations of the single-factor winners (no header, no overlap), with heading splits on and off
     # and with both models: decides the heading question for topic-level tone, and large vs small
     "combo_flat": {"headings": False, "header": "none", "overlap_tokens": 0},
@@ -70,7 +68,6 @@ VARIANTS = {
 MODELS = {
     "text-embedding-3-large": {"dims": 3072, "score_dims": [256, 1024, 3072], "price": 0.13},
     "text-embedding-3-small": {"dims": 1536, "score_dims": [512, 1024, 1536], "price": 0.02},
-    "gemini-embedding-2": {"dims": 3072, "score_dims": [768, 1024, 3072], "price": 0.20},
     # open models, run locally (free apart from compute time); both take inputs well past our 800 tokens
     "Qwen/Qwen3-Embedding-0.6B": {"dims": 1024, "score_dims": [256, 1024], "price": 0.0, "local": True},
     "BAAI/bge-m3": {"dims": 1024, "score_dims": [1024], "price": 0.0, "local": True},  # not trained for truncation
@@ -106,7 +103,7 @@ def chunk_table(table: tuple[int, bool], out: Path, tickers: list[str]) -> pd.Da
 
 
 def batches(texts: list[str], model: str) -> list[list[int]]:
-    """OpenAI takes up to 2,048 inputs and 300k tokens a request; Gemini gets 100 texts a request."""
+    """OpenAI takes up to 2,048 inputs and 300k tokens a request; local models get 100 texts at a time."""
     out, cur, tok = [], [], 0
     cap, size = (200_000, 1000) if model.startswith("text-embedding") else (10**9, 100)
     for i, t in enumerate(texts):
@@ -128,17 +125,6 @@ def local_model(name: str):
     return m
 
 
-@cache
-def gemini():
-    """One client for the run: a client that's garbage-collected closes its connection mid-request."""
-    from google import genai
-    from google.genai import types
-
-    retry = types.HttpOptions(timeout=API_TIMEOUT * 1000,  # milliseconds
-                              retry_options=types.HttpRetryOptions(attempts=6, initial_delay=5, max_delay=120))
-    return genai.Client(api_key=os.environ["GOOGLE_API_KEY"], http_options=retry)
-
-
 def embed(texts: list[str], model: str, query: bool = False) -> np.ndarray:
     """Full-size vectors, one per text, in order."""
     if model.startswith("text-embedding"):
@@ -146,19 +132,11 @@ def embed(texts: list[str], model: str, query: bool = False) -> np.ndarray:
 
         data = OpenAI(timeout=API_TIMEOUT, max_retries=3).embeddings.create(model=model, input=texts).data
         vecs = [d.embedding for d in data]
-    elif MODELS[model].get("local"):
+    else:  # a local model
         m = local_model(model)
         # Qwen3 expects an instruction on queries (its "query" prompt); documents get none
         prompt = "query" if query and "query" in m.prompts else None
         vecs = m.encode(texts, batch_size=8, prompt_name=prompt, convert_to_numpy=True)
-    else:
-        from google.genai import types
-
-        prefix = "task: search result | query: " if query else "title: none | text: "
-        # one Content per text: a plain list of strings would be merged into a single embedding
-        res = gemini().models.embed_content(
-            model=model, contents=[types.Content(parts=[types.Part(text=prefix + t)]) for t in texts])
-        vecs = [e.values for e in res.embeddings]
     out = np.array(vecs, dtype=np.float32)
     assert out.shape == (len(texts), MODELS[model]["dims"]), out.shape
     return out
@@ -405,13 +383,12 @@ def main() -> None:
 
 
 def check_apis(models: set[str]) -> None:
-    """Cheap checks before the paid run: truncating a 3072 OpenAI vector equals asking for 1024,
-    and Gemini returns one separate vector per text. Only for the providers in use."""
+    """Cheap check before the paid run: truncating a 3072 OpenAI vector equals asking for 1024."""
     from openai import OpenAI
 
     texts = ["Export controls restrict sales of our A100 and H100 chips to China.",
              "Demand for data center products grew strongly in fiscal 2024."]
-    if "text-embedding-3-large" not in models and "gemini-embedding-2" not in models:
+    if "text-embedding-3-large" not in models:
         return
     full = embed(texts, "text-embedding-3-large")
     small = np.array([d.embedding for d in OpenAI().embeddings.create(
@@ -419,13 +396,6 @@ def check_apis(models: set[str]) -> None:
     cos = (unit(full, 1024) * unit(small, 1024)).sum(axis=1)
     print(f"check: OpenAI 3072 truncated to 1024 vs dimensions=1024, cosine {cos.round(4).tolist()}")
     assert (cos > 0.999).all()
-    if "gemini-embedding-2" not in models:
-        return
-    g = embed(texts, "gemini-embedding-2")
-    one = embed(texts[:1], "gemini-embedding-2")
-    same, other = float(unit(g[0], 3072) @ unit(one[0], 3072)), float(unit(g[0], 3072) @ unit(g[1], 3072))
-    print(f"check: Gemini batch vs single call cosine {same:.4f}; between the two texts {other:.4f}")
-    assert same > 0.999 and other < 0.95
 
 
 if __name__ == "__main__":

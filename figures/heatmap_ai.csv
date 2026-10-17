@@ -35,25 +35,25 @@ polarity,AI,Financials,2023,-0.845959595959596,66
 polarity,AI,Financials,2024,-0.9155555555555556,75
 polarity,AI,Financials,2025,-0.9078947368421053,76
 polarity,AI,Health Care,2019,-0.7777777777777778,9
-polarity,AI,Health Care,2020,-0.6153846153846154,13
-polarity,AI,Health Care,2021,-0.3125,16
-polarity,AI,Health Care,2022,-0.45614035087719296,19
+polarity,AI,Health Care,2020,-0.6428571428571429,14
+polarity,AI,Health Care,2021,-0.2,15
+polarity,AI,Health Care,2022,-0.5098039215686274,17
 polarity,AI,Health Care,2023,-0.7456140350877193,38
 polarity,AI,Health Care,2024,-0.8720238095238095,56
 polarity,AI,Health Care,2025,-0.9196428571428571,56
-polarity,AI,Industrials,2019,-0.17361111111111113,24
-polarity,AI,Industrials,2020,-0.4895833333333333,32
-polarity,AI,Industrials,2021,-0.4191919191919192,33
+polarity,AI,Industrials,2019,-0.16666666666666669,25
+polarity,AI,Industrials,2020,-0.5,32
+polarity,AI,Industrials,2021,-0.4393939393939394,33
 polarity,AI,Industrials,2022,-0.48484848484848486,33
 polarity,AI,Industrials,2023,-0.7633333333333333,50
-polarity,AI,Industrials,2024,-0.7535211267605634,71
-polarity,AI,Industrials,2025,-0.7402597402597403,77
+polarity,AI,Industrials,2024,-0.7602739726027398,73
+polarity,AI,Industrials,2025,-0.75,80
 polarity,AI,Information Technology,2019,-0.20689655172413793,29
-polarity,AI,Information Technology,2020,-0.23170731707317074,41
-polarity,AI,Information Technology,2021,-0.2424242424242424,44
+polarity,AI,Information Technology,2020,-0.21825396825396828,42
+polarity,AI,Information Technology,2021,-0.22480620155038758,43
 polarity,AI,Information Technology,2022,-0.2872340425531915,47
 polarity,AI,Information Technology,2023,-0.7027777777777777,60
-polarity,AI,Information Technology,2024,-0.5547619047619048,70
+polarity,AI,Information Technology,2024,-0.5563380281690141,71
 polarity,AI,Information Technology,2025,-0.54,75
 polarity,AI,Materials,2019,0.0,2
 polarity,AI,Materials,2020,-0.3333333333333333,3
@@ -112,26 +112,26 @@ magnitude,AI,Financials,2023,0.5934343434343434,66
 magnitude,AI,Financials,2024,0.7577777777777777,75
 magnitude,AI,Financials,2025,0.8421052631578947,76
 magnitude,AI,Health Care,2019,0.3888888888888889,9
-magnitude,AI,Health Care,2020,0.5769230769230769,13
-magnitude,AI,Health Care,2021,0.28125,16
-magnitude,AI,Health Care,2022,0.29824561403508776,19
+magnitude,AI,Health Care,2020,0.5357142857142857,14
+magnitude,AI,Health Care,2021,0.3,15
+magnitude,AI,Health Care,2022,0.33333333333333337,17
 magnitude,AI,Health Care,2023,0.6710526315789473,38
 magnitude,AI,Health Care,2024,0.744047619047619,56
 magnitude,AI,Health Care,2025,0.7976190476190476,56
-magnitude,AI,Industrials,2019,0.4166666666666667,24
-magnitude,AI,Industrials,2020,0.390625,32
-magnitude,AI,Industrials,2021,0.5606060606060606,33
+magnitude,AI,Industrials,2019,0.4,25
+magnitude,AI,Industrials,2020,0.421875,32
+magnitude,AI,Industrials,2021,0.5808080808080809,33
 magnitude,AI,Industrials,2022,0.25757575757575757,33
 magnitude,AI,Industrials,2023,0.5133333333333333,50
-magnitude,AI,Industrials,2024,0.7300469483568075,71
-magnitude,AI,Industrials,2025,0.8333333333333334,77
+magnitude,AI,Industrials,2024,0.723744292237443,73
+magnitude,AI,Industrials,2025,0.825,80
 magnitude,AI,Information Technology,2019,0.6149425287356322,29
-magnitude,AI,Information Technology,2020,0.491869918699187,41
-magnitude,AI,Information Technology,2021,0.5265151515151515,44
+magnitude,AI,Information Technology,2020,0.496031746031746,42
+magnitude,AI,Information Technology,2021,0.5155038759689923,43
 magnitude,AI,Information Technology,2022,0.5354609929078015,47
 magnitude,AI,Information Technology,2023,0.7916666666666666,60
-magnitude,AI,Information Technology,2024,1.069047619047619,70
-magnitude,AI,Information Technology,2025,1.1577777777777778,75
+magnitude,AI,Information Technology,2024,1.0633802816901408,71
+magnitude,AI,Information Technology,2025,1.1622222222222223,75
 magnitude,AI,Materials,2019,1.5,2
 magnitude,AI,Materials,2020,1.0,3
 magnitude,AI,Materials,2021,0.3333333333333333,3
@@ -189,26 +189,26 @@ realization,AI,Financials,2023,0.5050505050505051,66
 realization,AI,Financials,2024,0.6066666666666667,75
 realization,AI,Financials,2025,0.6425438596491228,76
 realization,AI,Health Care,2019,0.2777777777777778,9
-realization,AI,Health Care,2020,0.3076923076923077,13
-realization,AI,Health Care,2021,0.34375,16
-realization,AI,Health Care,2022,0.14912280701754388,19
+realization,AI,Health Care,2020,0.2857142857142857,14
+realization,AI,Health Care,2021,0.36666666666666664,15
+realization,AI,Health Care,2022,0.16666666666666669,17
 realization,AI,Health Care,2023,0.4473684210526316,38
 realization,AI,Health Care,2024,0.5714285714285714,56
 realization,AI,Health Care,2025,0.6279761904761905,56
-realization,AI,Industrials,2019,0.3333333333333333,24
-realization,AI,Industrials,2020,0.28125,32
+realization,AI,Industrials,2019,0.32,25
+realization,AI,Industrials,2020,0.2916666666666667,32
 realization,AI,Industrials,2021,0.3232323232323232,33
 realization,AI,Industrials,2022,0.18181818181818182,33
 realization,AI,Industrials,2023,0.33333333333333337,50
-realization,AI,Industrials,2024,0.5164319248826291,71
-realization,AI,Industrials,2025,0.5151515151515151,77
+realization,AI,Industrials,2024,0.5159817351598173,73
+realization,AI,Industrials,2025,0.5208333333333333,80
 realization,AI,Information Technology,2019,0.6494252873563218,29
-realization,AI,Information Technology,2020,0.5772357723577236,41
-realization,AI,Information Technology,2021,0.662878787878788,44
-realization,AI,Information Technology,2022,0.6702127659574468,47
+realization,AI,Information Technology,2020,0.5714285714285714,42
+realization,AI,Information Technology,2021,0.6782945736434108,43
+realization,AI,Information Technology,2022,0.648936170212766,47
 realization,AI,Information Technology,2023,0.6722222222222223,60
-realization,AI,Information Technology,2024,0.7904761904761904,70
-realization,AI,Information Technology,2025,0.8355555555555555,75
+realization,AI,Information Technology,2024,0.784037558685446,71
+realization,AI,Information Technology,2025,0.8377777777777777,75
 realization,AI,Materials,2019,0.5,2
 realization,AI,Materials,2020,0.5,3
 realization,AI,Materials,2021,0.0,3
@@ -266,25 +266,25 @@ uncertainty,AI,Financials,2023,1.8813131313131315,66
 uncertainty,AI,Financials,2024,2.04,75
 uncertainty,AI,Financials,2025,2.039473684210526,76
 uncertainty,AI,Health Care,2019,1.7777777777777777,9
-uncertainty,AI,Health Care,2020,1.3076923076923077,13
-uncertainty,AI,Health Care,2021,1.25,16
-uncertainty,AI,Health Care,2022,0.9122807017543859,19
+uncertainty,AI,Health Care,2020,1.2142857142857142,14
+uncertainty,AI,Health Care,2021,1.0666666666666667,15
+uncertainty,AI,Health Care,2022,1.0196078431372548,17
 uncertainty,AI,Health Care,2023,1.6535087719298247,38
 uncertainty,AI,Health Care,2024,1.9404761904761905,56
 uncertainty,AI,Health Care,2025,2.0,56
-uncertainty,AI,Industrials,2019,1.0416666666666667,24
-uncertainty,AI,Industrials,2020,1.3229166666666667,32
-uncertainty,AI,Industrials,2021,1.196969696969697,33
+uncertainty,AI,Industrials,2019,1.0,25
+uncertainty,AI,Industrials,2020,1.3854166666666667,32
+uncertainty,AI,Industrials,2021,1.2575757575757576,33
 uncertainty,AI,Industrials,2022,1.2121212121212122,33
 uncertainty,AI,Industrials,2023,1.7266666666666666,50
-uncertainty,AI,Industrials,2024,1.7417840375586855,71
-uncertainty,AI,Industrials,2025,1.898268398268398,77
+uncertainty,AI,Industrials,2024,1.7534246575342465,73
+uncertainty,AI,Industrials,2025,1.9104166666666669,80
 uncertainty,AI,Information Technology,2019,1.206896551724138,29
-uncertainty,AI,Information Technology,2020,1.0,41
-uncertainty,AI,Information Technology,2021,1.0681818181818181,44
-uncertainty,AI,Information Technology,2022,1.1666666666666667,47
+uncertainty,AI,Information Technology,2020,1.007936507936508,42
+uncertainty,AI,Information Technology,2021,1.0465116279069768,43
+uncertainty,AI,Information Technology,2022,1.2092198581560285,47
 uncertainty,AI,Information Technology,2023,1.7611111111111113,60
-uncertainty,AI,Information Technology,2024,1.8809523809523807,70
+uncertainty,AI,Information Technology,2024,1.8732394366197183,71
 uncertainty,AI,Information Technology,2025,1.7644444444444445,75
 uncertainty,AI,Materials,2019,1.5,2
 uncertainty,AI,Materials,2020,1.6666666666666667,3
@@ -343,26 +343,26 @@ specificity,AI,Financials,2023,1.111111111111111,66
 specificity,AI,Financials,2024,1.2577777777777777,75
 specificity,AI,Financials,2025,1.3771929824561404,76
 specificity,AI,Health Care,2019,0.4444444444444444,9
-specificity,AI,Health Care,2020,0.6923076923076923,13
-specificity,AI,Health Care,2021,0.5625,16
-specificity,AI,Health Care,2022,0.32456140350877194,19
+specificity,AI,Health Care,2020,0.6428571428571429,14
+specificity,AI,Health Care,2021,0.6,15
+specificity,AI,Health Care,2022,0.36274509803921573,17
 specificity,AI,Health Care,2023,1.0789473684210527,38
 specificity,AI,Health Care,2024,1.2202380952380951,56
 specificity,AI,Health Care,2025,1.3482142857142858,56
-specificity,AI,Industrials,2019,0.7986111111111112,24
-specificity,AI,Industrials,2020,0.5052083333333334,32
+specificity,AI,Industrials,2019,0.7666666666666667,25
+specificity,AI,Industrials,2020,0.5364583333333334,32
 specificity,AI,Industrials,2021,0.6818181818181818,33
 specificity,AI,Industrials,2022,0.696969696969697,33
 specificity,AI,Industrials,2023,0.8866666666666667,50
-specificity,AI,Industrials,2024,1.068075117370892,71
-specificity,AI,Industrials,2025,1.1948051948051948,77
+specificity,AI,Industrials,2024,1.0570776255707763,73
+specificity,AI,Industrials,2025,1.1916666666666667,80
 specificity,AI,Information Technology,2019,1.0402298850574714,29
-specificity,AI,Information Technology,2020,0.7642276422764227,41
-specificity,AI,Information Technology,2021,0.8598484848484849,44
-specificity,AI,Information Technology,2022,0.8049645390070922,47
+specificity,AI,Information Technology,2020,0.7777777777777777,42
+specificity,AI,Information Technology,2021,0.8333333333333334,43
+specificity,AI,Information Technology,2022,0.7836879432624114,47
 specificity,AI,Information Technology,2023,1.2,60
-specificity,AI,Information Technology,2024,1.4404761904761905,70
-specificity,AI,Information Technology,2025,1.4844444444444445,75
+specificity,AI,Information Technology,2024,1.4342723004694835,71
+specificity,AI,Information Technology,2025,1.4822222222222223,75
 specificity,AI,Materials,2019,2.0,2
 specificity,AI,Materials,2020,1.0,3
 specificity,AI,Materials,2021,0.6666666666666666,3
@@ -392,7 +392,7 @@ discussed,AI,Communication Services,2023,0.8823529411764706,17
 discussed,AI,Communication Services,2024,0.9444444444444444,18
 discussed,AI,Communication Services,2025,0.9473684210526315,19
 discussed,AI,Consumer Discretionary,2019,0.28888888888888886,45
-discussed,AI,Consumer Discretionary,2020,0.391304347826087,46
+discussed,AI,Consumer Discretionary,2020,0.3829787234042553,47
 discussed,AI,Consumer Discretionary,2021,0.2978723404255319,47
 discussed,AI,Consumer Discretionary,2022,0.3404255319148936,47
 discussed,AI,Consumer Discretionary,2023,0.6382978723404256,47
@@ -420,28 +420,28 @@ discussed,AI,Financials,2023,0.88,75
 discussed,AI,Financials,2024,0.9868421052631579,76
 discussed,AI,Financials,2025,1.0,76
 discussed,AI,Health Care,2019,0.15789473684210525,57
-discussed,AI,Health Care,2020,0.23636363636363636,55
-discussed,AI,Health Care,2021,0.27586206896551724,58
-discussed,AI,Health Care,2022,0.3220338983050847,59
+discussed,AI,Health Care,2020,0.2413793103448276,58
+discussed,AI,Health Care,2021,0.25862068965517243,58
+discussed,AI,Health Care,2022,0.288135593220339,59
 discussed,AI,Health Care,2023,0.6440677966101694,59
 discussed,AI,Health Care,2024,0.9333333333333333,60
 discussed,AI,Health Care,2025,0.9333333333333333,60
-discussed,AI,Industrials,2019,0.32432432432432434,74
-discussed,AI,Industrials,2020,0.4266666666666667,75
+discussed,AI,Industrials,2019,0.32894736842105265,76
+discussed,AI,Industrials,2020,0.41025641025641024,78
 discussed,AI,Industrials,2021,0.4230769230769231,78
 discussed,AI,Industrials,2022,0.4230769230769231,78
 discussed,AI,Industrials,2023,0.6329113924050633,79
-discussed,AI,Industrials,2024,0.8987341772151899,79
-discussed,AI,Industrials,2025,0.9871794871794872,78
-discussed,AI,Information Technology,2019,0.42028985507246375,69
-discussed,AI,Information Technology,2020,0.5857142857142857,70
-discussed,AI,Information Technology,2021,0.6111111111111112,72
+discussed,AI,Industrials,2024,0.9012345679012346,81
+discussed,AI,Industrials,2025,0.9876543209876543,81
+discussed,AI,Information Technology,2019,0.4142857142857143,70
+discussed,AI,Information Technology,2020,0.5833333333333334,72
+discussed,AI,Information Technology,2021,0.5972222222222222,72
 discussed,AI,Information Technology,2022,0.6438356164383562,73
 discussed,AI,Information Technology,2023,0.821917808219178,73
-discussed,AI,Information Technology,2024,0.9722222222222222,72
+discussed,AI,Information Technology,2024,0.9726027397260274,73
 discussed,AI,Information Technology,2025,1.0,75
 discussed,AI,Materials,2019,0.09090909090909091,22
-discussed,AI,Materials,2020,0.14285714285714285,21
+discussed,AI,Materials,2020,0.13636363636363635,22
 discussed,AI,Materials,2021,0.13636363636363635,22
 discussed,AI,Materials,2022,0.22727272727272727,22
 discussed,AI,Materials,2023,0.391304347826087,23
