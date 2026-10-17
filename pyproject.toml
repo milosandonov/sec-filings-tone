@@ -1,7 +1,7 @@
 [project]
 name = "sec-filings-tone"
 version = "0.1.0"
-description = "Add your description here"
+description = "Topic tone profiles of S&P 500 10-K filings: hybrid retrieval, LLM scoring, FinBERT and Loughran-McDonald baselines, event tests"
 readme = "README.md"
 authors = [
     { name = "milosandonov", email = "milosandonov7@gmail.com" }
@@ -21,9 +21,6 @@ dependencies = [
     "sentence-transformers>=6.1.0",
     "tiktoken>=0.14.0",
 ]
-
-[project.scripts]
-sec-filings-tone = "sec_filings_tone:main"
 
 [build-system]
 requires = ["uv_build>=0.12.6,<0.13.0"]
