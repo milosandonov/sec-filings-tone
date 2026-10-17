@@ -14,10 +14,21 @@ With --quarterly, the same tests on the 10-Q cells (PLAN.md option B5) and event
 With --named, the word-checked version: a passage of a TOPIC_WORDS topic counts only if it names the
 topic, since the model calls many passages on topic that don't (RESULTS.md, limitations).
 
+With --robust (PLAN.md option A4): an event study (every fiscal year around each event), a check that
+the change is a break rather than a trend already under way, and every test on risk factors and MD&A
+separately; each also word-checked.
+
+With --fyrule, every test (model only and word-checked) with "before" = the last 10-K whose fiscal
+year ended before the date, in events_fyrule*.csv: those 10-Ks can already react to the event, which
+biases the change toward zero, but the filed rule compares FY2023 with FY2025 for most companies
+for the 2025 tariffs.
+
 Usage:
     uv run python -m sec_filings_tone.events
     uv run python -m sec_filings_tone.events --quarterly
     uv run python -m sec_filings_tone.events --named
+    uv run python -m sec_filings_tone.events --robust
+    uv run python -m sec_filings_tone.events --fyrule
 """
 
 import re
@@ -41,6 +52,8 @@ TOPIC_WORDS = {
     "Tariffs": r"(?i)tariff|section 301|section 232|anti-dumping|countervailing dut|import dut|customs dut|trade war",
 }
 DIMS = list(DIMENSIONS)
+MEASURES = [*DIMS, "discussed"]
+COMPANIES = Path(__file__).parents[2] / "data" / "companies.csv"
 # baseline -> the dimension whose expected direction it's tested against
 BASELINE_FOR = {"finbert_polarity": "polarity", "lm_polarity": "polarity", "lm_uncertainty": "uncertainty",
                 "details_per_100w": "specificity"}
@@ -78,12 +91,15 @@ def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None =
     return grid.assign(discussed=grid[DIMS[0]].notna().astype(float))
 
 
-def changes(c: pd.DataFrame, date: str, topics: list[str], after_date: str = "") -> pd.DataFrame:
+def changes(c: pd.DataFrame, date: str, topics: list[str], after_date: str = "", fy_before: bool = False) -> pd.DataFrame:
     """Per company: the last cell filed before `date` subtracted from the first whose fiscal year ends
     on or after `after_date` (default `date`), per topic, then averaged over the topics. A dimension
-    is missing where either cell isn't discussed."""
+    is missing where either cell isn't discussed. With `fy_before`, "before" is the last cell whose
+    fiscal year ended before `date`, even if filed after it (added 2026-10-17: the filed rule skips
+    December FY2024 10-Ks for the 2025 tariffs, so most companies compared FY2023 with FY2025)."""
     c = c[c.topic.isin(topics)].sort_values("filing_date")
-    before = c[c.filing_date < date].drop_duplicates(["ticker", "topic"], keep="last").set_index(["ticker", "topic"])
+    before = c[(c.report_date if fy_before else c.filing_date) < date]
+    before = before.drop_duplicates(["ticker", "topic"], keep="last").set_index(["ticker", "topic"])
     after = c[c.report_date >= (after_date or date)].drop_duplicates(["ticker", "topic"], keep="first").set_index(["ticker", "topic"])
     both = before.index.intersection(after.index)
     m = [x for x in c.columns if x not in ("ticker", "fy", "topic", "sector", "filing_date", "report_date")]
@@ -100,16 +116,23 @@ def did(a: pd.Series, u: pd.Series, n_boot: int = 2000, seed: int = 0) -> tuple[
     return est, *np.percentile(boot, [2.5, 97.5])
 
 
-def report(events: Path = EVENTS, form: str = "10-K", results: Path = RESULTS, keep: set | None = None) -> None:
-    ev = pd.read_csv(events, dtype=str, keep_default_na=False)
-    sub = pd.read_csv(Path(__file__).parents[2] / "data" / "companies.csv").set_index("ticker").sub_industry
+def affected(e, sector: pd.Series) -> pd.Series:
+    """Whether each company (`sector` indexed by ticker) is in the event's affected group."""
+    hit = sector.isin(e.sectors.split(";")) if e.sectors != "all" else pd.Series(True, sector.index)
+    if e.sub_industries:
+        sub = pd.read_csv(COMPANIES).set_index("ticker").sub_industry
+        hit &= sub.reindex(sector.index).fillna("").str.contains("|".join(e.sub_industries.split(";")))
+    return hit
+
+
+def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Path = RESULTS,
+           keep: set | None = None, fy_before: bool = False) -> None:
+    ev = events if isinstance(events, pd.DataFrame) else pd.read_csv(events, dtype=str, keep_default_na=False)
     rows = []
     for e in ev.itertuples():
         items = e.items.split(";") if e.items else None
-        ch = changes(cells(items, form, keep), e.date, e.topics.split(";"), e.after)
-        hit = ch.sector.isin(e.sectors.split(";")) if e.sectors != "all" else pd.Series(True, ch.index)
-        if e.sub_industries:
-            hit &= sub.reindex(ch.index).fillna("").str.contains("|".join(e.sub_industries.split(";")))
+        ch = changes(cells(items, form, keep), e.date, e.topics.split(";"), e.after, fy_before)
+        hit = affected(e, ch.sector)
         for m in [c for c in ch.columns if c != "sector"]:
             a, u = ch.loc[hit, m], ch.loc[~hit, m]
             want = getattr(e, BASELINE_FOR.get(m, m), "") if m != "discussed" else ""
@@ -138,10 +161,71 @@ def report(events: Path = EVENTS, form: str = "10-K", results: Path = RESULTS, k
     print(f"\nwrote {results}. 'ok' = the 95% interval is on the expected side of zero.")
 
 
+def study(c: pd.DataFrame, e) -> pd.DataFrame:
+    """Per company and event year k (fiscal year minus that of its last 10-K filed before the event):
+    each measure's change from that 10-K, averaged over the event's topics. FY2019-FY2025."""
+    c = c[c.topic.isin(e.topics.split(";")) & (c.fy <= 2025)]
+    before = c[c.filing_date < e.date].sort_values("filing_date").drop_duplicates(["ticker", "topic"], keep="last")
+    x = c.merge(before[["ticker", "topic", "fy", *MEASURES]], on=["ticker", "topic"], suffixes=("", "_b"))
+    x = x.assign(k=x.fy - x.fy_b, **{m: x[m] - x[f"{m}_b"] for m in MEASURES})
+    return x.groupby(["ticker", "sector", "k"], as_index=False)[MEASURES].mean()
+
+
+def breaks(c: pd.DataFrame, e) -> pd.DataFrame:
+    """Per company: the change before -> after minus the change in the year before the "before" 10-K,
+    averaged over the event's topics; only where "after" is the next fiscal year."""
+    key = ["ticker", "topic"]
+    c = c[c.topic.isin(e.topics.split(";"))].sort_values("filing_date")
+    b = c[c.filing_date < e.date].drop_duplicates(key, keep="last")
+    a = c[c.report_date >= (e.after or e.date)].drop_duplicates(key, keep="first")
+    x = b.merge(a, on=key, suffixes=("_b", "_a"))
+    x = x[x.fy_a == x.fy_b + 1]
+    prev = c.assign(fy_b=c.fy + 1)[[*key, "fy_b", *MEASURES]].rename(columns={m: f"{m}_p" for m in MEASURES})
+    x = x.merge(prev, on=[*key, "fy_b"])
+    out = pd.DataFrame({m: (x[f"{m}_a"] - x[f"{m}_b"]) - (x[f"{m}_b"] - x[f"{m}_p"]) for m in MEASURES})
+    return out.assign(ticker=x.ticker, sector=x.sector_b).groupby(["ticker", "sector"], as_index=False)[MEASURES].mean()
+
+
+def robust() -> None:
+    """A4: the event study, the break check, and the tests on each 10-K section alone; model only and
+    word-checked."""
+    ev = pd.read_csv(EVENTS, dtype=str, keep_default_na=False)
+    for suffix, keep in [("", None), ("_named", named())]:
+        rows, brk = [], []
+        for e in ev.itertuples():
+            c = cells(e.items.split(";") if e.items else None, keep=keep)
+            hit = affected(e, c.drop_duplicates("ticker").set_index("ticker").sector)
+            s = study(c, e)
+            for (k, g), y in s.assign(affected=s.ticker.map(hit)).groupby(["k", "affected"]):
+                for m in MEASURES:
+                    if (v := y[m].dropna()).size:
+                        rows.append({"event": e.event, "affected": g, "k": k, "measure": m, "n": v.size,
+                                     **dict(zip(["mean", "lo", "hi"], did(v, v[:0])))})
+            b = breaks(c, e)
+            b = b[b.ticker.map(hit)]
+            for m in [d for d in DIMS if getattr(e, d)]:
+                if not e.after and (v := b[m].dropna()).size:
+                    est, lo, hi = did(v, v[:0])
+                    sign = "+" if lo > 0 else "-" if hi < 0 else "0"
+                    brk.append({"event": e.event, "measure": m, "expected": getattr(e, m), "break": est, "lo": lo,
+                                "hi": hi, "n": v.size, "ok": sign == getattr(e, m)})
+        pd.DataFrame(rows).to_csv(OUT / f"event_study{suffix}.csv", index=False)
+        brk = pd.DataFrame(brk)
+        brk.to_csv(OUT / f"event_breaks{suffix}.csv", index=False)
+        print(f"\nbreak check{suffix or ' (model only)'}:\n" + brk.round(3).to_string(index=False))
+        for item in ["1A", "7"]:
+            report(ev.assign(items=item), results=OUT / f"events_{item}{suffix}.csv", keep=keep)
+
+
 if __name__ == "__main__":
     if "--quarterly" in sys.argv:
         report(*QUARTERLY)
     elif "--named" in sys.argv:
         report(results=OUT / "events_named.csv", keep=named())
+    elif "--robust" in sys.argv:
+        robust()
+    elif "--fyrule" in sys.argv:
+        for suffix, keep in [("", None), ("_named", named())]:
+            report(results=OUT / f"events_fyrule{suffix}.csv", keep=keep, fy_before=True)
     else:
         report()

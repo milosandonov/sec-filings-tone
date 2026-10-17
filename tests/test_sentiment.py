@@ -93,3 +93,18 @@ with tempfile.TemporaryDirectory() as tmp:
 k, lo, hi = kappa_ci([0, 1, 2, 2, 1, 0], [0, 1, 2, 2, 1, 0], (0, 1, 2))
 assert abs(k - 1) < 1e-9 and lo <= k <= hi
 print("ok")
+
+# gold baselines: each scorer is compared only on the items it has a score for (the LLM has none off topic)
+from sec_filings_tone.sentiment import GOLD_PAIRS, label_spearman  # noqa: E402
+
+ids = ["G01", "G02", "G03", "G04", "G05"]
+human = pd.DataFrame({d: [0, 1, 2, 3, 4] for d in DIMENSIONS}, index=ids)
+x = pd.DataFrame({c: [0.0, 1, 2, 3, 4] for _, c in GOLD_PAIRS}, index=ids)
+x["lm_polarity"] = [4.0, 3, 2, 1, 0]
+x.loc["G05", "llm_polarity"] = float("nan")
+res = {c: (n, r) for _, c, n, r, _, _ in label_spearman(human, x, ids)}
+assert res["finbert_polarity"][0] == 5 and abs(res["finbert_polarity"][1] - 1) < 1e-9
+assert abs(res["lm_polarity"][1] + 1) < 1e-9
+assert res["llm_polarity"][0] == 4 and abs(res["llm_polarity"][1] - 1) < 1e-9
+assert all(n == 3 for _, _, n, *_ in label_spearman(human, x, ids[:3]))
+print("ok")

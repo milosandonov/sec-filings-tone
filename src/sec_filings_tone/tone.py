@@ -16,10 +16,13 @@ Usage:
     uv run python -m sec_filings_tone.tone score --budget 30                    # the rest; resumes if stopped
     uv run python -m sec_filings_tone.tone baselines   # FinBERT and LM on the same passages, local; resumes
     uv run python -m sec_filings_tone.tone retrieve --quarterly   # any command, on the 10-Q cells
+    uv run python -m sec_filings_tone.tone rerun --budget 1.2      # B6: score 5,000 random passages again, compare
+    uv run python -m sec_filings_tone.tone masked --budget 0.5     # masked check: event-test passages without company and year; --budget 0 just shows sample and cost
 """
 
 import argparse
 import json
+import re
 import time
 from pathlib import Path
 
@@ -34,7 +37,7 @@ from anthropic.types.messages.batch_create_params import Request
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import call_usd
 from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS
-from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, proxies, schema, system_prompt, user_prompt
+from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
 
 OUT = Path("data/tone")
 PASSAGES = OUT / "passages.parquet"
@@ -44,12 +47,16 @@ STATE = OUT / "batches.json"  # submitted batches not yet collected
 BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per distinct chunk
 # form -> passages, scores, batch state, baselines; the 10-Q cells (B5) get their own q_ files
 FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
-         "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}
+         "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),
+         "rerun": (*(OUT / f"rerun_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # B6: a sample scored again
+         "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None)}  # masked check: event-test passages, no company or year
 KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 K = 3
 BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
 USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
+# the masked check leaves these out: their fiscal-year labels are being fixed (2026-10-17)
+MASK_SKIP = ["AVY", "CDNS", "DPZ", "ILMN", "JNJ", "LDOS", "LHX", "RVTY", "SNA", "SWK", "TDY", "TRMB", "TXT"]
 
 
 def cells(form: str = "10-K", k: pd.DataFrame | None = None) -> pd.DataFrame:
@@ -137,9 +144,9 @@ def check(n: int, form: str = "10-K", seed: int = 0) -> None:
     print(f"{same}/{n} cells identical to retrieve.search")
 
 
-def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10-K") -> None:
+def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10-K", prompt=user_prompt) -> None:
     """Submit every passage not yet scored, in batches, then wait and collect. Failed requests aren't
-    stored, so running again resubmits just those."""
+    stored, so running again resubmits just those. `prompt` writes each user message (the masked check: masked_prompt)."""
     passages, scores, saved, _ = FILES[form]
     client = anthropic.Anthropic()
     state = json.loads(saved.read_text()) if saved.exists() else []
@@ -161,7 +168,7 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
             req = None if r is None else Request(custom_id=f"p{r.pid}", params=MessageCreateParamsNonStreaming(
                 model=MODEL, max_tokens=4000, output_config={"effort": "low", "format": {"type": "json_schema", "schema": fmt}},
                 system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral", "ttl": "1h"}}],
-                messages=[{"role": "user", "content": user_prompt(rows.loc[r.chunk_id], r.topic, list(DIMENSIONS))}]))
+                messages=[{"role": "user", "content": prompt(rows.loc[r.chunk_id], r.topic, list(DIMENSIONS))}]))
             n = len(json.dumps(req)) if req else 0
             if batch and (req is None or len(batch) >= BATCH_REQUESTS or size + n > BATCH_BYTES):
                 while True:
@@ -213,6 +220,173 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
     print(f"{scores}: {len(s):,} passages scored, ${s.usd.sum():.2f} in all")
 
 
+def rerun(budget: float, n: int = 5000, seed: int = 0) -> None:
+    """B6: score a random sample of the annual passages again with the same request, then compare the
+    two runs as the pilot did. The sample is drawn once and kept, so a stopped run resumes."""
+    passages, scores, _, _ = FILES["rerun"]
+    if not passages.exists():
+        pd.read_parquet(PASSAGES).reset_index(names="orig_pid").sample(n, random_state=seed).to_parquet(passages, index=False)
+    score_cells(budget, form="rerun")
+    from sec_filings_tone.sentiment import kappa_ci
+
+    a = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
+    b = pd.read_parquet(SCORES).rename(columns={"pid": "orig_pid"})
+    m = a.merge(b, on="orig_pid", suffixes=("", "_first"))
+    print(f"{len(m):,} passages scored twice; off-topic flag the same for {(m.off_topic == m.off_topic_first).mean():.1%}")
+    both = m[~m.off_topic & ~m.off_topic_first]
+    for d, labels in DIMENSIONS.items():
+        print(f"  {d:12} identical {(both[d] == both[d + '_first']).mean():.0%}, weighted kappa "
+              "{:.2f} [{:.2f}, {:.2f}]".format(*kappa_ci(both[d], both[d + "_first"], labels, n_boot=500)))
+    by = both.groupby("sector")
+    print("identical share by sector:\n" + pd.DataFrame({d: by.apply(lambda g, d=d: (g[d] == g[d + "_first"]).mean())
+                                                         for d in DIMENSIONS}).round(2).to_string())
+    noise = {d: (both[d] - both[d + "_first"]).var() / 2 for d in DIMENSIONS}  # one run's scorer variance per passage
+    print("scorer noise variance per passage: " + ", ".join(f"{d} {v:.3f}" for d, v in noise.items()))
+
+
+def masked_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
+    """sentiment.user_prompt with the company and fiscal year taken out: the Filing line keeps only the
+    form and section ("Filing: a 10-K, Item 1A Risk Factors"). Every other character is the same."""
+    p, hint = user_prompt(row, topic, dims), f"\nFiling: {row['ticker']} {row['form']} {period(row)}, "
+    if hint not in p:  # the production prompt changed: stop rather than send the hint
+        raise ValueError("sentiment.user_prompt's Filing line changed; update masked_prompt")
+    return p.replace(hint, f"\nFiling: a {row['form']}, ", 1)
+
+
+def masked_sample(p: pd.DataFrame, ev: pd.DataFrame, n: int = 340, seed: int = 0) -> pd.DataFrame:
+    """The masked check's passages. For each event in `ev` (events.csv): each company's "before" and "after" cell on the
+    event's topics, picked as events.changes picks them, with only the passages its test uses (the
+    event's items), for companies with such passages in both cells and not in MASK_SKIP. Whole companies
+    are drawn at random until the event has about n passages: up to two thirds from the affected group
+    (all of it if that's fewer), the rest from the others, or all n from the affected group if there are
+    no others. `p` is the annual passages with orig_pid, item, filing_date and report_date."""
+    from sec_filings_tone.events import affected
+
+    p, key, out = p[~p.ticker.isin(MASK_SKIP)], ["ticker", "fy", "topic"], []
+    for e in ev.itertuples():
+        c = p[p.topic.isin(e.topics.split(";"))]
+        cell = c.drop_duplicates(key).sort_values("filing_date")
+        before = cell[cell.filing_date < e.date].drop_duplicates(["ticker", "topic"], keep="last")
+        after = cell[cell.report_date >= (e.after or e.date)].drop_duplicates(["ticker", "topic"], keep="first")
+        x = pd.concat([c.merge(before[key]).assign(cell="before"), c.merge(after[key]).assign(cell="after")])
+        x = x[x["item"].isin(e.items.split(";"))] if e.items else x
+        x = x[x.groupby(["ticker", "topic"]).cell.transform("nunique") == 2]
+        co = x.groupby("ticker").agg(n=("orig_pid", "size"), sector=("sector", "first"))
+        co = co.assign(group=np.where(affected(e, co.sector), "affected", "others")).sample(frac=1, random_state=seed)
+        a, o = co[co.group == "affected"], co[co.group == "others"]
+        a = a[a.n.cumsum() <= (n * 2 // 3 if len(o) else n)]
+        o = o[o.n.cumsum() <= n - a.n.sum()]
+        out.append(x[x.ticker.isin([*a.index, *o.index])].assign(event=e.event, group=lambda d: d.ticker.map(co.group)))
+    return pd.concat(out, ignore_index=True)
+
+
+def leaks(p: pd.DataFrame) -> pd.DataFrame:
+    """Per passage of `p`, whether its own text gives away what the masked header hides: its company (the
+    ticker, if two letters or more, or the name in data/companies.csv without Inc., Group and the like,
+    as written there or in capitals), a year from 2019 to 2026, COVID, or another word dated to the period."""
+    from sec_filings_tone.events import COMPANIES
+
+    text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]
+                           ).set_index("chunk_id").text.loc[p.chunk_id].reset_index(drop=True)
+    name = pd.read_csv(COMPANIES).set_index("ticker").name.str.replace(
+        r"(,? (Inc\.?|Corp\.|Corporation|Company|Co\.|plc|Holdings|Group|Ltd\.)| \(Class [ABC]\))+$", "", regex=True)
+    words = [rf"(?<!\w)(?:{re.escape(t) + '|' if len(t) > 1 else ''}{re.escape(name[t])}|{re.escape(name[t].upper())})(?!\w)"
+             for t in p.ticker]
+    return pd.DataFrame({
+        "company": [bool(re.search(w, s)) for w, s in zip(words, text)],
+        "year": text.str.contains(r"\b20(?:19|2[0-6])\b"),
+        "covid": text.str.contains(r"(?i)pandemic|covid|coronavirus|sars-cov"),
+        "other dated word": text.str.contains(r"(?i)ukraine|silicon valley bank|chatgpt|generative ai|"
+                                              r"inflation reduction act|chips (?:and science )?act\b")}).set_axis(p.index)
+
+
+def masked(budget: float, n: int = 340, seed: int = 0) -> None:
+    """Masked check: do the event results come partly from the company and fiscal year in the prompt, which the
+    model can date, rather than from the text? The passages the annual event tests compare
+    (masked_sample, drawn once and kept, so a stopped run resumes) are scored again with masked_prompt
+    and compared with their original scores (masked_report). The sample, how often its text names the
+    company or the period anyway, and the cost are printed first; with --budget 0 nothing is sent."""
+    from sec_filings_tone.events import EVENTS
+
+    passages = FILES["masked"][0]
+    if not passages.exists():
+        p = pd.read_parquet(PASSAGES).reset_index(names="orig_pid").merge(
+            pd.read_parquet(CHUNKS, columns=["chunk_id", "item", "filing_date", "report_date"]), on="chunk_id")
+        masked_sample(p, pd.read_csv(EVENTS, dtype=str, keep_default_na=False), n, seed).to_parquet(passages, index=False)
+    s = pd.read_parquet(passages)
+    print(s.groupby(["event", "group"], sort=False).agg(companies=("ticker", "nunique"), passages=("orig_pid", "size")).to_string())
+    leak = leaks(s).assign(any=lambda d: d.any(axis=1))
+    print("\nshare of passages whose text names the company or the period anyway:\n"
+          + leak.groupby([s.event, s.cell], sort=False).mean().round(2).to_string()
+          + f"\nall {len(s):,}: " + ", ".join(f"{k} {v:.0%}" for k, v in leak.mean().items()))
+    score_cells(budget, form="masked", prompt=masked_prompt)
+    masked_report()
+
+
+def masked_report() -> None:
+    """The masked check on the same passages, masked scores against the original ones: the off-topic flag, and per
+    dimension on passages both call on topic the share identical and weighted kappa [95% CI], beside
+    B6's second run against the first (the noise floor: the hint matters only if masking agrees clearly
+    less). Then each event's change where it hit, and its difference from the others, with each scoring,
+    on the companies whose change exists with both."""
+    from sec_filings_tone.events import EVENTS, affected, changes, did
+    from sec_filings_tone.sentiment import kappa_ci
+
+    dims, first = list(DIMENSIONS), pd.read_parquet(SCORES).rename(columns={"pid": "orig_pid"})
+
+    def paired(form):  # a sample's new scores beside its original ones (suffix _orig)
+        passages, scores, _, _ = FILES[form]
+        p = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
+        return p.merge(first, on="orig_pid", suffixes=("", "_orig"))
+
+    def agree(m):
+        both = m[~m.off_topic & ~m.off_topic_orig]
+        row = {"passages": len(m), "off topic same": f"{(m.off_topic == m.off_topic_orig).mean():.1%}", "both on topic": len(both)}
+        for d, labels in DIMENSIONS.items():
+            k, lo, hi = kappa_ci(both[d], both[d + "_orig"], labels, n_boot=500)
+            row[d] = f"{(both[d] == both[d + '_orig']).mean():.0%} {k:.2f} [{lo:.2f}, {hi:.2f}]"
+        return row
+
+    m, b6 = paired("masked"), paired("rerun")
+    clean = ~leaks(m).any(axis=1)
+    print(f"\n{len(m):,} of {len(pd.read_parquet(FILES['masked'][0])):,} passages scored masked. Per dimension: share identical, "
+          "weighted kappa [95% CI], on passages both scorings call on topic")
+    print(pd.DataFrame({"masked vs original": agree(m), "  text names no company or date": agree(m[clean]),
+                        "B6 rerun vs original": agree(b6), "  on these topics": agree(b6[b6.topic.isin(m.topic)])}).T.to_string())
+
+    f, rows, pooled = "{:+.2f} [{:+.2f}, {:+.2f}]".format, [], []
+    for e in pd.read_csv(EVENTS, dtype=str, keep_default_na=False).itertuples():
+        ch = {}
+        for name, sfx in [("original", "_orig"), ("masked", "")]:  # each cell's tone as events.cells has it
+            x = m[m.event == e.event]
+            x = x.assign(**{c: x[c + sfx] for c in ["off_topic", *dims]})
+            c = x.groupby(["ticker", "fy", "topic", "sector"], as_index=False)[["filing_date", "report_date"]].first()
+            c = c.merge(x[~x.off_topic].groupby(["ticker", "fy", "topic"], as_index=False)[dims].mean(), how="left")
+            ch[name] = changes(c.assign(discussed=c[dims[0]].notna().astype(float)), e.date, e.topics.split(";"), e.after)
+        o, k = ch["original"], ch["masked"]
+        hit = affected(e, o.sector)
+        for d in [*dims, "discussed"]:
+            same = o[d].notna() & k[d].notna()
+            a, u, none = same & hit, same & ~hit, o[d][:0]
+            if not a.any():
+                continue
+            row = {"event": e.event, "measure": d, "expected": getattr(e, d, "") or "·", "companies": a.sum(),
+                   "change, original": f(*did(o[d][a], none)), "change, masked": f(*did(k[d][a], none)),
+                   "masked - original": f(*did((k[d] - o[d])[a], none))}
+            if u.any():
+                row |= {"others": u.sum(), "vs others, original": f(*did(o[d][a], o[d][u])),
+                        "vs others, masked": f(*did(k[d][a], k[d][u])),
+                        "vs others, masked - original": f(*did((k[d] - o[d])[a], (k[d] - o[d])[u]))}
+            rows.append(row)
+        pooled.append((k[dims] - o[dims])[hit])
+    r = pd.DataFrame(rows)
+    for event, g in r.groupby("event", sort=False):
+        print(f"\n{event}\n" + g.drop(columns="event").dropna(axis=1, how="all").to_string(index=False, float_format="{:.0f}".format))
+    pooled = pd.concat(pooled)
+    print("\nall events, affected companies, masked - original change: "
+          + ", ".join(f"{d} {f(*did(pooled[d], pooled[d][:0]))}" for d in dims))
+
+
 def baselines(form: str = "10-K", part: int = 5000) -> None:
     """FinBERT, Loughran-McDonald and the rule-based counts for every passage, locally and free. They
     score the whole passage, not a topic, so each chunk is scored once however many cells it's in.
@@ -236,7 +410,7 @@ def baselines(form: str = "10-K", part: int = 5000) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("command", choices=["retrieve", "check", "score", "baselines"])
+    p.add_argument("command", choices=["retrieve", "check", "score", "baselines", "rerun", "masked"])
     p.add_argument("--n", type=int, default=50)
     p.add_argument("--tickers", nargs="+")
     p.add_argument("--budget", type=float, default=0.5, help="USD; nothing is submitted if the estimate is over it")
@@ -249,6 +423,10 @@ def main() -> None:
         check(a.n, form)
     elif a.command == "baselines":
         baselines(form)
+    elif a.command == "rerun":
+        rerun(a.budget)
+    elif a.command == "masked":
+        masked(a.budget)
     else:
         score_cells(a.budget, a.tickers, form)
 

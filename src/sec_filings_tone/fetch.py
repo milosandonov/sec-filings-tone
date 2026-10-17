@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import urllib.request
+from datetime import date, timedelta
 from io import StringIO
 from pathlib import Path
 
@@ -108,19 +109,29 @@ def full_text(filing) -> str:
     return "\n".join(parts)
 
 
+def fiscal_year(report_date: str) -> int:
+    """A 10-K's fiscal year: the calendar year its period ends in, but a 52/53-week year that ends in
+    the first week of January belongs to the year before (JNJ's fiscal 2020 ended 2021-01-03)."""
+    return (date.fromisoformat(report_date) - timedelta(days=7)).year
+
+
 def fetch_ticker(ticker: str, sector: str, form: str) -> list[dict]:
     items = FORMS[form][1]
-    rows, seen = [], set()
+    rows, seen = [], {}
     # EDGAR uses BRK-B where Wikipedia uses BRK.B
     for filing in Company(ticker.replace(".", "-")).get_filings(form=form, amendments=False):
-        fy = int(filing.report_date[:4])
+        # 10-Qs keep the calendar year: they're named by period end, so the year never decides which is kept
+        fy = fiscal_year(filing.report_date) if form == "10-K" else int(filing.report_date[:4])
         if fy < FIRST_FY:
             break  # filings come newest first
         # one 10-K per fiscal year; 10-Qs are named by period end since they have no FY label
         key = fy if form == "10-K" else filing.report_date
         if key in seen:
+            if seen[key] != filing.report_date:  # two periods with one label: the rule above is wrong for them
+                raise ValueError(f"{ticker}: 10-Ks for periods ending {seen[key]} and {filing.report_date} "
+                                 f"both map to fiscal {fy}")
             continue  # keep the latest filing for a period
-        seen.add(key)
+        seen[key] = filing.report_date
 
         paths = {item: CACHE / f"{ticker}_{key}_{item}.txt" for item in items}
         if not all(p.exists() for p in paths.values()):

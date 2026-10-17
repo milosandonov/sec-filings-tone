@@ -16,6 +16,7 @@ Usage:
     uv run python -m sec_filings_tone.sentiment baselines                 # FinBERT and LM on the pilot, local
     uv run python -m sec_filings_tone.sentiment gold                      # draw labels/gold_profiles.csv, 30 items
     uv run python -m sec_filings_tone.sentiment gold-report --budget 0.1  # score the labeled items, compare, adjudication sheet
+    uv run python -m sec_filings_tone.sentiment gold-baselines            # FinBERT, LM and the counts vs the labels, local
 """
 
 import argparse
@@ -33,7 +34,7 @@ from pydantic import Field, create_model
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import Cap, CapReached, call_usd
-from sec_filings_tone.ingest import ITEM_NAMES
+from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
 
 GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
 OUT = Path("data/sentiment")
@@ -482,6 +483,59 @@ def gold_report(cap: Cap, model: str, adjudicated: bool = False) -> None:
     print(f"\nwrote {ADJUDICATION.name}: {len(out)} disagreements on {len({o['item_id'] for o in out})} items")
 
 
+# the person's dimension -> scorer column; llm_ columns are the LLM's saved scores on the same items
+GOLD_PAIRS = [("polarity", "finbert_polarity"), ("polarity", "lm_polarity"), ("polarity", "llm_polarity"),
+              ("uncertainty", "lm_uncertainty"), ("uncertainty", "hedges_per_100w"), ("uncertainty", "llm_uncertainty"),
+              ("specificity", "details_per_100w"), ("specificity", "llm_specificity"),
+              ("realization", "realized_per_100w"), ("realization", "llm_realization")]
+
+
+def label_spearman(human: pd.DataFrame, x: pd.DataFrame, ids) -> list[tuple]:
+    """(dimension, scorer column, n, Spearman, low, high) for each of GOLD_PAIRS, on the items in `ids`
+    the scorer has a score for (the LLM has none where it calls an item off topic)."""
+    out = []
+    for d, c in GOLD_PAIRS:
+        k = [i for i in ids if pd.notna(x.at[i, c])]
+        out.append((d, c, len(k), *spearman_ci(human.loc[k, d], x.loc[k, c])))
+    return out
+
+
+def gold_baselines(model: str) -> None:
+    """Research question 1 on the labeled items: FinBERT, LM and the rule-based counts against the
+    person's labels, and the LLM's saved scores on the same items with the same statistic (Spearman).
+    Local and free: it stops if the LLM's scores aren't saved, never rescoring. Item sets: (a) the gold
+    items both the person and the LLM call on topic, as behind gold-report's kappas; (b) every item the
+    person calls on topic. Blind labels first; the adjudicated ones lean toward the LLM by construction."""
+    scores = OUT / f"gold_scores_{model}.parquet"
+    if not scores.exists():
+        raise SystemExit(f"{scores} not found; gold-report makes it (paid)")
+    llm = pd.read_parquet(scores).set_index("item_id")
+    llm["off_topic"] = llm.off_topic.astype(bool)
+    path = OUT / "gold_baselines.parquet"
+    if not path.exists():
+        items = pd.concat([pd.read_csv(p, usecols=["item_id", "chunk_id"]) for p in (PRACTICE, GOLD)])
+        text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", items.chunk_id.tolist())]
+                               ).set_index("chunk_id").text.loc[items.chunk_id]
+        b = pd.concat([finbert(text.tolist()), pd.DataFrame([lm(t) | proxies(t) for t in text])], axis=1)
+        b.insert(0, "item_id", items.item_id.values)
+        b.to_parquet(path, index=False)
+    x = pd.read_parquet(path).set_index("item_id").join(
+        llm.loc[~llm.off_topic, list(DIMENSIONS)].astype(float).add_prefix("llm_"))
+    print(f"\n{len(x)} labeled items. The person and {model} (llm_) score toward the topic; the baselines score "
+          f"the whole passage. llm_ counts only items {model} also calls on topic.")
+    for adjudicated in (False, True):
+        final = pd.read_csv(ADJUDICATION, dtype=str, keep_default_na=False) if adjudicated else None
+        human = pd.concat([labels(PRACTICE, final), labels(GOLD, final)]).set_index("item_id")
+        on = human.index[~human.off_topic]
+        both = on[on.str.startswith("G") & ~llm.loc[on].off_topic.values]
+        print(f"\n{'Adjudicated (leans toward the LLM by construction)' if adjudicated else 'Blind'} labels. "
+              "(a): gold items both call on topic. (b): every item the person calls on topic.")
+        print("\n| Person's dimension | Scorer | n (a) | Spearman (a) [95% CI] | n (b) | Spearman (b) [95% CI] |"
+              "\n|---|---|---|---|---|---|")
+        for (d, c, na, r, lo, hi), (*_, nb, rb, lob, hib) in zip(label_spearman(human, x, both), label_spearman(human, x, on)):
+            print(f"| {d} | {c} | {na} | {r:+.2f} [{lo:+.2f}, {hi:+.2f}] | {nb} | {rb:+.2f} [{lob:+.2f}, {hib:+.2f}] |")
+
+
 def rerank_call_usd(n_input_tokens: float) -> float:
     """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
     return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
@@ -542,7 +596,7 @@ def report(n: int, model: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("command", choices=["pilot", "report", "baselines", "gold", "gold-report"])
+    p.add_argument("command", choices=["pilot", "report", "baselines", "gold", "gold-report", "gold-baselines"])
     p.add_argument("--n", type=int, help="items; default 100 (pilot), 30 (gold)")
     p.add_argument("--model", default=MODEL)
     p.add_argument("--budget", type=float, default=2.0, help="USD; stop before a call would pass it")
@@ -558,6 +612,8 @@ def main() -> None:
         gold(n)
     elif a.command == "gold-report":
         gold_report(Cap(a.budget, a.max_minutes), a.model, a.adjudicated)
+    elif a.command == "gold-baselines":
+        gold_baselines(a.model)
     else:
         report(n, a.model)
 

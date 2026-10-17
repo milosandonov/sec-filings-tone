@@ -1,0 +1,91 @@
+event,affected,k,measure,n,mean,lo,hi,group
+Rate hikes,True,-2,polarity,100,0.0983333333333333,0.0016666666666666,0.2,"Financials, Real Estate"
+Rate hikes,True,-2,magnitude,100,-0.055,-0.1349999999999999,0.0216666666666666,"Financials, Real Estate"
+Rate hikes,True,-2,realization,100,-0.0899999999999999,-0.1933333333333333,0.0166666666666666,"Financials, Real Estate"
+Rate hikes,True,-2,uncertainty,100,-0.0749999999999999,-0.1699999999999999,0.015,"Financials, Real Estate"
+Rate hikes,True,-2,specificity,100,0.0216666666666666,-0.0383333333333333,0.0816666666666666,"Financials, Real Estate"
+Rate hikes,True,-2,discussed,102,-0.0098039215686274,-0.0294117647058823,0.0,"Financials, Real Estate"
+Rate hikes,True,-1,polarity,101,-0.0478547854785478,-0.1402640264026402,0.0429042904290429,"Financials, Real Estate"
+Rate hikes,True,-1,magnitude,101,-0.033003300330033,-0.1138613861386138,0.0561056105610561,"Financials, Real Estate"
+Rate hikes,True,-1,realization,101,0.0148514851485148,-0.0924092409240924,0.1188118811881188,"Financials, Real Estate"
+Rate hikes,True,-1,uncertainty,101,-0.0396039603960396,-0.1336633663366336,0.0610973597359733,"Financials, Real Estate"
+Rate hikes,True,-1,specificity,101,0.0181518151815181,-0.0643564356435643,0.094059405940594,"Financials, Real Estate"
+Rate hikes,True,-1,discussed,102,0.0098039215686274,0.0,0.0294117647058823,"Financials, Real Estate"
+Rate hikes,True,0,polarity,103,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,0,magnitude,103,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,0,realization,103,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,0,uncertainty,103,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,0,specificity,103,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,0,discussed,104,0.0,0.0,0.0,"Financials, Real Estate"
+Rate hikes,True,1,polarity,103,0.0307443365695792,-0.0793284789644013,0.1441343042071191,"Financials, Real Estate"
+Rate hikes,True,1,magnitude,103,0.1375404530744336,0.0598705501618122,0.2249190938511326,"Financials, Real Estate"
+Rate hikes,True,1,realization,103,0.1326860841423948,0.0161812297734627,0.2524676375404529,"Financials, Real Estate"
+Rate hikes,True,1,uncertainty,103,-0.0113268608414239,-0.1100728155339805,0.0890372168284787,"Financials, Real Estate"
+Rate hikes,True,1,specificity,103,0.0145631067961165,-0.0631067961165048,0.0954692556634304,"Financials, Real Estate"
+Rate hikes,True,1,discussed,104,0.0096153846153846,0.0,0.0290865384615371,"Financials, Real Estate"
+Rate hikes,True,2,polarity,103,0.0453074433656958,-0.0679611650485436,0.1601941747572815,"Financials, Real Estate"
+Rate hikes,True,2,magnitude,103,0.1035598705501618,0.017799352750809,0.1925566343042071,"Financials, Real Estate"
+Rate hikes,True,2,realization,103,0.2006472491909385,0.0776699029126213,0.3188106796116503,"Financials, Real Estate"
+Rate hikes,True,2,uncertainty,103,-0.1359223300970874,-0.2475728155339806,-0.0209951456310681,"Financials, Real Estate"
+Rate hikes,True,2,specificity,103,0.0048543689320388,-0.0712378640776699,0.0825242718446602,"Financials, Real Estate"
+Rate hikes,True,2,discussed,104,0.0096153846153846,0.0,0.0290865384615371,"Financials, Real Estate"
+Rate hikes,True,3,polarity,103,0.0598705501618123,-0.0534385113268608,0.1796116504854368,"Financials, Real Estate"
+Rate hikes,True,3,magnitude,103,0.0695792880258899,-0.0210355987055016,0.1634708737864075,"Financials, Real Estate"
+Rate hikes,True,3,realization,103,0.1472491909385113,0.0113268608414239,0.2766990291262136,"Financials, Real Estate"
+Rate hikes,True,3,uncertainty,103,-0.0841423948220064,-0.2006472491909385,0.0372572815533978,"Financials, Real Estate"
+Rate hikes,True,3,specificity,103,-0.0145631067961165,-0.0954692556634304,0.0728559870550159,"Financials, Real Estate"
+Rate hikes,True,3,discussed,104,0.0096153846153846,0.0,0.0290865384615371,"Financials, Real Estate"
+Rate hikes,True,4,polarity,103,-0.0323624595469255,-0.1229773462783171,0.0566343042071197,"Financials, Real Estate"
+Rate hikes,True,4,magnitude,103,0.0728155339805825,-0.0161812297734627,0.1634304207119741,"Financials, Real Estate"
+Rate hikes,True,4,realization,103,0.0792880258899676,-0.0550566343042071,0.2184466019417475,"Financials, Real Estate"
+Rate hikes,True,4,uncertainty,103,-0.0760517799352751,-0.1957928802588996,0.0501618122977346,"Financials, Real Estate"
+Rate hikes,True,4,specificity,103,-0.0080906148867313,-0.0857605177993527,0.0696197411003234,"Financials, Real Estate"
+Rate hikes,True,4,discussed,104,0.0096153846153846,0.0,0.0290865384615371,"Financials, Real Estate"
+Rate hikes,False,-3,polarity,10,0.3333333333333333,-0.0333333333333333,0.6666666666666667,Other companies
+Rate hikes,False,-3,magnitude,10,0.1499999999999999,-0.0499999999999999,0.3166666666666666,Other companies
+Rate hikes,False,-3,realization,10,0.4333333333333333,0.1666666666666666,0.75,Other companies
+Rate hikes,False,-3,uncertainty,10,-0.1166666666666666,-0.4833333333333334,0.1833333333333333,Other companies
+Rate hikes,False,-3,specificity,10,0.0333333333333333,0.0,0.0999999999999999,Other companies
+Rate hikes,False,-3,discussed,10,0.0,0.0,0.0,Other companies
+Rate hikes,False,-2,polarity,336,0.0992063492063492,0.0163690476190476,0.1875,Other companies
+Rate hikes,False,-2,magnitude,336,-0.0044642857142857,-0.0639880952380952,0.0555679563492062,Other companies
+Rate hikes,False,-2,realization,336,0.087797619047619,0.0173611111111111,0.1607266865079364,Other companies
+Rate hikes,False,-2,uncertainty,336,-0.0094246031746031,-0.0793650793650793,0.0625124007936507,Other companies
+Rate hikes,False,-2,specificity,336,0.0104166666666666,-0.0421750992063492,0.0640004960317459,Other companies
+Rate hikes,False,-2,discussed,357,-0.0224089635854341,-0.0448179271708683,0.0,Other companies
+Rate hikes,False,-1,polarity,352,0.0132575757575757,-0.056356534090909,0.0814393939393939,Other companies
+Rate hikes,False,-1,magnitude,352,0.0151515151515151,-0.0317234848484848,0.0667732007575757,Other companies
+Rate hikes,False,-1,realization,352,0.1022727272727272,0.0364583333333333,0.1628787878787878,Other companies
+Rate hikes,False,-1,uncertainty,352,-0.034090909090909,-0.1074810606060606,0.0397845643939393,Other companies
+Rate hikes,False,-1,specificity,352,0.0468749999999999,-0.0018939393939393,0.0970643939393939,Other companies
+Rate hikes,False,-1,discussed,368,-0.0027173913043478,-0.0217391304347826,0.0163043478260869,Other companies
+Rate hikes,False,0,polarity,368,0.0,0.0,0.0,Other companies
+Rate hikes,False,0,magnitude,368,0.0,0.0,0.0,Other companies
+Rate hikes,False,0,realization,368,0.0,0.0,0.0,Other companies
+Rate hikes,False,0,uncertainty,368,0.0,0.0,0.0,Other companies
+Rate hikes,False,0,specificity,368,0.0,0.0,0.0,Other companies
+Rate hikes,False,0,discussed,377,0.0,0.0,0.0,Other companies
+Rate hikes,False,1,polarity,361,0.0226223453370267,-0.0457063711911357,0.0904893813481071,Other companies
+Rate hikes,False,1,magnitude,361,0.0244690674053555,-0.0277008310249307,0.0780470914127422,Other companies
+Rate hikes,False,1,realization,361,0.087719298245614,0.0230840258541089,0.154674515235457,Other companies
+Rate hikes,False,1,uncertainty,361,0.0096952908587257,-0.0544783010156971,0.0734187442289934,Other companies
+Rate hikes,False,1,specificity,361,-0.0951061865189289,-0.1537396121883656,-0.0392428439519852,Other companies
+Rate hikes,False,1,discussed,377,-0.0053050397877984,-0.0238726790450928,0.013262599469496,Other companies
+Rate hikes,False,2,polarity,367,0.0962761126248864,0.0172456857402361,0.1753178928247047,Other companies
+Rate hikes,False,2,magnitude,367,0.0962761126248864,0.0385899182561307,0.1507720254314259,Other companies
+Rate hikes,False,2,realization,367,0.1798365122615803,0.1049046321525885,0.2520435967302452,Other companies
+Rate hikes,False,2,uncertainty,367,-0.0685740236148955,-0.1358083560399637,0.0063692098092642,Other companies
+Rate hikes,False,2,specificity,367,-0.0853769300635785,-0.1439600363306085,-0.0249659400544959,Other companies
+Rate hikes,False,2,discussed,377,0.0212201591511936,0.0053050397877984,0.0372015915119359,Other companies
+Rate hikes,False,3,polarity,363,0.0647382920110192,-0.0064279155188246,0.1414141414141414,Other companies
+Rate hikes,False,3,magnitude,363,0.0528007346189164,-0.0064393939393939,0.1092745638200183,Other companies
+Rate hikes,False,3,realization,363,0.1184573002754821,0.0417814508723599,0.1933080808080807,Other companies
+Rate hikes,False,3,uncertainty,363,-0.0234159779614325,-0.0945821854912764,0.0482208448117538,Other companies
+Rate hikes,False,3,specificity,363,-0.1528925619834711,-0.213510101010101,-0.0936409550045914,Other companies
+Rate hikes,False,3,discussed,374,0.0106951871657754,-0.0026737967914438,0.0267379679144385,Other companies
+Rate hikes,False,4,polarity,351,-0.0090218423551756,-0.0816832858499525,0.0660018993352326,Other companies
+Rate hikes,False,4,magnitude,351,0.0123456790123456,-0.0446462488129154,0.0698005698005697,Other companies
+Rate hikes,False,4,realization,351,0.0607787274453941,-0.0152065527065527,0.137238841405508,Other companies
+Rate hikes,False,4,uncertainty,351,-0.0090218423551757,-0.087369420702754,0.0754985754985754,Other companies
+Rate hikes,False,4,specificity,351,-0.1424501424501424,-0.2032407407407407,-0.0816714150047483,Other companies
+Rate hikes,False,4,discussed,363,0.0137741046831955,-0.0027548209366391,0.0303030303030303,Other companies

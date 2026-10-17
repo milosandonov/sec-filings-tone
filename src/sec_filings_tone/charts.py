@@ -9,6 +9,7 @@
 - Word-checked versions (`_named`) for AI, China and tariffs: their passages count only if they name the
   topic (events.TOPIC_WORDS), on the same color scales.
 - Phase 8: how much of each 10-K section is carried over from the year before, by sector and year.
+- A4 event studies: each event's change from every company's last 10-K before it, by year around it.
 Each PNG in figures/ has its numbers in a CSV beside it.
 
 Usage:
@@ -30,6 +31,7 @@ from matplotlib.ticker import PercentFormatter  # noqa: E402
 from sec_filings_tone.diff import CARRYOVER, ITEMS, filings  # noqa: E402
 from sec_filings_tone.events import DIMS, EVENTS, TOPIC_WORDS, cells, did, named  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
+from sec_filings_tone.tone import OUT  # noqa: E402
 
 FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
@@ -71,41 +73,74 @@ def table(groups: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def lines(t: pd.DataFrame, topic: str, path: Path, checked: bool = False) -> None:
-    ev = pd.read_csv(EVENTS, dtype=str, keep_default_na=False)
-    marks = {e.event: pd.Timestamp(e.date) for e in ev.itertuples() if topic in e.topics.split(";")}
+def panels(t: pd.DataFrame, x: str, marks: dict[str, float], title_text: str, sub: str, note: str, path: Path,
+           change: bool = False) -> None:
+    """Six line panels (the five dimensions and `discussed`), one line per `group` over `x`, with
+    vertical marks; `change` when the values are changes rather than levels."""
     fig, axes = plt.subplots(2, 3, figsize=(13, 7.6), sharex=True, facecolor=SURFACE)
     groups = list(dict.fromkeys(t.group))
     for ax, m in zip(axes.flat, MEASURES):
         ax.set_facecolor(SURFACE)
         for color, g in zip(SERIES, groups):
-            s = t[(t.group == g) & (t.measure == m)].sort_values("fy")
-            ax.fill_between(s.fy, s.lo, s.hi, color=color, alpha=0.12, lw=0)
-            ax.plot(s.fy, s["mean"], color=color, lw=2, marker="o", ms=5, mec=SURFACE, mew=1.5, label=g)
-        for name, d in marks.items():
-            x = d.year - 1 + d.dayofyear / 365.25  # FY t is plotted where it ends, at x = t
-            ax.axvline(x, color=AXIS, lw=1, zorder=0)
-            ax.text(x, 1.0, f" {name} ", transform=ax.get_xaxis_transform(), color=MUTED, fontsize=7.5, va="bottom")
-        ax.set_title(title(m), loc="left", color=INK, fontsize=10, pad=16)
+            s = t[(t.group == g) & (t.measure == m)].sort_values(x)
+            ax.fill_between(s[x], s.lo, s.hi, color=color, alpha=0.12, lw=0)
+            ax.plot(s[x], s["mean"], color=color, lw=2, marker="o", ms=5, mec=SURFACE, mew=1.5, label=g)
+        for name, at in marks.items():
+            ax.axvline(at, color=AXIS, lw=1, zorder=0)
+            ax.text(at, 1.0, f" {name} ", transform=ax.get_xaxis_transform(), color=MUTED, fontsize=7.5, va="bottom")
+        if change:
+            ax.axhline(0, color=AXIS, lw=1, zorder=0)
+        ax.set_title(("Change in: " if change else "") + title(m), loc="left", color=INK, fontsize=10, pad=16)
         if m == "discussed":
             ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
-            ax.set_ylim(0, 1.05)
+            if not change:
+                ax.set_ylim(0, 1.05)
         ax.grid(axis="y", color=GRID, lw=0.8)
         ax.set_axisbelow(True)
         ax.spines[["top", "right"]].set_visible(False)
         ax.spines[["left", "bottom"]].set_color(AXIS)
         ax.tick_params(colors=MUTED, length=0, pad=4)
-    n = t[(t.measure == "discussed") & (t.group == groups[0])].n
-    header(fig, f"{topic}: tone in S&P 500 10-Ks, risk factors and MD&A, by fiscal year" + (" (word-checked)" if checked else ""),
-           f"{n.min()}–{n.max()} companies a year; dimension means cover the companies with an on-topic passage "
-           "from that section", NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if checked else ""))
-    fig.legend(*axes.flat[0].get_legend_handles_labels(), loc="upper right", bbox_to_anchor=(0.99, 0.958),
-               ncol=len(groups), frameon=False, labelcolor=INK, fontsize=9.5)
-    fig.tight_layout(rect=(0, 0.06, 1, 0.93), h_pad=2.5)
+    header(fig, title_text, sub, note)
+    if len(groups) > 1:
+        fig.legend(*axes.flat[0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.93),
+                   ncol=len(groups), frameon=False, labelcolor=INK, fontsize=9.5)
+    fig.tight_layout(rect=(0, 0.06, 1, 0.9 if len(groups) > 1 else 0.93), h_pad=2.5)
     fig.savefig(path, dpi=200, facecolor=SURFACE)
     plt.close(fig)
     t.to_csv(path.with_suffix(".csv"), index=False)
     print(f"wrote {path} and its .csv")
+
+
+def lines(t: pd.DataFrame, topic: str, path: Path, checked: bool = False) -> None:
+    ev = pd.read_csv(EVENTS, dtype=str, keep_default_na=False)
+    # FY t is plotted where it ends, at x = t
+    marks = {e.event: (d := pd.Timestamp(e.date)).year - 1 + d.dayofyear / 365.25
+             for e in ev.itertuples() if topic in e.topics.split(";")}
+    n = t[(t.measure == "discussed") & (t.group == t.group.iloc[0])].n
+    panels(t, "fy", marks, f"{topic}: tone in S&P 500 10-Ks, risk factors and MD&A, by fiscal year" + (" (word-checked)" if checked else ""),
+           f"{n.min()}–{n.max()} companies a year; dimension means cover the companies with an on-topic passage "
+           "from that section", NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if checked else ""), path)
+
+
+def event_studies() -> None:
+    """A4: each event's change from every company's last 10-K before it, by fiscal year around it."""
+    ev = pd.read_csv(EVENTS, dtype=str, keep_default_na=False).set_index("event")
+    for suffix in ["", "_named"]:
+        st = pd.read_csv(OUT / f"event_study{suffix}.csv")
+        for event, t in st.groupby("event", sort=False):
+            e = ev.loc[event]
+            if suffix and not set(e.topics.split(";")) & set(TOPIC_WORDS):
+                continue  # the word check changes nothing for this event
+            hit = e.sectors.replace(";", ", ") if e.sectors != "all" else "All companies"
+            hit += f" ({e.sub_industries.replace(';', ', ')})" if e.sub_industries else ""
+            t = t[t.n >= MIN_N].sort_values("affected", ascending=False, kind="stable")  # affected first: slot 1
+            t = t.assign(group=t.affected.map({True: hit, False: "Other companies"}))
+            slug = "_".join("".join(ch if ch.isalnum() else " " for ch in event.lower()).split())
+            panels(t, "k", {"event": 0.5}, f"{event}: change from each company's last 10-K before {e.date}" + (" (word-checked)" if suffix else ""),
+                   f"Topics: {e.topics.replace(';', ', ')}. Event year 0 is that 10-K, 1 the next fiscal year; means over "
+                   f"companies discussing the topic in both years (at least {MIN_N}).",
+                   NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if suffix else ""),
+                   FIGURES / f"event_study_{slug}{suffix}.png", change=True)
 
 
 def heat(fig, ax, v: pd.DataFrame, colors: list[str], lo: float, hi: float, name: str, pct: bool = False) -> None:
@@ -193,6 +228,8 @@ def main() -> None:
     heatmaps(cells(keep=keep).query("fy <= @LAST_FY and topic in @TOPIC_WORDS"), lims, checked=True)
     if CARRYOVER.exists():
         carryover()
+    if (OUT / "event_study.csv").exists():
+        event_studies()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,91 @@
+event,affected,k,measure,n,mean,lo,hi,group
+US chip export controls on China,True,-2,polarity,18,0.0925925925925925,-0.037037037037037,0.2407407407407406,Information Technology (Semiconductor)
+US chip export controls on China,True,-2,magnitude,18,-0.2314814814814815,-0.4537037037037038,-0.0092592592592592,Information Technology (Semiconductor)
+US chip export controls on China,True,-2,realization,18,-0.0185185185185185,-0.3425925925925926,0.2777777777777777,Information Technology (Semiconductor)
+US chip export controls on China,True,-2,uncertainty,18,-0.1296296296296296,-0.3611111111111111,0.0555555555555555,Information Technology (Semiconductor)
+US chip export controls on China,True,-2,specificity,18,-0.1296296296296296,-0.2407407407407407,-0.0277777777777777,Information Technology (Semiconductor)
+US chip export controls on China,True,-2,discussed,18,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,polarity,18,0.0185185185185185,-0.2129629629629629,0.3333333333333333,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,magnitude,18,-0.0925925925925925,-0.4076388888888889,0.2129629629629629,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,realization,18,0.1944444444444445,-0.074074074074074,0.4814814814814815,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,uncertainty,18,-0.0092592592592592,-0.1481481481481481,0.0925925925925926,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,specificity,18,0.0185185185185185,-0.0925925925925926,0.1388888888888889,Information Technology (Semiconductor)
+US chip export controls on China,True,-1,discussed,18,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,polarity,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,magnitude,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,realization,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,uncertainty,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,specificity,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,0,discussed,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,1,polarity,19,-0.0526315789473684,-0.2456140350877192,0.1403508771929825,Information Technology (Semiconductor)
+US chip export controls on China,True,1,magnitude,19,-0.0350877192982455,-0.3333333333333333,0.2719298245614034,Information Technology (Semiconductor)
+US chip export controls on China,True,1,realization,19,-0.2368421052631578,-0.5087719298245614,0.0175438596491228,Information Technology (Semiconductor)
+US chip export controls on China,True,1,uncertainty,19,-0.2192982456140351,-0.3771929824561403,-0.0701754385964912,Information Technology (Semiconductor)
+US chip export controls on China,True,1,specificity,19,-0.0263157894736842,-0.175438596491228,0.1052631578947368,Information Technology (Semiconductor)
+US chip export controls on China,True,1,discussed,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,2,polarity,19,-0.0964912280701754,-0.2631578947368421,0.0701754385964912,Information Technology (Semiconductor)
+US chip export controls on China,True,2,magnitude,19,-0.087719298245614,-0.3598684210526316,0.2282894736842093,Information Technology (Semiconductor)
+US chip export controls on China,True,2,realization,19,-0.1052631578947368,-0.3333333333333333,0.1403508771929824,Information Technology (Semiconductor)
+US chip export controls on China,True,2,uncertainty,19,-0.0964912280701754,-0.2368421052631578,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,2,specificity,19,-0.0526315789473684,-0.1403508771929824,0.0350877192982456,Information Technology (Semiconductor)
+US chip export controls on China,True,2,discussed,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,3,polarity,19,-0.0614035087719298,-0.2105263157894736,0.0701754385964912,Information Technology (Semiconductor)
+US chip export controls on China,True,3,magnitude,19,0.087719298245614,-0.1929824561403508,0.3947368421052631,Information Technology (Semiconductor)
+US chip export controls on China,True,3,realization,19,-0.1140350877192982,-0.3508771929824562,0.1228070175438596,Information Technology (Semiconductor)
+US chip export controls on China,True,3,uncertainty,19,-0.1491228070175438,-0.2807017543859648,-0.043859649122807,Information Technology (Semiconductor)
+US chip export controls on China,True,3,specificity,19,0.0526315789473684,-0.0350877192982455,0.1403508771929825,Information Technology (Semiconductor)
+US chip export controls on China,True,3,discussed,19,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,True,4,polarity,14,-0.0595238095238095,-0.2619047619047618,0.119047619047619,Information Technology (Semiconductor)
+US chip export controls on China,True,4,magnitude,14,0.0833333333333333,-0.2142857142857142,0.4047619047619047,Information Technology (Semiconductor)
+US chip export controls on China,True,4,realization,14,0.0119047619047619,-0.2619047619047619,0.2976190476190476,Information Technology (Semiconductor)
+US chip export controls on China,True,4,uncertainty,14,-0.0714285714285714,-0.3095238095238095,0.1071428571428571,Information Technology (Semiconductor)
+US chip export controls on China,True,4,specificity,14,0.0119047619047619,-0.1309523809523809,0.1666666666666666,Information Technology (Semiconductor)
+US chip export controls on China,True,4,discussed,14,0.0,0.0,0.0,Information Technology (Semiconductor)
+US chip export controls on China,False,-3,polarity,35,0.0428571428571428,-0.0666666666666666,0.1619047619047618,Other companies
+US chip export controls on China,False,-3,magnitude,35,-0.3571428571428571,-0.5286904761904762,-0.1903571428571435,Other companies
+US chip export controls on China,False,-3,realization,35,-0.0761904761904761,-0.3142857142857143,0.1714285714285714,Other companies
+US chip export controls on China,False,-3,uncertainty,35,-0.1047619047619047,-0.3428571428571428,0.1144047619047612,Other companies
+US chip export controls on China,False,-3,specificity,35,-0.0619047619047618,-0.2285714285714285,0.0952380952380952,Other companies
+US chip export controls on China,False,-3,discussed,70,-0.0142857142857142,-0.1,0.0714285714285714,Other companies
+US chip export controls on China,False,-2,polarity,165,-0.0757575757575757,-0.1373989898989898,-0.0191666666666668,Other companies
+US chip export controls on China,False,-2,magnitude,165,-0.0414141414141414,-0.1343434343434343,0.0525252525252525,Other companies
+US chip export controls on China,False,-2,realization,165,-0.0868686868686868,-0.204040404040404,0.024292929292929,Other companies
+US chip export controls on China,False,-2,uncertainty,165,0.1666666666666666,0.061590909090909,0.2767929292929291,Other companies
+US chip export controls on China,False,-2,specificity,165,-0.0393939393939393,-0.1232323232323232,0.0495454545454542,Other companies
+US chip export controls on China,False,-2,discussed,442,0.0361990950226244,-0.004524886877828,0.0746606334841629,Other companies
+US chip export controls on China,False,-1,polarity,181,0.0101289134438305,-0.0395948434622467,0.0589318600368324,Other companies
+US chip export controls on China,False,-1,magnitude,181,-0.0211786372007366,-0.0985267034990792,0.0506906077348063,Other companies
+US chip export controls on China,False,-1,realization,181,-0.0248618784530386,-0.1224677716390423,0.0681629834254142,Other companies
+US chip export controls on China,False,-1,uncertainty,181,0.007366482504604,-0.070902394106814,0.083793738489871,Other companies
+US chip export controls on China,False,-1,specificity,181,-0.0386740331491712,-0.1049723756906077,0.0276243093922651,Other companies
+US chip export controls on China,False,-1,discussed,452,0.0176991150442477,-0.0132743362831858,0.0465154867256634,Other companies
+US chip export controls on China,False,0,polarity,207,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,0,magnitude,207,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,0,realization,207,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,0,uncertainty,207,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,0,specificity,207,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,0,discussed,462,0.0,0.0,0.0,Other companies
+US chip export controls on China,False,1,polarity,192,-0.0564236111111111,-0.1050347222222222,-0.0129991319444445,Other companies
+US chip export controls on China,False,1,magnitude,192,-0.0494791666666666,-0.1284722222222222,0.0312499999999999,Other companies
+US chip export controls on China,False,1,realization,192,-0.0494791666666666,-0.1432291666666666,0.0468749999999999,Other companies
+US chip export controls on China,False,1,uncertainty,192,0.0130208333333333,-0.0824869791666666,0.102473958333333,Other companies
+US chip export controls on China,False,1,specificity,192,-0.0538194444444444,-0.1258897569444444,0.0173611111111111,Other companies
+US chip export controls on China,False,1,discussed,462,0.0411255411255411,0.0108225108225108,0.0692640692640692,Other companies
+US chip export controls on China,False,2,polarity,190,-0.0535087719298245,-0.1166666666666666,0.0035087719298245,Other companies
+US chip export controls on China,False,2,magnitude,190,0.0105263157894736,-0.0745614035087719,0.0939035087719296,Other companies
+US chip export controls on China,False,2,realization,190,-0.0350877192982456,-0.1280921052631579,0.0631578947368421,Other companies
+US chip export controls on China,False,2,uncertainty,190,0.0219298245614035,-0.0649122807017544,0.1061622807017542,Other companies
+US chip export controls on China,False,2,specificity,190,-0.0771929824561403,-0.1421052631578947,-0.0096491228070175,Other companies
+US chip export controls on China,False,2,discussed,462,0.0649350649350649,0.0324675324675324,0.0995670995670995,Other companies
+US chip export controls on China,False,3,polarity,185,-0.0756756756756756,-0.1279279279279279,-0.0288288288288288,Other companies
+US chip export controls on China,False,3,magnitude,185,-0.0009009009009009,-0.0855855855855856,0.0873873873873873,Other companies
+US chip export controls on China,False,3,realization,185,-0.0936936936936937,-0.2054279279279279,0.0198198198198198,Other companies
+US chip export controls on China,False,3,uncertainty,185,0.0621621621621621,-0.0288288288288288,0.1558783783783782,Other companies
+US chip export controls on China,False,3,specificity,185,-0.0441441441441441,-0.1171396396396396,0.0297522522522521,Other companies
+US chip export controls on China,False,3,discussed,459,0.0849673202614379,0.0457516339869281,0.1220043572984749,Other companies
+US chip export controls on China,False,4,polarity,145,-0.0977011494252873,-0.1735919540229885,-0.025287356321839,Other companies
+US chip export controls on China,False,4,magnitude,145,0.0103448275862068,-0.0931321839080459,0.1206896551724138,Other companies
+US chip export controls on China,False,4,realization,145,-0.1114942528735632,-0.2344827586206896,0.0091954022988505,Other companies
+US chip export controls on China,False,4,uncertainty,145,0.1620689655172413,0.0608908045977011,0.2689655172413793,Other companies
+US chip export controls on China,False,4,specificity,145,0.0149425287356321,-0.0678160919540229,0.096551724137931,Other companies
+US chip export controls on China,False,4,discussed,388,0.0902061855670103,0.0463917525773195,0.1314432989690721,Other companies

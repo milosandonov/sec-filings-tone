@@ -1,0 +1,72 @@
+event,affected,k,measure,n,mean,lo,hi,group
+AI boom,True,-3,discussed,38,0.0,-0.131578947368421,0.131578947368421,"Information Technology, Communication Services"
+AI boom,True,-2,polarity,9,-0.1111111111111111,-0.3703703703703704,0.074074074074074,"Information Technology, Communication Services"
+AI boom,True,-2,magnitude,9,-0.1111111111111111,-0.3333333333333333,0.0,"Information Technology, Communication Services"
+AI boom,True,-2,realization,9,-0.1111111111111111,-0.3333333333333333,0.0,"Information Technology, Communication Services"
+AI boom,True,-2,uncertainty,9,0.1851851851851851,0.0,0.4444444444444444,"Information Technology, Communication Services"
+AI boom,True,-2,specificity,9,-0.037037037037037,-0.1111111111111111,0.0,"Information Technology, Communication Services"
+AI boom,True,-2,discussed,84,-0.0476190476190476,-0.1071428571428571,0.0119047619047619,"Information Technology, Communication Services"
+AI boom,True,-1,polarity,12,0.0277777777777777,-0.2222222222222222,0.25,"Information Technology, Communication Services"
+AI boom,True,-1,magnitude,12,0.1944444444444444,0.0,0.4722222222222223,"Information Technology, Communication Services"
+AI boom,True,-1,realization,12,0.0833333333333333,0.0,0.25,"Information Technology, Communication Services"
+AI boom,True,-1,uncertainty,12,-0.1805555555555555,-0.5555555555555556,0.0555555555555555,"Information Technology, Communication Services"
+AI boom,True,-1,specificity,12,-0.1111111111111111,-0.3055555555555556,0.0,"Information Technology, Communication Services"
+AI boom,True,-1,discussed,86,-0.0232558139534883,-0.0697674418604651,0.0119186046511612,"Information Technology, Communication Services"
+AI boom,True,0,polarity,15,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,0,magnitude,15,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,0,realization,15,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,0,uncertainty,15,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,0,specificity,15,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,0,discussed,89,0.0,0.0,0.0,"Information Technology, Communication Services"
+AI boom,True,1,polarity,10,-0.1333333333333333,-0.8333333333333333,0.3666666666666667,"Information Technology, Communication Services"
+AI boom,True,1,magnitude,10,0.1,-0.3333333333333333,0.5333333333333333,"Information Technology, Communication Services"
+AI boom,True,1,realization,10,-0.0666666666666666,-0.4008333333333333,0.3,"Information Technology, Communication Services"
+AI boom,True,1,uncertainty,10,0.3166666666666666,-0.1166666666666666,0.7833333333333334,"Information Technology, Communication Services"
+AI boom,True,1,specificity,10,-0.0333333333333333,-0.4,0.3333333333333333,"Information Technology, Communication Services"
+AI boom,True,1,discussed,89,-0.0224719101123595,-0.0898876404494382,0.0337078651685393,"Information Technology, Communication Services"
+AI boom,True,2,polarity,9,0.2037037037037036,-0.6666666666666666,0.8703703703703703,"Information Technology, Communication Services"
+AI boom,True,2,magnitude,9,0.6481481481481483,0.3333333333333333,0.9814814814814814,"Information Technology, Communication Services"
+AI boom,True,2,realization,9,0.2037037037037037,-0.0555555555555555,0.4814814814814814,"Information Technology, Communication Services"
+AI boom,True,2,uncertainty,9,0.4629629629629629,-0.4814814814814815,1.2962962962962965,"Information Technology, Communication Services"
+AI boom,True,2,specificity,9,0.074074074074074,-0.3333333333333333,0.4444444444444444,"Information Technology, Communication Services"
+AI boom,True,2,discussed,89,0.146067415730337,0.0449438202247191,0.2584269662921348,"Information Technology, Communication Services"
+AI boom,True,3,polarity,10,0.2,-0.2,0.6,"Information Technology, Communication Services"
+AI boom,True,3,magnitude,10,0.65,0.2666666666666667,1.0666666666666669,"Information Technology, Communication Services"
+AI boom,True,3,realization,10,0.25,0.0,0.5012499999999932,"Information Technology, Communication Services"
+AI boom,True,3,uncertainty,10,0.2666666666666666,-0.3341666666666666,0.7333333333333333,"Information Technology, Communication Services"
+AI boom,True,3,specificity,10,0.3,-0.1,0.6333333333333334,"Information Technology, Communication Services"
+AI boom,True,3,discussed,88,0.2272727272727272,0.1247159090909091,0.3295454545454545,"Information Technology, Communication Services"
+AI boom,True,4,discussed,49,0.1836734693877551,0.0204081632653061,0.3469387755102041,"Information Technology, Communication Services"
+AI boom,False,-3,discussed,65,-0.0153846153846153,-0.0461538461538461,0.0,Other companies
+AI boom,False,-2,discussed,376,-0.0106382978723404,-0.026595744680851,0.0053191489361702,Other companies
+AI boom,False,-1,polarity,5,0.0,0.0,0.0,Other companies
+AI boom,False,-1,magnitude,5,0.2,0.0,0.6,Other companies
+AI boom,False,-1,realization,5,0.2,0.0,0.6,Other companies
+AI boom,False,-1,uncertainty,5,0.3,0.0,0.9,Other companies
+AI boom,False,-1,specificity,5,0.1,-0.3,0.6,Other companies
+AI boom,False,-1,discussed,384,-0.0026041666666666,-0.0182291666666666,0.0130208333333333,Other companies
+AI boom,False,0,polarity,11,0.0,0.0,0.0,Other companies
+AI boom,False,0,magnitude,11,0.0,0.0,0.0,Other companies
+AI boom,False,0,realization,11,0.0,0.0,0.0,Other companies
+AI boom,False,0,uncertainty,11,0.0,0.0,0.0,Other companies
+AI boom,False,0,specificity,11,0.0,0.0,0.0,Other companies
+AI boom,False,0,discussed,392,0.0,0.0,0.0,Other companies
+AI boom,False,1,polarity,6,0.1666666666666666,0.0,0.5,Other companies
+AI boom,False,1,magnitude,6,0.0,-0.5,0.5,Other companies
+AI boom,False,1,realization,6,0.25,0.0,0.5833333333333334,Other companies
+AI boom,False,1,uncertainty,6,-0.5,-1.0,-0.0833333333333333,Other companies
+AI boom,False,1,specificity,6,-0.0833333333333333,-0.25,0.0,Other companies
+AI boom,False,1,discussed,392,-0.0076530612244897,-0.0204719387755102,0.0051020408163265,Other companies
+AI boom,False,2,discussed,392,0.0025510204081632,-0.0178571428571428,0.0255102040816326,Other companies
+AI boom,False,3,polarity,5,-0.1,-0.3,0.0,Other companies
+AI boom,False,3,magnitude,5,0.0,-0.6,0.6,Other companies
+AI boom,False,3,realization,5,0.0,-1.0,0.8,Other companies
+AI boom,False,3,uncertainty,5,0.1,-1.1,1.0,Other companies
+AI boom,False,3,specificity,5,-0.1,-0.7,0.5,Other companies
+AI boom,False,3,discussed,390,0.0589743589743589,0.0307692307692307,0.0897435897435897,Other companies
+AI boom,False,4,polarity,6,-0.5,-1.0833333333333333,-0.0833333333333333,Other companies
+AI boom,False,4,magnitude,6,0.0833333333333333,-0.6666666666666666,0.8333333333333334,Other companies
+AI boom,False,4,realization,6,-0.0833333333333333,-0.6666666666666666,0.5,Other companies
+AI boom,False,4,uncertainty,6,0.8333333333333334,0.25,1.4166666666666667,Other companies
+AI boom,False,4,specificity,6,0.3333333333333333,-0.1666666666666666,0.8333333333333334,Other companies
+AI boom,False,4,discussed,324,0.0864197530864197,0.0555555555555555,0.1203703703703703,Other companies
