@@ -7,8 +7,8 @@ polarity,Inflation and costs,Communication Services,2023,-1.0686274509803921,17
 polarity,Inflation and costs,Communication Services,2024,-0.9607843137254901,17
 polarity,Inflation and costs,Communication Services,2025,-0.9649122807017543,19
 polarity,Inflation and costs,Consumer Discretionary,2019,-0.9037037037037037,45
-polarity,Inflation and costs,Consumer Discretionary,2020,-0.8695652173913043,46
-polarity,Inflation and costs,Consumer Discretionary,2021,-0.9964539007092199,47
+polarity,Inflation and costs,Consumer Discretionary,2020,-0.8794326241134752,47
+polarity,Inflation and costs,Consumer Discretionary,2021,-1.00354609929078,47
 polarity,Inflation and costs,Consumer Discretionary,2022,-1.0780141843971631,47
 polarity,Inflation and costs,Consumer Discretionary,2023,-1.0851063829787233,47
 polarity,Inflation and costs,Consumer Discretionary,2024,-1.0070921985815604,47
@@ -35,29 +35,29 @@ polarity,Inflation and costs,Financials,2023,-0.8911111111111111,75
 polarity,Inflation and costs,Financials,2024,-0.8618421052631579,76
 polarity,Inflation and costs,Financials,2025,-0.9561403508771931,76
 polarity,Inflation and costs,Health Care,2019,-0.9415204678362573,57
-polarity,Inflation and costs,Health Care,2020,-1.0666666666666667,55
-polarity,Inflation and costs,Health Care,2021,-1.0201149425287357,58
-polarity,Inflation and costs,Health Care,2022,-1.1327683615819208,59
+polarity,Inflation and costs,Health Care,2020,-1.0574712643678161,58
+polarity,Inflation and costs,Health Care,2021,-1.014367816091954,58
+polarity,Inflation and costs,Health Care,2022,-1.1384180790960452,59
 polarity,Inflation and costs,Health Care,2023,-1.073446327683616,59
 polarity,Inflation and costs,Health Care,2024,-1.05,60
 polarity,Inflation and costs,Health Care,2025,-1.1138888888888887,60
-polarity,Inflation and costs,Industrials,2019,-0.8333333333333333,74
-polarity,Inflation and costs,Industrials,2020,-0.82,75
+polarity,Inflation and costs,Industrials,2019,-0.837719298245614,76
+polarity,Inflation and costs,Industrials,2020,-0.8226495726495727,78
 polarity,Inflation and costs,Industrials,2021,-1.0683760683760684,78
 polarity,Inflation and costs,Industrials,2022,-1.0598290598290598,78
 polarity,Inflation and costs,Industrials,2023,-0.8755274261603376,79
-polarity,Inflation and costs,Industrials,2024,-0.9156118143459915,79
-polarity,Inflation and costs,Industrials,2025,-0.9358974358974359,78
-polarity,Inflation and costs,Information Technology,2019,-0.8840579710144928,69
-polarity,Inflation and costs,Information Technology,2020,-0.8928571428571429,70
+polarity,Inflation and costs,Industrials,2024,-0.9176954732510287,81
+polarity,Inflation and costs,Industrials,2025,-0.9382716049382716,81
+polarity,Inflation and costs,Information Technology,2019,-0.8857142857142857,70
+polarity,Inflation and costs,Information Technology,2020,-0.8958333333333334,72
 polarity,Inflation and costs,Information Technology,2021,-0.9513888888888888,72
-polarity,Inflation and costs,Information Technology,2022,-1.0365296803652968,73
+polarity,Inflation and costs,Information Technology,2022,-1.0342465753424657,73
 polarity,Inflation and costs,Information Technology,2023,-1.0,73
-polarity,Inflation and costs,Information Technology,2024,-0.9583333333333334,72
+polarity,Inflation and costs,Information Technology,2024,-0.958904109589041,73
 polarity,Inflation and costs,Information Technology,2025,-1.0177777777777777,75
 polarity,Inflation and costs,Materials,2019,-0.8030303030303031,22
-polarity,Inflation and costs,Materials,2020,-0.8095238095238095,21
-polarity,Inflation and costs,Materials,2021,-1.0303030303030303,22
+polarity,Inflation and costs,Materials,2020,-0.8181818181818182,22
+polarity,Inflation and costs,Materials,2021,-1.0454545454545454,22
 polarity,Inflation and costs,Materials,2022,-1.2272727272727273,22
 polarity,Inflation and costs,Materials,2023,-0.9057971014492753,23
 polarity,Inflation and costs,Materials,2024,-0.8055555555555555,24
@@ -84,9 +84,9 @@ magnitude,Inflation and costs,Communication Services,2023,1.1372549019607843,17
 magnitude,Inflation and costs,Communication Services,2024,1.2156862745098038,17
 magnitude,Inflation and costs,Communication Services,2025,1.0087719298245614,19
 magnitude,Inflation and costs,Consumer Discretionary,2019,1.0777777777777777,45
-magnitude,Inflation and costs,Consumer Discretionary,2020,1.076086956521739,46
-magnitude,Inflation and costs,Consumer Discretionary,2021,1.2907801418439715,47
-magnitude,Inflation and costs,Consumer Discretionary,2022,1.297872340425532,47
+magnitude,Inflation and costs,Consumer Discretionary,2020,1.0886524822695034,47
+magnitude,Inflation and costs,Consumer Discretionary,2021,1.297872340425532,47
+magnitude,Inflation and costs,Consumer Discretionary,2022,1.2907801418439715,47
 magnitude,Inflation and costs,Consumer Discretionary,2023,1.3617021276595744,47
 magnitude,Inflation and costs,Consumer Discretionary,2024,1.2872340425531914,47
 magnitude,Inflation and costs,Consumer Discretionary,2025,1.3652482269503547,47
@@ -98,7 +98,7 @@ magnitude,Inflation and costs,Consumer Staples,2023,1.5858585858585859,33
 magnitude,Inflation and costs,Consumer Staples,2024,1.4343434343434345,33
 magnitude,Inflation and costs,Consumer Staples,2025,1.4242424242424243,33
 magnitude,Inflation and costs,Energy,2019,0.9649122807017543,19
-magnitude,Inflation and costs,Energy,2020,1.1083333333333334,20
+magnitude,Inflation and costs,Energy,2020,1.0916666666666666,20
 magnitude,Inflation and costs,Energy,2021,1.1825396825396826,21
 magnitude,Inflation and costs,Energy,2022,1.007936507936508,21
 magnitude,Inflation and costs,Energy,2023,1.2142857142857142,21
@@ -112,29 +112,29 @@ magnitude,Inflation and costs,Financials,2023,1.1177777777777778,75
 magnitude,Inflation and costs,Financials,2024,1.0657894736842106,76
 magnitude,Inflation and costs,Financials,2025,1.0219298245614035,76
 magnitude,Inflation and costs,Health Care,2019,1.0847953216374269,57
-magnitude,Inflation and costs,Health Care,2020,1.1757575757575758,55
-magnitude,Inflation and costs,Health Care,2021,1.1666666666666667,58
-magnitude,Inflation and costs,Health Care,2022,1.3220338983050848,59
+magnitude,Inflation and costs,Health Care,2020,1.1637931034482758,58
+magnitude,Inflation and costs,Health Care,2021,1.1551724137931034,58
+magnitude,Inflation and costs,Health Care,2022,1.3361581920903953,59
 magnitude,Inflation and costs,Health Care,2023,1.2881355932203389,59
 magnitude,Inflation and costs,Health Care,2024,1.2944444444444445,60
 magnitude,Inflation and costs,Health Care,2025,1.1833333333333333,60
-magnitude,Inflation and costs,Industrials,2019,1.1058558558558558,74
-magnitude,Inflation and costs,Industrials,2020,1.1377777777777778,75
-magnitude,Inflation and costs,Industrials,2021,1.3525641025641026,78
+magnitude,Inflation and costs,Industrials,2019,1.087719298245614,76
+magnitude,Inflation and costs,Industrials,2020,1.1346153846153846,78
+magnitude,Inflation and costs,Industrials,2021,1.3653846153846154,78
 magnitude,Inflation and costs,Industrials,2022,1.4914529914529915,78
 magnitude,Inflation and costs,Industrials,2023,1.4050632911392404,79
-magnitude,Inflation and costs,Industrials,2024,1.2911392405063291,79
-magnitude,Inflation and costs,Industrials,2025,1.2542735042735043,78
-magnitude,Inflation and costs,Information Technology,2019,0.9685990338164251,69
-magnitude,Inflation and costs,Information Technology,2020,1.0452380952380953,70
-magnitude,Inflation and costs,Information Technology,2021,1.0671296296296295,72
-magnitude,Inflation and costs,Information Technology,2022,1.1027397260273972,73
+magnitude,Inflation and costs,Industrials,2024,1.2962962962962963,81
+magnitude,Inflation and costs,Industrials,2025,1.251028806584362,81
+magnitude,Inflation and costs,Information Technology,2019,0.9619047619047618,70
+magnitude,Inflation and costs,Information Technology,2020,1.0277777777777777,72
+magnitude,Inflation and costs,Information Technology,2021,1.0902777777777777,72
+magnitude,Inflation and costs,Information Technology,2022,1.095890410958904,73
 magnitude,Inflation and costs,Information Technology,2023,1.1278538812785388,73
-magnitude,Inflation and costs,Information Technology,2024,0.9699074074074073,72
-magnitude,Inflation and costs,Information Technology,2025,1.0711111111111111,75
+magnitude,Inflation and costs,Information Technology,2024,0.9703196347031963,73
+magnitude,Inflation and costs,Information Technology,2025,1.0777777777777777,75
 magnitude,Inflation and costs,Materials,2019,1.2651515151515151,22
-magnitude,Inflation and costs,Materials,2020,1.507936507936508,21
-magnitude,Inflation and costs,Materials,2021,1.628787878787879,22
+magnitude,Inflation and costs,Materials,2020,1.4848484848484846,22
+magnitude,Inflation and costs,Materials,2021,1.6439393939393938,22
 magnitude,Inflation and costs,Materials,2022,1.6742424242424243,22
 magnitude,Inflation and costs,Materials,2023,1.565217391304348,23
 magnitude,Inflation and costs,Materials,2024,1.5277777777777777,24
@@ -148,7 +148,7 @@ magnitude,Inflation and costs,Real Estate,2024,1.1055555555555554,30
 magnitude,Inflation and costs,Real Estate,2025,1.1277777777777778,30
 magnitude,Inflation and costs,Utilities,2019,1.0944444444444446,30
 magnitude,Inflation and costs,Utilities,2020,1.2555555555555555,30
-magnitude,Inflation and costs,Utilities,2021,1.3333333333333335,31
+magnitude,Inflation and costs,Utilities,2021,1.3118279569892473,31
 magnitude,Inflation and costs,Utilities,2022,1.446236559139785,31
 magnitude,Inflation and costs,Utilities,2023,1.3225806451612903,31
 magnitude,Inflation and costs,Utilities,2024,1.3548387096774193,31
@@ -161,8 +161,8 @@ realization,Inflation and costs,Communication Services,2023,1.1764705882352942,1
 realization,Inflation and costs,Communication Services,2024,1.049019607843137,17
 realization,Inflation and costs,Communication Services,2025,1.131578947368421,19
 realization,Inflation and costs,Consumer Discretionary,2019,0.8259259259259258,45
-realization,Inflation and costs,Consumer Discretionary,2020,0.8731884057971014,46
-realization,Inflation and costs,Consumer Discretionary,2021,1.2056737588652482,47
+realization,Inflation and costs,Consumer Discretionary,2020,0.8900709219858156,47
+realization,Inflation and costs,Consumer Discretionary,2021,1.2127659574468086,47
 realization,Inflation and costs,Consumer Discretionary,2022,1.3156028368794326,47
 realization,Inflation and costs,Consumer Discretionary,2023,1.304964539007092,47
 realization,Inflation and costs,Consumer Discretionary,2024,1.2765957446808511,47
@@ -189,28 +189,28 @@ realization,Inflation and costs,Financials,2023,1.111111111111111,75
 realization,Inflation and costs,Financials,2024,1.0043859649122806,76
 realization,Inflation and costs,Financials,2025,0.8135964912280701,76
 realization,Inflation and costs,Health Care,2019,0.9590643274853801,57
-realization,Inflation and costs,Health Care,2020,0.9939393939393939,55
-realization,Inflation and costs,Health Care,2021,1.0229885057471264,58
-realization,Inflation and costs,Health Care,2022,1.2740112994350283,59
+realization,Inflation and costs,Health Care,2020,1.0,58
+realization,Inflation and costs,Health Care,2021,0.9942528735632183,58
+realization,Inflation and costs,Health Care,2022,1.2909604519774012,59
 realization,Inflation and costs,Health Care,2023,1.2966101694915255,59
 realization,Inflation and costs,Health Care,2024,1.275,60
 realization,Inflation and costs,Health Care,2025,1.1083333333333334,60
-realization,Inflation and costs,Industrials,2019,0.8445945945945946,74
-realization,Inflation and costs,Industrials,2020,0.9733333333333334,75
-realization,Inflation and costs,Industrials,2021,1.185897435897436,78
+realization,Inflation and costs,Industrials,2019,0.8355263157894737,76
+realization,Inflation and costs,Industrials,2020,0.9743589743589743,78
+realization,Inflation and costs,Industrials,2021,1.2072649572649574,78
 realization,Inflation and costs,Industrials,2022,1.4423076923076923,78
 realization,Inflation and costs,Industrials,2023,1.3523206751054853,79
-realization,Inflation and costs,Industrials,2024,1.1983122362869199,79
-realization,Inflation and costs,Industrials,2025,1.2179487179487178,78
-realization,Inflation and costs,Information Technology,2019,0.7705314009661836,69
-realization,Inflation and costs,Information Technology,2020,0.8952380952380952,70
-realization,Inflation and costs,Information Technology,2021,0.9861111111111112,72
-realization,Inflation and costs,Information Technology,2022,1.143835616438356,73
+realization,Inflation and costs,Industrials,2024,1.1934156378600824,81
+realization,Inflation and costs,Industrials,2025,1.2263374485596708,81
+realization,Inflation and costs,Information Technology,2019,0.7738095238095237,70
+realization,Inflation and costs,Information Technology,2020,0.8657407407407407,72
+realization,Inflation and costs,Information Technology,2021,1.011574074074074,72
+realization,Inflation and costs,Information Technology,2022,1.134703196347032,73
 realization,Inflation and costs,Information Technology,2023,1.1552511415525113,73
-realization,Inflation and costs,Information Technology,2024,1.0578703703703705,72
-realization,Inflation and costs,Information Technology,2025,1.0644444444444443,75
+realization,Inflation and costs,Information Technology,2024,1.0639269406392695,73
+realization,Inflation and costs,Information Technology,2025,1.0844444444444443,75
 realization,Inflation and costs,Materials,2019,1.0075757575757576,22
-realization,Inflation and costs,Materials,2020,1.1111111111111112,21
+realization,Inflation and costs,Materials,2020,1.1515151515151514,22
 realization,Inflation and costs,Materials,2021,1.4090909090909092,22
 realization,Inflation and costs,Materials,2022,1.4090909090909092,22
 realization,Inflation and costs,Materials,2023,1.4637681159420288,23
@@ -225,7 +225,7 @@ realization,Inflation and costs,Real Estate,2024,0.9944444444444444,30
 realization,Inflation and costs,Real Estate,2025,0.9,30
 realization,Inflation and costs,Utilities,2019,0.7944444444444444,30
 realization,Inflation and costs,Utilities,2020,0.9166666666666666,30
-realization,Inflation and costs,Utilities,2021,1.0483870967741935,31
+realization,Inflation and costs,Utilities,2021,1.0268817204301075,31
 realization,Inflation and costs,Utilities,2022,1.3064516129032258,31
 realization,Inflation and costs,Utilities,2023,1.150537634408602,31
 realization,Inflation and costs,Utilities,2024,1.1720430107526882,31
@@ -238,9 +238,9 @@ uncertainty,Inflation and costs,Communication Services,2023,1.5196078431372548,1
 uncertainty,Inflation and costs,Communication Services,2024,1.6274509803921569,17
 uncertainty,Inflation and costs,Communication Services,2025,1.5701754385964912,19
 uncertainty,Inflation and costs,Consumer Discretionary,2019,1.6333333333333333,45
-uncertainty,Inflation and costs,Consumer Discretionary,2020,1.7246376811594202,46
+uncertainty,Inflation and costs,Consumer Discretionary,2020,1.7163120567375887,47
 uncertainty,Inflation and costs,Consumer Discretionary,2021,1.7056737588652484,47
-uncertainty,Inflation and costs,Consumer Discretionary,2022,1.7624113475177303,47
+uncertainty,Inflation and costs,Consumer Discretionary,2022,1.7765957446808511,47
 uncertainty,Inflation and costs,Consumer Discretionary,2023,1.75177304964539,47
 uncertainty,Inflation and costs,Consumer Discretionary,2024,1.7446808510638299,47
 uncertainty,Inflation and costs,Consumer Discretionary,2025,1.7907801418439717,47
@@ -266,29 +266,29 @@ uncertainty,Inflation and costs,Financials,2023,1.531111111111111,75
 uncertainty,Inflation and costs,Financials,2024,1.5833333333333333,76
 uncertainty,Inflation and costs,Financials,2025,1.743421052631579,76
 uncertainty,Inflation and costs,Health Care,2019,1.6140350877192982,57
-uncertainty,Inflation and costs,Health Care,2020,1.809090909090909,55
-uncertainty,Inflation and costs,Health Care,2021,1.7241379310344827,58
-uncertainty,Inflation and costs,Health Care,2022,1.847457627118644,59
+uncertainty,Inflation and costs,Health Care,2020,1.7902298850574712,58
+uncertainty,Inflation and costs,Health Care,2021,1.735632183908046,58
+uncertainty,Inflation and costs,Health Care,2022,1.8446327683615817,59
 uncertainty,Inflation and costs,Health Care,2023,1.768361581920904,59
 uncertainty,Inflation and costs,Health Care,2024,1.8388888888888888,60
 uncertainty,Inflation and costs,Health Care,2025,1.9361111111111111,60
-uncertainty,Inflation and costs,Industrials,2019,1.4909909909909909,74
-uncertainty,Inflation and costs,Industrials,2020,1.5555555555555556,75
-uncertainty,Inflation and costs,Industrials,2021,1.4957264957264957,78
+uncertainty,Inflation and costs,Industrials,2019,1.5043859649122806,76
+uncertainty,Inflation and costs,Industrials,2020,1.5576923076923077,78
+uncertainty,Inflation and costs,Industrials,2021,1.4786324786324785,78
 uncertainty,Inflation and costs,Industrials,2022,1.547008547008547,78
 uncertainty,Inflation and costs,Industrials,2023,1.5443037974683544,79
-uncertainty,Inflation and costs,Industrials,2024,1.59915611814346,79
-uncertainty,Inflation and costs,Industrials,2025,1.6217948717948718,78
-uncertainty,Inflation and costs,Information Technology,2019,1.6280193236714975,69
-uncertainty,Inflation and costs,Information Technology,2020,1.6619047619047618,70
-uncertainty,Inflation and costs,Information Technology,2021,1.699074074074074,72
-uncertainty,Inflation and costs,Information Technology,2022,1.773972602739726,73
+uncertainty,Inflation and costs,Industrials,2024,1.609053497942387,81
+uncertainty,Inflation and costs,Industrials,2025,1.6358024691358024,81
+uncertainty,Inflation and costs,Information Technology,2019,1.6333333333333333,70
+uncertainty,Inflation and costs,Information Technology,2020,1.6620370370370372,72
+uncertainty,Inflation and costs,Information Technology,2021,1.6944444444444444,72
+uncertainty,Inflation and costs,Information Technology,2022,1.7785388127853883,73
 uncertainty,Inflation and costs,Information Technology,2023,1.6894977168949772,73
-uncertainty,Inflation and costs,Information Technology,2024,1.6944444444444444,72
-uncertainty,Inflation and costs,Information Technology,2025,1.7377777777777779,75
+uncertainty,Inflation and costs,Information Technology,2024,1.6986301369863013,73
+uncertainty,Inflation and costs,Information Technology,2025,1.7288888888888887,75
 uncertainty,Inflation and costs,Materials,2019,1.621212121212121,22
-uncertainty,Inflation and costs,Materials,2020,1.619047619047619,21
-uncertainty,Inflation and costs,Materials,2021,1.4772727272727273,22
+uncertainty,Inflation and costs,Materials,2020,1.6363636363636365,22
+uncertainty,Inflation and costs,Materials,2021,1.446969696969697,22
 uncertainty,Inflation and costs,Materials,2022,1.4848484848484846,22
 uncertainty,Inflation and costs,Materials,2023,1.5507246376811594,23
 uncertainty,Inflation and costs,Materials,2024,1.611111111111111,24
@@ -315,7 +315,7 @@ specificity,Inflation and costs,Communication Services,2023,1.4705882352941178,1
 specificity,Inflation and costs,Communication Services,2024,1.5294117647058822,17
 specificity,Inflation and costs,Communication Services,2025,1.2456140350877194,19
 specificity,Inflation and costs,Consumer Discretionary,2019,1.5814814814814815,45
-specificity,Inflation and costs,Consumer Discretionary,2020,1.5362318840579712,46
+specificity,Inflation and costs,Consumer Discretionary,2020,1.5460992907801419,47
 specificity,Inflation and costs,Consumer Discretionary,2021,1.6134751773049645,47
 specificity,Inflation and costs,Consumer Discretionary,2022,1.6205673758865249,47
 specificity,Inflation and costs,Consumer Discretionary,2023,1.5886524822695036,47
@@ -343,29 +343,29 @@ specificity,Inflation and costs,Financials,2023,1.3155555555555556,75
 specificity,Inflation and costs,Financials,2024,1.3026315789473684,76
 specificity,Inflation and costs,Financials,2025,1.2741228070175439,76
 specificity,Inflation and costs,Health Care,2019,1.567251461988304,57
-specificity,Inflation and costs,Health Care,2020,1.593939393939394,55
-specificity,Inflation and costs,Health Care,2021,1.471264367816092,58
-specificity,Inflation and costs,Health Care,2022,1.5649717514124293,59
+specificity,Inflation and costs,Health Care,2020,1.5919540229885056,58
+specificity,Inflation and costs,Health Care,2021,1.4655172413793103,58
+specificity,Inflation and costs,Health Care,2022,1.5847457627118644,59
 specificity,Inflation and costs,Health Care,2023,1.5197740112994351,59
 specificity,Inflation and costs,Health Care,2024,1.5611111111111111,60
 specificity,Inflation and costs,Health Care,2025,1.475,60
-specificity,Inflation and costs,Industrials,2019,1.5315315315315314,74
-specificity,Inflation and costs,Industrials,2020,1.5222222222222224,75
-specificity,Inflation and costs,Industrials,2021,1.6047008547008548,78
+specificity,Inflation and costs,Industrials,2019,1.513157894736842,76
+specificity,Inflation and costs,Industrials,2020,1.5384615384615385,78
+specificity,Inflation and costs,Industrials,2021,1.623931623931624,78
 specificity,Inflation and costs,Industrials,2022,1.6880341880341878,78
 specificity,Inflation and costs,Industrials,2023,1.609704641350211,79
-specificity,Inflation and costs,Industrials,2024,1.5907172995780592,79
-specificity,Inflation and costs,Industrials,2025,1.6111111111111112,78
-specificity,Inflation and costs,Information Technology,2019,1.3671497584541061,69
-specificity,Inflation and costs,Information Technology,2020,1.4047619047619047,70
-specificity,Inflation and costs,Information Technology,2021,1.4236111111111112,72
-specificity,Inflation and costs,Information Technology,2022,1.3858447488584476,73
+specificity,Inflation and costs,Industrials,2024,1.5925925925925926,81
+specificity,Inflation and costs,Industrials,2025,1.6111111111111112,81
+specificity,Inflation and costs,Information Technology,2019,1.369047619047619,70
+specificity,Inflation and costs,Information Technology,2020,1.3981481481481481,72
+specificity,Inflation and costs,Information Technology,2021,1.4375,72
+specificity,Inflation and costs,Information Technology,2022,1.3835616438356164,73
 specificity,Inflation and costs,Information Technology,2023,1.3721461187214612,73
-specificity,Inflation and costs,Information Technology,2024,1.3263888888888888,72
-specificity,Inflation and costs,Information Technology,2025,1.3933333333333333,75
+specificity,Inflation and costs,Information Technology,2024,1.3287671232876712,73
+specificity,Inflation and costs,Information Technology,2025,1.4088888888888889,75
 specificity,Inflation and costs,Materials,2019,1.7348484848484846,22
-specificity,Inflation and costs,Materials,2020,1.7460317460317458,21
-specificity,Inflation and costs,Materials,2021,1.8333333333333335,22
+specificity,Inflation and costs,Materials,2020,1.7575757575757576,22
+specificity,Inflation and costs,Materials,2021,1.803030303030303,22
 specificity,Inflation and costs,Materials,2022,1.878787878787879,22
 specificity,Inflation and costs,Materials,2023,1.8695652173913044,23
 specificity,Inflation and costs,Materials,2024,1.9027777777777777,24
@@ -392,7 +392,7 @@ discussed,Inflation and costs,Communication Services,2023,1.0,17
 discussed,Inflation and costs,Communication Services,2024,0.9444444444444444,18
 discussed,Inflation and costs,Communication Services,2025,1.0,19
 discussed,Inflation and costs,Consumer Discretionary,2019,1.0,45
-discussed,Inflation and costs,Consumer Discretionary,2020,1.0,46
+discussed,Inflation and costs,Consumer Discretionary,2020,1.0,47
 discussed,Inflation and costs,Consumer Discretionary,2021,1.0,47
 discussed,Inflation and costs,Consumer Discretionary,2022,1.0,47
 discussed,Inflation and costs,Consumer Discretionary,2023,1.0,47
@@ -420,28 +420,28 @@ discussed,Inflation and costs,Financials,2023,1.0,75
 discussed,Inflation and costs,Financials,2024,1.0,76
 discussed,Inflation and costs,Financials,2025,1.0,76
 discussed,Inflation and costs,Health Care,2019,1.0,57
-discussed,Inflation and costs,Health Care,2020,1.0,55
+discussed,Inflation and costs,Health Care,2020,1.0,58
 discussed,Inflation and costs,Health Care,2021,1.0,58
 discussed,Inflation and costs,Health Care,2022,1.0,59
 discussed,Inflation and costs,Health Care,2023,1.0,59
 discussed,Inflation and costs,Health Care,2024,1.0,60
 discussed,Inflation and costs,Health Care,2025,1.0,60
-discussed,Inflation and costs,Industrials,2019,1.0,74
-discussed,Inflation and costs,Industrials,2020,1.0,75
+discussed,Inflation and costs,Industrials,2019,1.0,76
+discussed,Inflation and costs,Industrials,2020,1.0,78
 discussed,Inflation and costs,Industrials,2021,1.0,78
 discussed,Inflation and costs,Industrials,2022,1.0,78
 discussed,Inflation and costs,Industrials,2023,1.0,79
-discussed,Inflation and costs,Industrials,2024,1.0,79
-discussed,Inflation and costs,Industrials,2025,1.0,78
-discussed,Inflation and costs,Information Technology,2019,1.0,69
-discussed,Inflation and costs,Information Technology,2020,1.0,70
+discussed,Inflation and costs,Industrials,2024,1.0,81
+discussed,Inflation and costs,Industrials,2025,1.0,81
+discussed,Inflation and costs,Information Technology,2019,1.0,70
+discussed,Inflation and costs,Information Technology,2020,1.0,72
 discussed,Inflation and costs,Information Technology,2021,1.0,72
 discussed,Inflation and costs,Information Technology,2022,1.0,73
 discussed,Inflation and costs,Information Technology,2023,1.0,73
-discussed,Inflation and costs,Information Technology,2024,1.0,72
+discussed,Inflation and costs,Information Technology,2024,1.0,73
 discussed,Inflation and costs,Information Technology,2025,1.0,75
 discussed,Inflation and costs,Materials,2019,1.0,22
-discussed,Inflation and costs,Materials,2020,1.0,21
+discussed,Inflation and costs,Materials,2020,1.0,22
 discussed,Inflation and costs,Materials,2021,1.0,22
 discussed,Inflation and costs,Materials,2022,1.0,22
 discussed,Inflation and costs,Materials,2023,1.0,23

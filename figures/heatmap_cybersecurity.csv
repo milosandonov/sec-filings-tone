@@ -7,7 +7,7 @@ polarity,Cybersecurity,Communication Services,2023,-1.1372549019607843,17
 polarity,Cybersecurity,Communication Services,2024,-1.1481481481481481,18
 polarity,Cybersecurity,Communication Services,2025,-1.105263157894737,19
 polarity,Cybersecurity,Consumer Discretionary,2019,-1.0222222222222221,45
-polarity,Cybersecurity,Consumer Discretionary,2020,-1.036231884057971,46
+polarity,Cybersecurity,Consumer Discretionary,2020,-1.0354609929078014,47
 polarity,Cybersecurity,Consumer Discretionary,2021,-1.0,47
 polarity,Cybersecurity,Consumer Discretionary,2022,-1.0460992907801419,47
 polarity,Cybersecurity,Consumer Discretionary,2023,-1.0354609929078014,47
@@ -35,28 +35,28 @@ polarity,Cybersecurity,Financials,2023,-0.9888888888888889,75
 polarity,Cybersecurity,Financials,2024,-0.9956140350877194,76
 polarity,Cybersecurity,Financials,2025,-1.0219298245614035,76
 polarity,Cybersecurity,Health Care,2019,-1.0058479532163742,57
-polarity,Cybersecurity,Health Care,2020,-1.0151515151515151,55
-polarity,Cybersecurity,Health Care,2021,-0.9971264367816093,58
+polarity,Cybersecurity,Health Care,2020,-1.014367816091954,58
+polarity,Cybersecurity,Health Care,2021,-0.9885057471264368,58
 polarity,Cybersecurity,Health Care,2022,-1.0056497175141244,59
 polarity,Cybersecurity,Health Care,2023,-1.0225988700564972,59
 polarity,Cybersecurity,Health Care,2024,-1.0333333333333334,60
 polarity,Cybersecurity,Health Care,2025,-1.0444444444444445,60
-polarity,Cybersecurity,Industrials,2019,-0.990990990990991,74
-polarity,Cybersecurity,Industrials,2020,-0.98,75
+polarity,Cybersecurity,Industrials,2019,-0.9912280701754386,76
+polarity,Cybersecurity,Industrials,2020,-0.985042735042735,78
 polarity,Cybersecurity,Industrials,2021,-0.9978632478632478,78
 polarity,Cybersecurity,Industrials,2022,-0.9978632478632478,78
 polarity,Cybersecurity,Industrials,2023,-1.0021097046413503,79
-polarity,Cybersecurity,Industrials,2024,-1.0,79
-polarity,Cybersecurity,Industrials,2025,-1.0320512820512822,78
-polarity,Cybersecurity,Information Technology,2019,-0.9710144927536232,69
-polarity,Cybersecurity,Information Technology,2020,-1.0047619047619047,70
+polarity,Cybersecurity,Industrials,2024,-1.0,81
+polarity,Cybersecurity,Industrials,2025,-1.0308641975308641,81
+polarity,Cybersecurity,Information Technology,2019,-0.9714285714285714,70
+polarity,Cybersecurity,Information Technology,2020,-1.0046296296296295,72
 polarity,Cybersecurity,Information Technology,2021,-0.9421296296296295,72
 polarity,Cybersecurity,Information Technology,2022,-0.995433789954338,73
 polarity,Cybersecurity,Information Technology,2023,-1.0342465753424657,73
-polarity,Cybersecurity,Information Technology,2024,-1.0185185185185184,72
+polarity,Cybersecurity,Information Technology,2024,-1.0182648401826484,73
 polarity,Cybersecurity,Information Technology,2025,-1.0444444444444443,75
 polarity,Cybersecurity,Materials,2019,-0.9924242424242423,22
-polarity,Cybersecurity,Materials,2020,-1.0,21
+polarity,Cybersecurity,Materials,2020,-1.0,22
 polarity,Cybersecurity,Materials,2021,-0.9545454545454546,22
 polarity,Cybersecurity,Materials,2022,-0.9772727272727273,22
 polarity,Cybersecurity,Materials,2023,-0.963768115942029,23
@@ -84,9 +84,9 @@ magnitude,Cybersecurity,Communication Services,2023,1.0392156862745099,17
 magnitude,Cybersecurity,Communication Services,2024,1.0185185185185184,18
 magnitude,Cybersecurity,Communication Services,2025,1.2280701754385965,19
 magnitude,Cybersecurity,Consumer Discretionary,2019,1.174074074074074,45
-magnitude,Cybersecurity,Consumer Discretionary,2020,1.2065217391304348,46
+magnitude,Cybersecurity,Consumer Discretionary,2020,1.2092198581560285,47
 magnitude,Cybersecurity,Consumer Discretionary,2021,1.0638297872340425,47
-magnitude,Cybersecurity,Consumer Discretionary,2022,1.2659574468085106,47
+magnitude,Cybersecurity,Consumer Discretionary,2022,1.2588652482269502,47
 magnitude,Cybersecurity,Consumer Discretionary,2023,1.173758865248227,47
 magnitude,Cybersecurity,Consumer Discretionary,2024,1.2765957446808511,47
 magnitude,Cybersecurity,Consumer Discretionary,2025,1.2092198581560285,47
@@ -112,29 +112,29 @@ magnitude,Cybersecurity,Financials,2023,1.2,75
 magnitude,Cybersecurity,Financials,2024,1.1425438596491226,76
 magnitude,Cybersecurity,Financials,2025,1.1206140350877194,76
 magnitude,Cybersecurity,Health Care,2019,0.9239766081871345,57
-magnitude,Cybersecurity,Health Care,2020,0.9969696969696971,55
-magnitude,Cybersecurity,Health Care,2021,1.0057471264367814,58
-magnitude,Cybersecurity,Health Care,2022,0.9152542372881356,59
+magnitude,Cybersecurity,Health Care,2020,0.9741379310344828,58
+magnitude,Cybersecurity,Health Care,2021,1.028735632183908,58
+magnitude,Cybersecurity,Health Care,2022,0.9067796610169492,59
 magnitude,Cybersecurity,Health Care,2023,1.1355932203389831,59
 magnitude,Cybersecurity,Health Care,2024,1.0833333333333333,60
 magnitude,Cybersecurity,Health Care,2025,1.1861111111111111,60
-magnitude,Cybersecurity,Industrials,2019,0.9391891891891891,74
-magnitude,Cybersecurity,Industrials,2020,0.8866666666666667,75
-magnitude,Cybersecurity,Industrials,2021,1.0512820512820513,78
+magnitude,Cybersecurity,Industrials,2019,0.9451754385964911,76
+magnitude,Cybersecurity,Industrials,2020,0.8782051282051282,78
+magnitude,Cybersecurity,Industrials,2021,1.0384615384615385,78
 magnitude,Cybersecurity,Industrials,2022,0.9893162393162394,78
 magnitude,Cybersecurity,Industrials,2023,1.021097046413502,79
-magnitude,Cybersecurity,Industrials,2024,1.0696202531645569,79
-magnitude,Cybersecurity,Industrials,2025,1.0747863247863247,78
-magnitude,Cybersecurity,Information Technology,2019,1.0458937198067633,69
-magnitude,Cybersecurity,Information Technology,2020,1.1619047619047618,70
-magnitude,Cybersecurity,Information Technology,2021,1.0949074074074074,72
-magnitude,Cybersecurity,Information Technology,2022,1.0981735159817352,73
+magnitude,Cybersecurity,Industrials,2024,1.0761316872427984,81
+magnitude,Cybersecurity,Industrials,2025,1.0617283950617284,81
+magnitude,Cybersecurity,Information Technology,2019,1.05,70
+magnitude,Cybersecurity,Information Technology,2020,1.1504629629629628,72
+magnitude,Cybersecurity,Information Technology,2021,1.0879629629629628,72
+magnitude,Cybersecurity,Information Technology,2022,1.093607305936073,73
 magnitude,Cybersecurity,Information Technology,2023,1.143835616438356,73
-magnitude,Cybersecurity,Information Technology,2024,1.1689814814814816,72
-magnitude,Cybersecurity,Information Technology,2025,1.131111111111111,75
+magnitude,Cybersecurity,Information Technology,2024,1.1666666666666667,73
+magnitude,Cybersecurity,Information Technology,2025,1.1355555555555557,75
 magnitude,Cybersecurity,Materials,2019,0.7045454545454546,22
-magnitude,Cybersecurity,Materials,2020,0.9047619047619048,21
-magnitude,Cybersecurity,Materials,2021,1.0606060606060606,22
+magnitude,Cybersecurity,Materials,2020,0.9090909090909091,22
+magnitude,Cybersecurity,Materials,2021,1.0454545454545454,22
 magnitude,Cybersecurity,Materials,2022,0.893939393939394,22
 magnitude,Cybersecurity,Materials,2023,1.0797101449275361,23
 magnitude,Cybersecurity,Materials,2024,0.8819444444444445,24
@@ -161,9 +161,9 @@ realization,Cybersecurity,Communication Services,2023,0.9607843137254901,17
 realization,Cybersecurity,Communication Services,2024,1.1111111111111112,18
 realization,Cybersecurity,Communication Services,2025,1.1228070175438596,19
 realization,Cybersecurity,Consumer Discretionary,2019,0.4925925925925925,45
-realization,Cybersecurity,Consumer Discretionary,2020,0.572463768115942,46
-realization,Cybersecurity,Consumer Discretionary,2021,0.5957446808510638,47
-realization,Cybersecurity,Consumer Discretionary,2022,0.7659574468085106,47
+realization,Cybersecurity,Consumer Discretionary,2020,0.5602836879432623,47
+realization,Cybersecurity,Consumer Discretionary,2021,0.6028368794326241,47
+realization,Cybersecurity,Consumer Discretionary,2022,0.7588652482269503,47
 realization,Cybersecurity,Consumer Discretionary,2023,0.7659574468085106,47
 realization,Cybersecurity,Consumer Discretionary,2024,0.8120567375886524,47
 realization,Cybersecurity,Consumer Discretionary,2025,0.8687943262411348,47
@@ -189,28 +189,28 @@ realization,Cybersecurity,Financials,2023,0.9733333333333334,75
 realization,Cybersecurity,Financials,2024,1.0087719298245612,76
 realization,Cybersecurity,Financials,2025,1.0899122807017543,76
 realization,Cybersecurity,Health Care,2019,0.5409356725146198,57
-realization,Cybersecurity,Health Care,2020,0.6878787878787879,55
+realization,Cybersecurity,Health Care,2020,0.6522988505747127,58
 realization,Cybersecurity,Health Care,2021,0.6810344827586207,58
-realization,Cybersecurity,Health Care,2022,0.6412429378531074,59
+realization,Cybersecurity,Health Care,2022,0.6666666666666666,59
 realization,Cybersecurity,Health Care,2023,0.7711864406779662,59
 realization,Cybersecurity,Health Care,2024,0.8138888888888889,60
 realization,Cybersecurity,Health Care,2025,0.8194444444444444,60
-realization,Cybersecurity,Industrials,2019,0.5900900900900901,74
-realization,Cybersecurity,Industrials,2020,0.6022222222222222,75
-realization,Cybersecurity,Industrials,2021,0.8034188034188033,78
+realization,Cybersecurity,Industrials,2019,0.5964912280701755,76
+realization,Cybersecurity,Industrials,2020,0.6068376068376068,78
+realization,Cybersecurity,Industrials,2021,0.7991452991452992,78
 realization,Cybersecurity,Industrials,2022,0.8846153846153846,78
 realization,Cybersecurity,Industrials,2023,0.9071729957805907,79
-realization,Cybersecurity,Industrials,2024,0.9219409282700421,79
-realization,Cybersecurity,Industrials,2025,0.873931623931624,78
-realization,Cybersecurity,Information Technology,2019,0.6376811594202898,69
-realization,Cybersecurity,Information Technology,2020,0.738095238095238,70
+realization,Cybersecurity,Industrials,2024,0.9074074074074074,81
+realization,Cybersecurity,Industrials,2025,0.8641975308641975,81
+realization,Cybersecurity,Information Technology,2019,0.6428571428571429,70
+realization,Cybersecurity,Information Technology,2020,0.7361111111111112,72
 realization,Cybersecurity,Information Technology,2021,0.9004629629629629,72
-realization,Cybersecurity,Information Technology,2022,0.8721461187214612,73
+realization,Cybersecurity,Information Technology,2022,0.8812785388127853,73
 realization,Cybersecurity,Information Technology,2023,1.0068493150684932,73
-realization,Cybersecurity,Information Technology,2024,1.0162037037037037,72
-realization,Cybersecurity,Information Technology,2025,1.0577777777777777,75
+realization,Cybersecurity,Information Technology,2024,1.0114155251141552,73
+realization,Cybersecurity,Information Technology,2025,1.0622222222222222,75
 realization,Cybersecurity,Materials,2019,0.356060606060606,22
-realization,Cybersecurity,Materials,2020,0.31746031746031744,21
+realization,Cybersecurity,Materials,2020,0.3333333333333333,22
 realization,Cybersecurity,Materials,2021,0.6363636363636364,22
 realization,Cybersecurity,Materials,2022,0.4848484848484848,22
 realization,Cybersecurity,Materials,2023,0.6159420289855072,23
@@ -238,7 +238,7 @@ uncertainty,Cybersecurity,Communication Services,2023,1.9215686274509802,17
 uncertainty,Cybersecurity,Communication Services,2024,1.962962962962963,18
 uncertainty,Cybersecurity,Communication Services,2025,1.9824561403508771,19
 uncertainty,Cybersecurity,Consumer Discretionary,2019,2.007407407407407,45
-uncertainty,Cybersecurity,Consumer Discretionary,2020,2.0144927536231885,46
+uncertainty,Cybersecurity,Consumer Discretionary,2020,2.014184397163121,47
 uncertainty,Cybersecurity,Consumer Discretionary,2021,2.00709219858156,47
 uncertainty,Cybersecurity,Consumer Discretionary,2022,1.9964539007092197,47
 uncertainty,Cybersecurity,Consumer Discretionary,2023,1.9929078014184398,47
@@ -266,28 +266,28 @@ uncertainty,Cybersecurity,Financials,2023,1.9133333333333333,75
 uncertainty,Cybersecurity,Financials,2024,1.9671052631578947,76
 uncertainty,Cybersecurity,Financials,2025,1.9232456140350875,76
 uncertainty,Cybersecurity,Health Care,2019,1.97953216374269,57
-uncertainty,Cybersecurity,Health Care,2020,1.9636363636363636,55
-uncertainty,Cybersecurity,Health Care,2021,1.9655172413793103,58
+uncertainty,Cybersecurity,Health Care,2020,1.9655172413793103,58
+uncertainty,Cybersecurity,Health Care,2021,1.9482758620689655,58
 uncertainty,Cybersecurity,Health Care,2022,2.016949152542373,59
 uncertainty,Cybersecurity,Health Care,2023,2.016949152542373,59
 uncertainty,Cybersecurity,Health Care,2024,2.0055555555555555,60
 uncertainty,Cybersecurity,Health Care,2025,2.0055555555555555,60
-uncertainty,Cybersecurity,Industrials,2019,2.0135135135135136,74
-uncertainty,Cybersecurity,Industrials,2020,2.008888888888889,75
+uncertainty,Cybersecurity,Industrials,2019,2.017543859649123,76
+uncertainty,Cybersecurity,Industrials,2020,2.0085470085470085,78
 uncertainty,Cybersecurity,Industrials,2021,2.0384615384615383,78
 uncertainty,Cybersecurity,Industrials,2022,2.032051282051282,78
 uncertainty,Cybersecurity,Industrials,2023,1.9725738396624475,79
-uncertainty,Cybersecurity,Industrials,2024,1.9388185654008439,79
-uncertainty,Cybersecurity,Industrials,2025,2.0042735042735043,78
-uncertainty,Cybersecurity,Information Technology,2019,2.0,69
-uncertainty,Cybersecurity,Information Technology,2020,1.995238095238095,70
-uncertainty,Cybersecurity,Information Technology,2021,1.9351851851851853,72
+uncertainty,Cybersecurity,Industrials,2024,1.9444444444444444,81
+uncertainty,Cybersecurity,Industrials,2025,2.004115226337449,81
+uncertainty,Cybersecurity,Information Technology,2019,2.0047619047619047,70
+uncertainty,Cybersecurity,Information Technology,2020,1.990740740740741,72
+uncertainty,Cybersecurity,Information Technology,2021,1.9259259259259258,72
 uncertainty,Cybersecurity,Information Technology,2022,1.9885844748858446,73
 uncertainty,Cybersecurity,Information Technology,2023,2.006849315068493,73
-uncertainty,Cybersecurity,Information Technology,2024,2.009259259259259,72
+uncertainty,Cybersecurity,Information Technology,2024,2.009132420091324,73
 uncertainty,Cybersecurity,Information Technology,2025,2.0044444444444447,75
 uncertainty,Cybersecurity,Materials,2019,2.0,22
-uncertainty,Cybersecurity,Materials,2020,1.984126984126984,21
+uncertainty,Cybersecurity,Materials,2020,1.9848484848484846,22
 uncertainty,Cybersecurity,Materials,2021,2.0,22
 uncertainty,Cybersecurity,Materials,2022,1.9393939393939392,22
 uncertainty,Cybersecurity,Materials,2023,1.8985507246376812,23
@@ -315,8 +315,8 @@ specificity,Cybersecurity,Communication Services,2023,1.7058823529411764,17
 specificity,Cybersecurity,Communication Services,2024,1.5925925925925926,18
 specificity,Cybersecurity,Communication Services,2025,1.6140350877192984,19
 specificity,Cybersecurity,Consumer Discretionary,2019,1.5481481481481483,45
-specificity,Cybersecurity,Consumer Discretionary,2020,1.6195652173913044,46
-specificity,Cybersecurity,Consumer Discretionary,2021,1.5851063829787233,47
+specificity,Cybersecurity,Consumer Discretionary,2020,1.6205673758865249,47
+specificity,Cybersecurity,Consumer Discretionary,2021,1.5921985815602835,47
 specificity,Cybersecurity,Consumer Discretionary,2022,1.6595744680851063,47
 specificity,Cybersecurity,Consumer Discretionary,2023,1.6382978723404256,47
 specificity,Cybersecurity,Consumer Discretionary,2024,1.6985815602836878,47
@@ -343,28 +343,28 @@ specificity,Cybersecurity,Financials,2023,1.722222222222222,75
 specificity,Cybersecurity,Financials,2024,1.6864035087719298,76
 specificity,Cybersecurity,Financials,2025,1.7171052631578947,76
 specificity,Cybersecurity,Health Care,2019,1.5350877192982457,57
-specificity,Cybersecurity,Health Care,2020,1.6696969696969697,55
-specificity,Cybersecurity,Health Care,2021,1.603448275862069,58
-specificity,Cybersecurity,Health Care,2022,1.6497175141242937,59
+specificity,Cybersecurity,Health Care,2020,1.6522988505747125,58
+specificity,Cybersecurity,Health Care,2021,1.6149425287356323,58
+specificity,Cybersecurity,Health Care,2022,1.6666666666666665,59
 specificity,Cybersecurity,Health Care,2023,1.6694915254237288,59
 specificity,Cybersecurity,Health Care,2024,1.6777777777777778,60
 specificity,Cybersecurity,Health Care,2025,1.6333333333333333,60
-specificity,Cybersecurity,Industrials,2019,1.400900900900901,74
-specificity,Cybersecurity,Industrials,2020,1.531111111111111,75
-specificity,Cybersecurity,Industrials,2021,1.5555555555555556,78
+specificity,Cybersecurity,Industrials,2019,1.405701754385965,76
+specificity,Cybersecurity,Industrials,2020,1.5320512820512822,78
+specificity,Cybersecurity,Industrials,2021,1.5341880341880343,78
 specificity,Cybersecurity,Industrials,2022,1.5192307692307692,78
 specificity,Cybersecurity,Industrials,2023,1.5548523206751055,79
-specificity,Cybersecurity,Industrials,2024,1.518987341772152,79
-specificity,Cybersecurity,Industrials,2025,1.5598290598290598,78
-specificity,Cybersecurity,Information Technology,2019,1.5628019323671496,69
-specificity,Cybersecurity,Information Technology,2020,1.6380952380952383,70
-specificity,Cybersecurity,Information Technology,2021,1.6203703703703705,72
-specificity,Cybersecurity,Information Technology,2022,1.7123287671232876,73
+specificity,Cybersecurity,Industrials,2024,1.51440329218107,81
+specificity,Cybersecurity,Industrials,2025,1.5617283950617284,81
+specificity,Cybersecurity,Information Technology,2019,1.5642857142857143,70
+specificity,Cybersecurity,Information Technology,2020,1.6342592592592593,72
+specificity,Cybersecurity,Information Technology,2021,1.6087962962962963,72
+specificity,Cybersecurity,Information Technology,2022,1.7077625570776256,73
 specificity,Cybersecurity,Information Technology,2023,1.6598173515981736,73
-specificity,Cybersecurity,Information Technology,2024,1.6828703703703705,72
+specificity,Cybersecurity,Information Technology,2024,1.678082191780822,73
 specificity,Cybersecurity,Information Technology,2025,1.6377777777777778,75
 specificity,Cybersecurity,Materials,2019,1.2575757575757576,22
-specificity,Cybersecurity,Materials,2020,1.3968253968253967,21
+specificity,Cybersecurity,Materials,2020,1.4090909090909092,22
 specificity,Cybersecurity,Materials,2021,1.5681818181818181,22
 specificity,Cybersecurity,Materials,2022,1.356060606060606,22
 specificity,Cybersecurity,Materials,2023,1.492753623188406,23
@@ -392,7 +392,7 @@ discussed,Cybersecurity,Communication Services,2023,1.0,17
 discussed,Cybersecurity,Communication Services,2024,1.0,18
 discussed,Cybersecurity,Communication Services,2025,1.0,19
 discussed,Cybersecurity,Consumer Discretionary,2019,1.0,45
-discussed,Cybersecurity,Consumer Discretionary,2020,1.0,46
+discussed,Cybersecurity,Consumer Discretionary,2020,1.0,47
 discussed,Cybersecurity,Consumer Discretionary,2021,1.0,47
 discussed,Cybersecurity,Consumer Discretionary,2022,1.0,47
 discussed,Cybersecurity,Consumer Discretionary,2023,1.0,47
@@ -420,28 +420,28 @@ discussed,Cybersecurity,Financials,2023,1.0,75
 discussed,Cybersecurity,Financials,2024,1.0,76
 discussed,Cybersecurity,Financials,2025,1.0,76
 discussed,Cybersecurity,Health Care,2019,1.0,57
-discussed,Cybersecurity,Health Care,2020,1.0,55
+discussed,Cybersecurity,Health Care,2020,1.0,58
 discussed,Cybersecurity,Health Care,2021,1.0,58
 discussed,Cybersecurity,Health Care,2022,1.0,59
 discussed,Cybersecurity,Health Care,2023,1.0,59
 discussed,Cybersecurity,Health Care,2024,1.0,60
 discussed,Cybersecurity,Health Care,2025,1.0,60
-discussed,Cybersecurity,Industrials,2019,1.0,74
-discussed,Cybersecurity,Industrials,2020,1.0,75
+discussed,Cybersecurity,Industrials,2019,1.0,76
+discussed,Cybersecurity,Industrials,2020,1.0,78
 discussed,Cybersecurity,Industrials,2021,1.0,78
 discussed,Cybersecurity,Industrials,2022,1.0,78
 discussed,Cybersecurity,Industrials,2023,1.0,79
-discussed,Cybersecurity,Industrials,2024,1.0,79
-discussed,Cybersecurity,Industrials,2025,1.0,78
-discussed,Cybersecurity,Information Technology,2019,1.0,69
-discussed,Cybersecurity,Information Technology,2020,1.0,70
+discussed,Cybersecurity,Industrials,2024,1.0,81
+discussed,Cybersecurity,Industrials,2025,1.0,81
+discussed,Cybersecurity,Information Technology,2019,1.0,70
+discussed,Cybersecurity,Information Technology,2020,1.0,72
 discussed,Cybersecurity,Information Technology,2021,1.0,72
 discussed,Cybersecurity,Information Technology,2022,1.0,73
 discussed,Cybersecurity,Information Technology,2023,1.0,73
-discussed,Cybersecurity,Information Technology,2024,1.0,72
+discussed,Cybersecurity,Information Technology,2024,1.0,73
 discussed,Cybersecurity,Information Technology,2025,1.0,75
 discussed,Cybersecurity,Materials,2019,1.0,22
-discussed,Cybersecurity,Materials,2020,1.0,21
+discussed,Cybersecurity,Materials,2020,1.0,22
 discussed,Cybersecurity,Materials,2021,1.0,22
 discussed,Cybersecurity,Materials,2022,1.0,22
 discussed,Cybersecurity,Materials,2023,1.0,23

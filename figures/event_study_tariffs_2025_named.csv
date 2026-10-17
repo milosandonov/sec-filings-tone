@@ -5,29 +5,29 @@ Tariffs (2025),True,-5,realization,68,-0.0294117647058823,-0.1838235294117647,0.
 Tariffs (2025),True,-5,uncertainty,68,0.0294117647058823,-0.0441176470588235,0.1029411764705882,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,-5,specificity,68,-0.0833333333333333,-0.2328431372549019,0.0735294117647058,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,-5,discussed,79,0.0126582278481012,-0.0379746835443038,0.0632911392405063,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,polarity,145,0.0172413793103448,-0.0183908045977011,0.0540229885057471,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,magnitude,145,0.0160919540229885,-0.0885632183908046,0.1253160919540228,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,realization,145,0.0942528735632184,-0.0241666666666666,0.2092241379310343,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,uncertainty,145,-0.0344827586206896,-0.1000287356321839,0.028735632183908,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,specificity,145,0.1057471264367816,0.0206896551724137,0.1896839080459768,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-4,discussed,189,0.0317460317460317,-0.0107142857142857,0.074074074074074,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,polarity,141,0.0224586288416075,-0.0082742316784869,0.0543735224586288,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,magnitude,141,-0.0744680851063829,-0.1784869976359338,0.033126477541371,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,realization,141,-0.0035460992907801,-0.1075650118203309,0.1028368794326241,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,uncertainty,141,-0.0106382978723404,-0.0638297872340425,0.0413711583924349,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,specificity,141,0.0035460992907801,-0.0875,0.0969562647754135,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-3,discussed,191,-0.0104712041884816,-0.0523560209424083,0.031413612565445,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-2,polarity,151,0.0055187637969094,-0.0209988962472406,0.032008830022075,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-2,magnitude,151,-0.0706401766004415,-0.1556567328918322,0.0209988962472404,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-2,realization,151,-0.0187637969094922,-0.0993377483443708,0.0584988962472406,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-2,uncertainty,151,-0.0463576158940397,-0.0971578366445916,-0.0021799116997793,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-2,specificity,151,-0.0176600441501103,-0.097130242825607,0.0629139072847682,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,polarity,148,0.0168918918918918,-0.0168918918918918,0.0518299549549548,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,magnitude,148,0.009009009009009,-0.0968468468468468,0.1171171171171171,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,realization,148,0.1024774774774774,-0.0135416666666666,0.2207207207207207,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,uncertainty,148,-0.0304054054054054,-0.0945945945945945,0.0337837837837837,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,specificity,148,0.0968468468468468,0.0123873873873873,0.1824887387387384,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-4,discussed,192,0.03125,-0.0104166666666666,0.0729166666666666,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,polarity,146,0.0216894977168949,-0.0079908675799086,0.0525114155251141,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,magnitude,146,-0.0684931506849315,-0.1678082191780822,0.0342465753424657,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,realization,146,-0.0148401826484018,-0.11875,0.0867579908675798,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,uncertainty,146,-0.0148401826484018,-0.0650684931506849,0.0342751141552509,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,specificity,146,-6.083413833562501e-18,-0.0958904109589041,0.0878995433789954,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-3,discussed,197,-0.0050761421319796,-0.0458121827411167,0.0406091370558375,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-2,polarity,151,-0.0044150110375275,-0.0331401766004415,0.0242825607064017,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-2,magnitude,151,-0.0496688741721854,-0.1390728476821192,0.0474613686534216,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-2,realization,151,-0.0044150110375275,-0.0850165562913907,0.0783664459161147,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-2,uncertainty,151,-0.0386313465783664,-0.0905353200883002,0.0088300220750551,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-2,specificity,151,-0.0033112582781456,-0.0849889624724061,0.079497792494481,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,-2,discussed,198,0.0101010101010101,-0.0252525252525252,0.0505050505050505,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-1,polarity,152,-0.0043859649122807,-0.0296052631578947,0.0219298245614035,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-1,magnitude,152,0.0515350877192982,-0.0427905701754386,0.1392543859649122,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-1,polarity,152,-0.0032894736842105,-0.0285087719298245,0.0230263157894736,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-1,magnitude,152,0.0537280701754385,-0.0416666666666666,0.140378289473684,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,-1,realization,152,-0.0361842105263157,-0.1052905701754386,0.0372807017543859,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-1,uncertainty,152,-0.0131578947368421,-0.050438596491228,0.0230263157894736,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,-1,specificity,152,0.0328947368421052,-0.0394736842105263,0.1041666666666666,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-1,uncertainty,152,-0.0142543859649122,-0.0515350877192982,0.0208607456140349,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,-1,specificity,152,0.0361842105263157,-0.0361842105263157,0.1063870614035086,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,-1,discussed,198,0.0,-0.0303030303030303,0.0303030303030303,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,0,polarity,159,0.0,0.0,0.0,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,0,magnitude,159,0.0,0.0,0.0,"Industrials, Consumer Discretionary, Information Technology"
@@ -35,18 +35,18 @@ Tariffs (2025),True,0,realization,159,0.0,0.0,0.0,"Industrials, Consumer Discret
 Tariffs (2025),True,0,uncertainty,159,0.0,0.0,0.0,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,0,specificity,159,0.0,0.0,0.0,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),True,0,discussed,200,0.0,0.0,0.0,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,polarity,155,-0.0172043010752688,-0.0548387096774193,0.0193817204301073,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,magnitude,155,0.2,0.0892473118279569,0.3129032258064516,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,realization,155,0.1580645161290322,0.0623387096774193,0.2569892473118279,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,uncertainty,155,0.0559139784946236,0.0010752688172043,0.1172043010752688,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,specificity,155,0.0978494623655914,0.0085752688172042,0.186021505376344,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,1,discussed,197,0.0862944162436548,0.0456852791878172,0.1319796954314721,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,polarity,84,-0.0595238095238095,-0.1130952380952381,-0.005902777777778,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,magnitude,84,0.246031746031746,0.0912698412698412,0.3909226190476188,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,realization,84,0.3432539682539682,0.1805059523809523,0.50203373015873,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,uncertainty,84,0.0039682539682539,-0.0833333333333333,0.0833333333333333,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,specificity,84,0.1686507936507936,0.0416170634920634,0.2916666666666667,"Industrials, Consumer Discretionary, Information Technology"
-Tariffs (2025),True,2,discussed,115,0.1913043478260869,0.1217391304347826,0.2695652173913043,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,polarity,157,-0.0169851380042462,-0.0541666666666666,0.0201698513800424,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,magnitude,157,0.1985138004246284,0.0955414012738853,0.3089437367303608,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,realization,157,0.1602972399150743,0.0668789808917197,0.2579883227176219,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,uncertainty,157,0.059447983014862,0.0052813163481953,0.1167993630573247,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,specificity,157,0.0912951167728237,0.0042197452229299,0.1889596602972399,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,1,discussed,200,0.09,0.05,0.135,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,polarity,87,-0.0613026819923371,-0.1130268199233716,-0.0095785440613026,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,magnitude,87,0.2452107279693486,0.1053639846743294,0.3888888888888888,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,realization,87,0.3275862068965517,0.1647509578544061,0.4789750957854403,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,uncertainty,87,0.0076628352490421,-0.0690134099616858,0.0805076628352488,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,specificity,87,0.1800766283524904,0.0651340996168582,0.3007662835249042,"Industrials, Consumer Discretionary, Information Technology"
+Tariffs (2025),True,2,discussed,118,0.1864406779661017,0.1186440677966101,0.2542372881355932,"Industrials, Consumer Discretionary, Information Technology"
 Tariffs (2025),False,-5,polarity,29,-0.0402298850574712,-0.2068965517241379,0.0689655172413793,Other companies
 Tariffs (2025),False,-5,magnitude,29,-0.0632183908045977,-0.2760057471264368,0.160919540229885,Other companies
 Tariffs (2025),False,-5,realization,29,0.0114942528735632,-0.1668103448275862,0.1724137931034483,Other companies
@@ -59,21 +59,21 @@ Tariffs (2025),False,-4,realization,124,0.0591397849462365,-0.0470766129032258,0
 Tariffs (2025),False,-4,uncertainty,124,-0.0174731182795698,-0.0846774193548387,0.0443884408602148,Other companies
 Tariffs (2025),False,-4,specificity,124,0.0295698924731182,-0.0766129032258064,0.1424731182795698,Other companies
 Tariffs (2025),False,-4,discussed,276,0.0398550724637681,-0.0108695652173913,0.0905797101449275,Other companies
-Tariffs (2025),False,-3,polarity,120,-0.0013888888888888,-0.075,0.0653124999999998,Other companies
-Tariffs (2025),False,-3,magnitude,120,0.0625,-0.0528125,0.1777777777777777,Other companies
-Tariffs (2025),False,-3,realization,120,0.0958333333333333,-0.0166666666666666,0.2111458333333331,Other companies
-Tariffs (2025),False,-3,uncertainty,120,-0.0180555555555555,-0.1013888888888889,0.0583333333333333,Other companies
-Tariffs (2025),False,-3,specificity,120,1.1102230246251566e-17,-0.1084027777777777,0.1014236111111109,Other companies
-Tariffs (2025),False,-3,discussed,274,-0.0182481751824817,-0.0656934306569343,0.0291970802919708,Other companies
+Tariffs (2025),False,-3,polarity,123,-0.0013550135501355,-0.0691395663956639,0.065040650406504,Other companies
+Tariffs (2025),False,-3,magnitude,123,0.065040650406504,-0.0474254742547425,0.1816056910569103,Other companies
+Tariffs (2025),False,-3,realization,123,0.0975609756097561,-0.010840108401084,0.2073170731707317,Other companies
+Tariffs (2025),False,-3,uncertainty,123,-0.0094850948509485,-0.0907859078590785,0.0663956639566395,Other companies
+Tariffs (2025),False,-3,specificity,123,0.0121951219512195,-0.0907859078590785,0.1138550135501353,Other companies
+Tariffs (2025),False,-3,discussed,278,-0.0179856115107913,-0.0647482014388489,0.0287769784172661,Other companies
 Tariffs (2025),False,-2,polarity,133,0.0037593984962406,-0.0588972431077694,0.0538847117794486,Other companies
-Tariffs (2025),False,-2,magnitude,133,-0.037593984962406,-0.1466165413533834,0.075187969924812,Other companies
-Tariffs (2025),False,-2,realization,133,0.0037593984962406,-0.0927631578947368,0.100250626566416,Other companies
-Tariffs (2025),False,-2,uncertainty,133,-0.012531328320802,-0.0802318295739348,0.0551691729323306,Other companies
-Tariffs (2025),False,-2,specificity,133,-0.0112781954887218,-0.1115601503759398,0.0914786967418546,Other companies
+Tariffs (2025),False,-2,magnitude,133,-0.0338345864661654,-0.1453634085213032,0.0789473684210526,Other companies
+Tariffs (2025),False,-2,realization,133,8.347541538535011e-19,-0.0915100250626566,0.0914786967418546,Other companies
+Tariffs (2025),False,-2,uncertainty,133,-0.0200501253132832,-0.0890037593984962,0.0488721804511278,Other companies
+Tariffs (2025),False,-2,specificity,133,-0.0150375939849624,-0.11281328320802,0.0852130325814536,Other companies
 Tariffs (2025),False,-2,discussed,283,0.0141342756183745,-0.0247349823321554,0.0530918727915189,Other companies
 Tariffs (2025),False,-1,polarity,140,0.0166666666666666,-0.0226488095238095,0.0535714285714285,Other companies
-Tariffs (2025),False,-1,magnitude,140,0.0333333333333333,-0.0797619047619047,0.1428869047619046,Other companies
-Tariffs (2025),False,-1,realization,140,0.0119047619047619,-0.0607440476190476,0.0892857142857142,Other companies
+Tariffs (2025),False,-1,magnitude,140,0.0261904761904761,-0.0845535714285714,0.1357440476190474,Other companies
+Tariffs (2025),False,-1,realization,140,0.019047619047619,-0.0571428571428571,0.1000297619047617,Other companies
 Tariffs (2025),False,-1,uncertainty,140,-0.0309523809523809,-0.0880952380952381,0.0238095238095238,Other companies
 Tariffs (2025),False,-1,specificity,140,0.0154761904761904,-0.0809523809523809,0.1154761904761904,Other companies
 Tariffs (2025),False,-1,discussed,285,-0.0035087719298245,-0.031578947368421,0.0280701754385964,Other companies

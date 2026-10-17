@@ -20,7 +20,7 @@ kept, with its caveat.
   model isn't detectably better than free word counts on any dimension (closest: realization,
   +0.35 [−0.06, +0.76] in Spearman over a count of realization cues), with polarity impossible to judge.
 - **Stability and spread:** scored twice, **magnitude** misses the run-to-run bar fixed in advance
-  (kappa 0.78, bar 0.8), and polarity barely varies, with 86% of on-topic passages at −1.
+  (kappa 0.78, bar 0.8) but is kept by a dated decision, and polarity barely varies, with 86% of on-topic passages at −1.
 - **Events, the planned test:** against sectors the event didn't hit, only **2 of 11** expected
   changes are detected (rate hikes' magnitude and specificity, the second only because other sectors'
   specificity fell), the check for a break rather than a trend already under way passes only for the
@@ -37,7 +37,9 @@ kept, with its caveat.
   [−0.13, +0.12]; which rule is primary is the owner's decision), the AI-boom test is selected on
   retrieval rank and isn't interpretable as designed, and the scorer is told each filing's company
   and fiscal year while the baselines aren't, so the tests are free of labels but not of the model's
-  knowledge (a check with both masked is **pending**).
+  knowledge (masked, on 1,904 event-test passages, scores agree with the originals about as well as
+  a second run does and realization's changes hold, but COVID's rise in uncertainty falls from +0.21
+  to +0.02).
 - **Quarterly 10-Qs:** a follow-up on Financials' 10-Qs ($1.45) detected neither SVB nor the rate
   hikes in its planned before-after tests (0 of 5), because bank MD&A already sits at the top of the
   realization and specificity scales and the top 3 passages often miss the event text, though its
@@ -150,7 +152,7 @@ computation, not in the code): realization +0.35 [−0.06, +0.76], uncertainty a
 
   Every sector is within a few points of these. **Magnitude falls below the 0.8 run-to-run bar that
   Phase 6 fixed in advance**, by which it would be dropped (the semiconductor pilot had passed it);
-  the other four clear it. Polarity's 95% is helped by 86% of passages scoring −1; its kappa still
+  the other four clear it. Magnitude is kept by the owner's decision (2026-10-17, after the result): 0.78 is close to the bar, so the 0.8 rule was relaxed for it, and single-company magnitude changes are read with that noise in mind. Polarity's 95% is helped by 86% of passages scoring −1; its kappa still
   holds. For a single cell's year-to-year change, the scorer's own noise is 19% (polarity) to 46%
   (magnitude) of the variance; the rest is which passages are retrieved and real change (section 9).
 
@@ -275,8 +277,24 @@ How to read it:
 - **The scorer knows the company and the year.** Each request names them ("Filing: NVDA 10-K FY2023,
   Item 1A Risk Factors"; `sentiment.user_prompt`), so the model could score what it knows about
   that period rather than only what the passage says. The event tests are free of labels, not of the
-  model's knowledge. FinBERT and LM see only the text. A check with the company and year masked is
-  pending; no result yet.
+  model's knowledge. FinBERT and LM see only the text. **Checked 2026-10-17, after the results**
+  (`tone.py masked`, $0.27): 1,904 passages of the event tests' before and after cells (the 13
+  companies whose fiscal-year labels were being fixed left out) were scored again with the company
+  and year removed ("Filing: a 10-K, Item 1A Risk Factors"). Per passage, the masked scores agree
+  with the originals about as well as a second identical run does (weighted kappa 0.80–0.94, against
+  0.79–0.91 for the run-to-run check on the same topics; off-topic flag 94.9% the same, against
+  97.0%). Pooled over the events, the masked change where the event hit differs from the original
+  only for uncertainty (−0.06 [−0.12, −0.02]; realization +0.02 [−0.04, +0.08]). Most of that is
+  COVID: on the 28 sampled companies, uncertainty rose +0.21 [+0.06, +0.35] with the year named and
+  +0.02 [−0.14, +0.17] masked. The difference sits in the FY2019 "before" passages, which the model
+  scored as more certain when told they were from FY2019 (masked, +0.12 a passage; FY2020, +0.02).
+  SVB's uncertainty change also shrinks (−0.11 [−0.21, −0.01]), and AI polarity falls from +0.32 to
+  +0.22 n.s. (10 companies). Realization's results come from the text (COVID +0.25 → +0.18, tariffs
+  +0.37 → +0.36). Two limits: two thirds of the passages name a year, the company or COVID in their
+  own text, which masking the header can't hide (on the 623 that name none, agreement is similar,
+  kappa 0.73–0.93); and single events are small (10–56 companies), so only the pooled differences
+  are firm. The sample's companies are a subset, so its changes differ from the table above (COVID
+  uncertainty +0.21 here, +0.15 over all 464 companies).
 - **Robustness check, added 2026-10-17 after the results, both versions kept:** before FY2023, 53–59%
   of the passages the model called on topic for AI contain no AI word (limitations). Counting only
   passages that name AI (artificial intelligence, machine learning, "AI", generative and the like),
@@ -364,7 +382,8 @@ So the LLM's scores move where the baselines' don't, but on the planned test nei
 much. Two differences in what they see are part of the gap. The baselines score the whole passage
 and the LLM scores the topic, which is the design's point. And the LLM is told the company and
 fiscal year while the baselines see only the text, so some of its movement may come from what it
-knows about the period (section 3; a check with both masked is pending).
+knows about the period (section 3: with both masked, COVID's uncertainty rise mostly goes; the
+realization changes hold).
 
 ## 5. Does realization move more than polarity?
 
@@ -567,8 +586,9 @@ did what the rules ask: a named benchmark counts as concrete, and when it went, 
   passages were more often upbeat MD&A in FY2019 and mostly risk factors by FY2025. 10-Ks in 2025 describe more of their risks as things that have happened, with larger effects.
   The same model scored every year, so this is not a change of scorer, though it may partly be a
   general change in how 10-Ks are written rather than in the topics themselves. And each request
-  names the fiscal year, so the model's knowledge of the period may play a part (section 3; a masked
-  check is pending). This shared drift is why a before-after change where an event hit isn't enough
+  names the fiscal year, so the model's knowledge of the period may play a part (section 3: masking
+  it leaves realization's event changes intact, but not COVID's uncertainty; the trends here weren't
+  rechecked masked). This shared drift is why a before-after change where an event hit isn't enough
   on its own (section 3).
 - **Cybersecurity, checked by reading:** the share of passages scored realization 2 went from 21% to
   36%, as wording moved from "if any of these systems fail … we could suffer financial loss" to "we
@@ -711,8 +731,10 @@ Added 2026-10-17 after an external review: the first six points below.
   rather than search each section. Retrieval within MD&A is a priced option (about $1.30–1.55 for AI),
   not done.
 - **The scorer is told the company and fiscal year,** so the event tests are free of labels but not
-  of the model's knowledge of what happened when. The baselines see only the text. A check with both
-  masked is pending.
+  of the model's knowledge of what happened when. The baselines see only the text. Masking both
+  (1,904 event-test passages, $0.27; section 3) leaves realization's changes intact but removes most
+  of COVID's rise in uncertainty (+0.21 → +0.02), which came from FY2019 passages scored as calmer
+  when labeled FY2019.
 - **Only realization passes the label rule fixed in advance** (weighted kappa ≥ 0.6 on blind labels),
   and only on its point estimate: 0.67 [0.33, 0.88] on 20 items. One person labeled the gold set,
   with no second rater.

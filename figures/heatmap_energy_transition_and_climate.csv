@@ -7,7 +7,7 @@ polarity,Energy transition and climate,Communication Services,2023,-0.8974358974
 polarity,Energy transition and climate,Communication Services,2024,-0.9,15
 polarity,Energy transition and climate,Communication Services,2025,-0.8974358974358974,13
 polarity,Energy transition and climate,Consumer Discretionary,2019,-0.7675438596491229,38
-polarity,Energy transition and climate,Consumer Discretionary,2020,-0.8738738738738739,37
+polarity,Energy transition and climate,Consumer Discretionary,2020,-0.8771929824561404,38
 polarity,Energy transition and climate,Consumer Discretionary,2021,-0.9037037037037037,45
 polarity,Energy transition and climate,Consumer Discretionary,2022,-0.9777777777777777,45
 polarity,Energy transition and climate,Consumer Discretionary,2023,-0.9361702127659575,47
@@ -35,28 +35,28 @@ polarity,Energy transition and climate,Financials,2023,-0.9547619047619047,70
 polarity,Energy transition and climate,Financials,2024,-0.9366197183098591,71
 polarity,Energy transition and climate,Financials,2025,-0.9214285714285714,70
 polarity,Energy transition and climate,Health Care,2019,-0.8157894736842105,19
-polarity,Energy transition and climate,Health Care,2020,-0.9080459770114943,29
-polarity,Energy transition and climate,Health Care,2021,-0.9703703703703703,45
+polarity,Energy transition and climate,Health Care,2020,-0.9111111111111111,30
+polarity,Energy transition and climate,Health Care,2021,-0.9710144927536232,46
 polarity,Energy transition and climate,Health Care,2022,-0.9183006535947713,51
 polarity,Energy transition and climate,Health Care,2023,-0.925531914893617,47
 polarity,Energy transition and climate,Health Care,2024,-1.0,48
 polarity,Energy transition and climate,Health Care,2025,-0.9967948717948718,52
-polarity,Energy transition and climate,Industrials,2019,-0.8277777777777777,60
-polarity,Energy transition and climate,Industrials,2020,-0.7626262626262627,66
+polarity,Energy transition and climate,Industrials,2019,-0.825268817204301,62
+polarity,Energy transition and climate,Industrials,2020,-0.7810945273631841,67
 polarity,Energy transition and climate,Industrials,2021,-0.7824074074074074,72
-polarity,Energy transition and climate,Industrials,2022,-0.8088888888888889,75
+polarity,Energy transition and climate,Industrials,2022,-0.8063063063063063,74
 polarity,Energy transition and climate,Industrials,2023,-0.8696581196581196,78
-polarity,Energy transition and climate,Industrials,2024,-0.8375527426160339,79
-polarity,Energy transition and climate,Industrials,2025,-0.8203463203463203,77
+polarity,Energy transition and climate,Industrials,2024,-0.8415637860082306,81
+polarity,Energy transition and climate,Industrials,2025,-0.8270833333333334,80
 polarity,Energy transition and climate,Information Technology,2019,-0.9340277777777778,48
-polarity,Energy transition and climate,Information Technology,2020,-0.84,50
+polarity,Energy transition and climate,Information Technology,2020,-0.8461538461538461,52
 polarity,Energy transition and climate,Information Technology,2021,-0.9047619047619048,63
 polarity,Energy transition and climate,Information Technology,2022,-0.8980099502487562,67
 polarity,Energy transition and climate,Information Technology,2023,-0.9116161616161615,66
-polarity,Energy transition and climate,Information Technology,2024,-0.9413145539906103,71
+polarity,Energy transition and climate,Information Technology,2024,-0.9421296296296295,72
 polarity,Energy transition and climate,Information Technology,2025,-0.9624413145539905,71
 polarity,Energy transition and climate,Materials,2019,-0.9545454545454546,22
-polarity,Energy transition and climate,Materials,2020,-0.9047619047619048,21
+polarity,Energy transition and climate,Materials,2020,-0.9090909090909091,22
 polarity,Energy transition and climate,Materials,2021,-0.8787878787878788,22
 polarity,Energy transition and climate,Materials,2022,-0.7878787878787878,22
 polarity,Energy transition and climate,Materials,2023,-0.782608695652174,23
@@ -84,9 +84,9 @@ magnitude,Energy transition and climate,Communication Services,2023,0.7564102564
 magnitude,Energy transition and climate,Communication Services,2024,0.7777777777777778,15
 magnitude,Energy transition and climate,Communication Services,2025,0.6666666666666666,13
 magnitude,Energy transition and climate,Consumer Discretionary,2019,0.6754385964912281,38
-magnitude,Energy transition and climate,Consumer Discretionary,2020,0.7702702702702703,37
+magnitude,Energy transition and climate,Consumer Discretionary,2020,0.75,38
 magnitude,Energy transition and climate,Consumer Discretionary,2021,0.8037037037037037,45
-magnitude,Energy transition and climate,Consumer Discretionary,2022,0.9481481481481481,45
+magnitude,Energy transition and climate,Consumer Discretionary,2022,0.9592592592592593,45
 magnitude,Energy transition and climate,Consumer Discretionary,2023,1.127659574468085,47
 magnitude,Energy transition and climate,Consumer Discretionary,2024,1.0471014492753623,46
 magnitude,Energy transition and climate,Consumer Discretionary,2025,1.0,47
@@ -112,29 +112,29 @@ magnitude,Energy transition and climate,Financials,2023,0.9523809523809524,70
 magnitude,Energy transition and climate,Financials,2024,0.9507042253521126,71
 magnitude,Energy transition and climate,Financials,2025,0.9047619047619048,70
 magnitude,Energy transition and climate,Health Care,2019,0.6052631578947368,19
-magnitude,Energy transition and climate,Health Care,2020,0.6896551724137931,29
-magnitude,Energy transition and climate,Health Care,2021,0.6888888888888889,45
+magnitude,Energy transition and climate,Health Care,2020,0.6666666666666666,30
+magnitude,Energy transition and climate,Health Care,2021,0.6956521739130435,46
 magnitude,Energy transition and climate,Health Care,2022,0.7287581699346405,51
 magnitude,Energy transition and climate,Health Care,2023,0.875886524822695,47
 magnitude,Energy transition and climate,Health Care,2024,0.9444444444444445,48
 magnitude,Energy transition and climate,Health Care,2025,0.8269230769230769,52
-magnitude,Energy transition and climate,Industrials,2019,0.9722222222222222,60
-magnitude,Energy transition and climate,Industrials,2020,0.9646464646464648,66
-magnitude,Energy transition and climate,Industrials,2021,1.0439814814814816,72
-magnitude,Energy transition and climate,Industrials,2022,1.028888888888889,75
+magnitude,Energy transition and climate,Industrials,2019,0.9623655913978494,62
+magnitude,Energy transition and climate,Industrials,2020,0.9751243781094526,67
+magnitude,Energy transition and climate,Industrials,2021,1.0671296296296295,72
+magnitude,Energy transition and climate,Industrials,2022,1.042792792792793,74
 magnitude,Energy transition and climate,Industrials,2023,1.061965811965812,78
-magnitude,Energy transition and climate,Industrials,2024,1.0654008438818565,79
-magnitude,Energy transition and climate,Industrials,2025,1.0541125541125542,77
+magnitude,Energy transition and climate,Industrials,2024,1.0514403292181072,81
+magnitude,Energy transition and climate,Industrials,2025,1.0729166666666665,80
 magnitude,Energy transition and climate,Information Technology,2019,0.7118055555555555,48
-magnitude,Energy transition and climate,Information Technology,2020,0.8733333333333333,50
-magnitude,Energy transition and climate,Information Technology,2021,0.8597883597883598,63
-magnitude,Energy transition and climate,Information Technology,2022,0.9228855721393036,67
+magnitude,Energy transition and climate,Information Technology,2020,0.8974358974358974,52
+magnitude,Energy transition and climate,Information Technology,2021,0.8624338624338624,63
+magnitude,Energy transition and climate,Information Technology,2022,0.9129353233830846,67
 magnitude,Energy transition and climate,Information Technology,2023,0.9166666666666666,66
-magnitude,Energy transition and climate,Information Technology,2024,0.8943661971830986,71
-magnitude,Energy transition and climate,Information Technology,2025,0.812206572769953,71
+magnitude,Energy transition and climate,Information Technology,2024,0.8958333333333334,72
+magnitude,Energy transition and climate,Information Technology,2025,0.7981220657276995,71
 magnitude,Energy transition and climate,Materials,2019,1.1893939393939394,22
-magnitude,Energy transition and climate,Materials,2020,1.2142857142857142,21
-magnitude,Energy transition and climate,Materials,2021,1.325757575757576,22
+magnitude,Energy transition and climate,Materials,2020,1.25,22
+magnitude,Energy transition and climate,Materials,2021,1.3106060606060606,22
 magnitude,Energy transition and climate,Materials,2022,1.1666666666666667,22
 magnitude,Energy transition and climate,Materials,2023,1.3985507246376812,23
 magnitude,Energy transition and climate,Materials,2024,1.3055555555555556,24
@@ -161,8 +161,8 @@ realization,Energy transition and climate,Communication Services,2023,0.43589743
 realization,Energy transition and climate,Communication Services,2024,0.6888888888888888,15
 realization,Energy transition and climate,Communication Services,2025,0.641025641025641,13
 realization,Energy transition and climate,Consumer Discretionary,2019,0.7149122807017544,38
-realization,Energy transition and climate,Consumer Discretionary,2020,0.5855855855855856,37
-realization,Energy transition and climate,Consumer Discretionary,2021,0.5629629629629629,45
+realization,Energy transition and climate,Consumer Discretionary,2020,0.5701754385964912,38
+realization,Energy transition and climate,Consumer Discretionary,2021,0.5740740740740741,45
 realization,Energy transition and climate,Consumer Discretionary,2022,0.5851851851851851,45
 realization,Energy transition and climate,Consumer Discretionary,2023,0.6808510638297872,47
 realization,Energy transition and climate,Consumer Discretionary,2024,0.8188405797101449,46
@@ -189,28 +189,28 @@ realization,Energy transition and climate,Financials,2023,0.6,70
 realization,Energy transition and climate,Financials,2024,0.5375586854460094,71
 realization,Energy transition and climate,Financials,2025,0.6357142857142857,70
 realization,Energy transition and climate,Health Care,2019,0.2894736842105263,19
-realization,Energy transition and climate,Health Care,2020,0.339080459770115,29
-realization,Energy transition and climate,Health Care,2021,0.28148148148148144,45
+realization,Energy transition and climate,Health Care,2020,0.3277777777777778,30
+realization,Energy transition and climate,Health Care,2021,0.2753623188405797,46
 realization,Energy transition and climate,Health Care,2022,0.4084967320261438,51
 realization,Energy transition and climate,Health Care,2023,0.6099290780141844,47
 realization,Energy transition and climate,Health Care,2024,0.6805555555555555,48
 realization,Energy transition and climate,Health Care,2025,0.6185897435897435,52
-realization,Energy transition and climate,Industrials,2019,0.6305555555555556,60
-realization,Energy transition and climate,Industrials,2020,0.6666666666666666,66
-realization,Energy transition and climate,Industrials,2021,0.6435185185185186,72
-realization,Energy transition and climate,Industrials,2022,0.6666666666666666,75
+realization,Energy transition and climate,Industrials,2019,0.6209677419354839,62
+realization,Energy transition and climate,Industrials,2020,0.6666666666666666,67
+realization,Energy transition and climate,Industrials,2021,0.6828703703703703,72
+realization,Energy transition and climate,Industrials,2022,0.6756756756756757,74
 realization,Energy transition and climate,Industrials,2023,0.7200854700854701,78
-realization,Energy transition and climate,Industrials,2024,0.6940928270042195,79
-realization,Energy transition and climate,Industrials,2025,0.7554112554112554,77
+realization,Energy transition and climate,Industrials,2024,0.6851851851851852,81
+realization,Energy transition and climate,Industrials,2025,0.7645833333333333,80
 realization,Energy transition and climate,Information Technology,2019,0.517361111111111,48
-realization,Energy transition and climate,Information Technology,2020,0.6533333333333333,50
-realization,Energy transition and climate,Information Technology,2021,0.6666666666666666,63
+realization,Energy transition and climate,Information Technology,2020,0.657051282051282,52
+realization,Energy transition and climate,Information Technology,2021,0.671957671957672,63
 realization,Energy transition and climate,Information Technology,2022,0.6766169154228856,67
 realization,Energy transition and climate,Information Technology,2023,0.6237373737373737,66
-realization,Energy transition and climate,Information Technology,2024,0.6009389671361502,71
-realization,Energy transition and climate,Information Technology,2025,0.6549295774647887,71
+realization,Energy transition and climate,Information Technology,2024,0.6064814814814814,72
+realization,Energy transition and climate,Information Technology,2025,0.6408450704225352,71
 realization,Energy transition and climate,Materials,2019,0.8636363636363636,22
-realization,Energy transition and climate,Materials,2020,0.7380952380952381,21
+realization,Energy transition and climate,Materials,2020,0.75,22
 realization,Energy transition and climate,Materials,2021,0.8409090909090909,22
 realization,Energy transition and climate,Materials,2022,0.9015151515151515,22
 realization,Energy transition and climate,Materials,2023,0.8840579710144927,23
@@ -238,7 +238,7 @@ uncertainty,Energy transition and climate,Communication Services,2023,1.98717948
 uncertainty,Energy transition and climate,Communication Services,2024,1.8111111111111111,15
 uncertainty,Energy transition and climate,Communication Services,2025,2.076923076923077,13
 uncertainty,Energy transition and climate,Consumer Discretionary,2019,1.8245614035087718,38
-uncertainty,Energy transition and climate,Consumer Discretionary,2020,1.90990990990991,37
+uncertainty,Energy transition and climate,Consumer Discretionary,2020,1.9122807017543861,38
 uncertainty,Energy transition and climate,Consumer Discretionary,2021,1.9666666666666666,45
 uncertainty,Energy transition and climate,Consumer Discretionary,2022,2.125925925925926,45
 uncertainty,Energy transition and climate,Consumer Discretionary,2023,2.00354609929078,47
@@ -266,29 +266,29 @@ uncertainty,Energy transition and climate,Financials,2023,2.0666666666666664,70
 uncertainty,Energy transition and climate,Financials,2024,2.056338028169014,71
 uncertainty,Energy transition and climate,Financials,2025,1.988095238095238,70
 uncertainty,Energy transition and climate,Health Care,2019,1.7894736842105263,19
-uncertainty,Energy transition and climate,Health Care,2020,1.764367816091954,29
-uncertainty,Energy transition and climate,Health Care,2021,1.9962962962962962,45
+uncertainty,Energy transition and climate,Health Care,2020,1.7722222222222221,30
+uncertainty,Energy transition and climate,Health Care,2021,1.9963768115942029,46
 uncertainty,Energy transition and climate,Health Care,2022,2.0065359477124183,51
 uncertainty,Energy transition and climate,Health Care,2023,1.9964539007092197,47
 uncertainty,Energy transition and climate,Health Care,2024,2.0520833333333335,48
 uncertainty,Energy transition and climate,Health Care,2025,2.0576923076923075,52
-uncertainty,Energy transition and climate,Industrials,2019,1.9972222222222222,60
-uncertainty,Energy transition and climate,Industrials,2020,1.9621212121212122,66
-uncertainty,Energy transition and climate,Industrials,2021,2.013888888888889,72
-uncertainty,Energy transition and climate,Industrials,2022,1.98,75
+uncertainty,Energy transition and climate,Industrials,2019,1.9973118279569892,62
+uncertainty,Energy transition and climate,Industrials,2020,1.962686567164179,67
+uncertainty,Energy transition and climate,Industrials,2021,2.0208333333333335,72
+uncertainty,Energy transition and climate,Industrials,2022,1.9797297297297298,74
 uncertainty,Energy transition and climate,Industrials,2023,1.9572649572649572,78
-uncertainty,Energy transition and climate,Industrials,2024,1.99789029535865,79
-uncertainty,Energy transition and climate,Industrials,2025,2.0064935064935066,77
+uncertainty,Energy transition and climate,Industrials,2024,2.006172839506173,81
+uncertainty,Energy transition and climate,Industrials,2025,2.002083333333333,80
 uncertainty,Energy transition and climate,Information Technology,2019,2.0416666666666665,48
-uncertainty,Energy transition and climate,Information Technology,2020,1.94,50
+uncertainty,Energy transition and climate,Information Technology,2020,1.9519230769230769,52
 uncertainty,Energy transition and climate,Information Technology,2021,1.9973544973544972,63
 uncertainty,Energy transition and climate,Information Technology,2022,2.012437810945274,67
 uncertainty,Energy transition and climate,Information Technology,2023,1.9873737373737372,66
-uncertainty,Energy transition and climate,Information Technology,2024,1.9624413145539907,71
+uncertainty,Energy transition and climate,Information Technology,2024,1.962962962962963,72
 uncertainty,Energy transition and climate,Information Technology,2025,2.007042253521127,71
 uncertainty,Energy transition and climate,Materials,2019,2.1893939393939394,22
-uncertainty,Energy transition and climate,Materials,2020,2.2063492063492065,21
-uncertainty,Energy transition and climate,Materials,2021,2.227272727272727,22
+uncertainty,Energy transition and climate,Materials,2020,2.2424242424242427,22
+uncertainty,Energy transition and climate,Materials,2021,2.1818181818181817,22
 uncertainty,Energy transition and climate,Materials,2022,2.159090909090909,22
 uncertainty,Energy transition and climate,Materials,2023,2.0942028985507246,23
 uncertainty,Energy transition and climate,Materials,2024,2.0833333333333335,24
@@ -315,8 +315,8 @@ specificity,Energy transition and climate,Communication Services,2023,1.21794871
 specificity,Energy transition and climate,Communication Services,2024,1.3888888888888888,15
 specificity,Energy transition and climate,Communication Services,2025,1.0384615384615385,13
 specificity,Energy transition and climate,Consumer Discretionary,2019,1.162280701754386,38
-specificity,Energy transition and climate,Consumer Discretionary,2020,1.2882882882882882,37
-specificity,Energy transition and climate,Consumer Discretionary,2021,1.2259259259259259,45
+specificity,Energy transition and climate,Consumer Discretionary,2020,1.2675438596491226,38
+specificity,Energy transition and climate,Consumer Discretionary,2021,1.248148148148148,45
 specificity,Energy transition and climate,Consumer Discretionary,2022,1.4148148148148147,45
 specificity,Energy transition and climate,Consumer Discretionary,2023,1.5212765957446808,47
 specificity,Energy transition and climate,Consumer Discretionary,2024,1.4637681159420288,46
@@ -343,29 +343,29 @@ specificity,Energy transition and climate,Financials,2023,1.4166666666666667,70
 specificity,Energy transition and climate,Financials,2024,1.4553990610328638,71
 specificity,Energy transition and climate,Financials,2025,1.4047619047619047,70
 specificity,Energy transition and climate,Health Care,2019,0.9649122807017543,19
-specificity,Energy transition and climate,Health Care,2020,0.7471264367816093,29
-specificity,Energy transition and climate,Health Care,2021,1.0814814814814815,45
-specificity,Energy transition and climate,Health Care,2022,1.2516339869281046,51
+specificity,Energy transition and climate,Health Care,2020,0.7555555555555556,30
+specificity,Energy transition and climate,Health Care,2021,1.1014492753623188,46
+specificity,Energy transition and climate,Health Care,2022,1.2320261437908497,51
 specificity,Energy transition and climate,Health Care,2023,1.4858156028368794,47
 specificity,Energy transition and climate,Health Care,2024,1.5833333333333333,48
 specificity,Energy transition and climate,Health Care,2025,1.483974358974359,52
-specificity,Energy transition and climate,Industrials,2019,1.3166666666666667,60
-specificity,Energy transition and climate,Industrials,2020,1.3964646464646466,66
-specificity,Energy transition and climate,Industrials,2021,1.5208333333333333,72
-specificity,Energy transition and climate,Industrials,2022,1.4977777777777777,75
+specificity,Energy transition and climate,Industrials,2019,1.2983870967741935,62
+specificity,Energy transition and climate,Industrials,2020,1.3980099502487562,67
+specificity,Energy transition and climate,Industrials,2021,1.5347222222222223,72
+specificity,Energy transition and climate,Industrials,2022,1.5045045045045045,74
 specificity,Energy transition and climate,Industrials,2023,1.5726495726495726,78
-specificity,Energy transition and climate,Industrials,2024,1.5274261603375527,79
-specificity,Energy transition and climate,Industrials,2025,1.525974025974026,77
+specificity,Energy transition and climate,Industrials,2024,1.51440329218107,81
+specificity,Energy transition and climate,Industrials,2025,1.5270833333333333,80
 specificity,Energy transition and climate,Information Technology,2019,1.222222222222222,48
-specificity,Energy transition and climate,Information Technology,2020,1.3366666666666667,50
-specificity,Energy transition and climate,Information Technology,2021,1.343915343915344,63
+specificity,Energy transition and climate,Information Technology,2020,1.3814102564102564,52
+specificity,Energy transition and climate,Information Technology,2021,1.3703703703703702,63
 specificity,Energy transition and climate,Information Technology,2022,1.427860696517413,67
 specificity,Energy transition and climate,Information Technology,2023,1.4823232323232323,66
-specificity,Energy transition and climate,Information Technology,2024,1.4014084507042253,71
-specificity,Energy transition and climate,Information Technology,2025,1.4014084507042253,71
+specificity,Energy transition and climate,Information Technology,2024,1.4097222222222223,72
+specificity,Energy transition and climate,Information Technology,2025,1.3873239436619718,71
 specificity,Energy transition and climate,Materials,2019,1.4848484848484846,22
-specificity,Energy transition and climate,Materials,2020,1.5476190476190477,21
-specificity,Energy transition and climate,Materials,2021,1.6742424242424243,22
+specificity,Energy transition and climate,Materials,2020,1.5681818181818181,22
+specificity,Energy transition and climate,Materials,2021,1.628787878787879,22
 specificity,Energy transition and climate,Materials,2022,1.7575757575757576,22
 specificity,Energy transition and climate,Materials,2023,1.7463768115942029,23
 specificity,Energy transition and climate,Materials,2024,1.6597222222222223,24
@@ -392,7 +392,7 @@ discussed,Energy transition and climate,Communication Services,2023,0.7647058823
 discussed,Energy transition and climate,Communication Services,2024,0.8333333333333334,18
 discussed,Energy transition and climate,Communication Services,2025,0.6842105263157895,19
 discussed,Energy transition and climate,Consumer Discretionary,2019,0.8444444444444444,45
-discussed,Energy transition and climate,Consumer Discretionary,2020,0.8043478260869565,46
+discussed,Energy transition and climate,Consumer Discretionary,2020,0.8085106382978723,47
 discussed,Energy transition and climate,Consumer Discretionary,2021,0.9574468085106383,47
 discussed,Energy transition and climate,Consumer Discretionary,2022,0.9574468085106383,47
 discussed,Energy transition and climate,Consumer Discretionary,2023,1.0,47
@@ -420,28 +420,28 @@ discussed,Energy transition and climate,Financials,2023,0.9333333333333333,75
 discussed,Energy transition and climate,Financials,2024,0.9342105263157895,76
 discussed,Energy transition and climate,Financials,2025,0.9210526315789473,76
 discussed,Energy transition and climate,Health Care,2019,0.3333333333333333,57
-discussed,Energy transition and climate,Health Care,2020,0.5272727272727272,55
-discussed,Energy transition and climate,Health Care,2021,0.7758620689655172,58
+discussed,Energy transition and climate,Health Care,2020,0.5172413793103449,58
+discussed,Energy transition and climate,Health Care,2021,0.7931034482758621,58
 discussed,Energy transition and climate,Health Care,2022,0.864406779661017,59
 discussed,Energy transition and climate,Health Care,2023,0.7966101694915254,59
 discussed,Energy transition and climate,Health Care,2024,0.8,60
 discussed,Energy transition and climate,Health Care,2025,0.8666666666666667,60
-discussed,Energy transition and climate,Industrials,2019,0.8108108108108109,74
-discussed,Energy transition and climate,Industrials,2020,0.88,75
+discussed,Energy transition and climate,Industrials,2019,0.8157894736842105,76
+discussed,Energy transition and climate,Industrials,2020,0.8589743589743589,78
 discussed,Energy transition and climate,Industrials,2021,0.9230769230769231,78
-discussed,Energy transition and climate,Industrials,2022,0.9615384615384616,78
+discussed,Energy transition and climate,Industrials,2022,0.9487179487179487,78
 discussed,Energy transition and climate,Industrials,2023,0.9873417721518988,79
-discussed,Energy transition and climate,Industrials,2024,1.0,79
-discussed,Energy transition and climate,Industrials,2025,0.9871794871794872,78
-discussed,Energy transition and climate,Information Technology,2019,0.6956521739130435,69
-discussed,Energy transition and climate,Information Technology,2020,0.7142857142857143,70
+discussed,Energy transition and climate,Industrials,2024,1.0,81
+discussed,Energy transition and climate,Industrials,2025,0.9876543209876543,81
+discussed,Energy transition and climate,Information Technology,2019,0.6857142857142857,70
+discussed,Energy transition and climate,Information Technology,2020,0.7222222222222222,72
 discussed,Energy transition and climate,Information Technology,2021,0.875,72
 discussed,Energy transition and climate,Information Technology,2022,0.9178082191780822,73
 discussed,Energy transition and climate,Information Technology,2023,0.9041095890410958,73
-discussed,Energy transition and climate,Information Technology,2024,0.9861111111111112,72
+discussed,Energy transition and climate,Information Technology,2024,0.9863013698630136,73
 discussed,Energy transition and climate,Information Technology,2025,0.9466666666666667,75
 discussed,Energy transition and climate,Materials,2019,1.0,22
-discussed,Energy transition and climate,Materials,2020,1.0,21
+discussed,Energy transition and climate,Materials,2020,1.0,22
 discussed,Energy transition and climate,Materials,2021,1.0,22
 discussed,Energy transition and climate,Materials,2022,1.0,22
 discussed,Energy transition and climate,Materials,2023,1.0,23

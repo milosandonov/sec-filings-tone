@@ -7,9 +7,9 @@ polarity,Supply chain,Communication Services,2023,-0.7745098039215685,17
 polarity,Supply chain,Communication Services,2024,-0.7037037037037037,18
 polarity,Supply chain,Communication Services,2025,-0.7017543859649122,19
 polarity,Supply chain,Consumer Discretionary,2019,-0.7083333333333334,44
-polarity,Supply chain,Consumer Discretionary,2020,-0.8666666666666667,45
-polarity,Supply chain,Consumer Discretionary,2021,-0.9716312056737588,47
-polarity,Supply chain,Consumer Discretionary,2022,-0.9680851063829787,47
+polarity,Supply chain,Consumer Discretionary,2020,-0.8478260869565217,46
+polarity,Supply chain,Consumer Discretionary,2021,-0.9929078014184397,47
+polarity,Supply chain,Consumer Discretionary,2022,-0.975177304964539,47
 polarity,Supply chain,Consumer Discretionary,2023,-0.9007092198581559,47
 polarity,Supply chain,Consumer Discretionary,2024,-0.875886524822695,47
 polarity,Supply chain,Consumer Discretionary,2025,-0.8794326241134752,47
@@ -35,28 +35,28 @@ polarity,Supply chain,Financials,2023,-0.7142857142857143,63
 polarity,Supply chain,Financials,2024,-0.6744791666666666,64
 polarity,Supply chain,Financials,2025,-0.6820512820512821,65
 polarity,Supply chain,Health Care,2019,-0.8742690058479533,57
-polarity,Supply chain,Health Care,2020,-0.978395061728395,54
-polarity,Supply chain,Health Care,2021,-1.0775862068965518,58
-polarity,Supply chain,Health Care,2022,-1.089080459770115,58
+polarity,Supply chain,Health Care,2020,-0.9912280701754386,57
+polarity,Supply chain,Health Care,2021,-1.0747126436781609,58
+polarity,Supply chain,Health Care,2022,-1.0919540229885059,58
 polarity,Supply chain,Health Care,2023,-1.0254237288135593,59
 polarity,Supply chain,Health Care,2024,-0.980225988700565,59
 polarity,Supply chain,Health Care,2025,-1.0,60
-polarity,Supply chain,Industrials,2019,-0.7785388127853882,73
-polarity,Supply chain,Industrials,2020,-0.8933333333333333,75
-polarity,Supply chain,Industrials,2021,-1.0598290598290598,78
+polarity,Supply chain,Industrials,2019,-0.7666666666666667,75
+polarity,Supply chain,Industrials,2020,-0.9273504273504273,78
+polarity,Supply chain,Industrials,2021,-1.0512820512820513,78
 polarity,Supply chain,Industrials,2022,-1.0662393162393162,78
 polarity,Supply chain,Industrials,2023,-0.9092827004219408,79
-polarity,Supply chain,Industrials,2024,-0.8987341772151899,79
-polarity,Supply chain,Industrials,2025,-0.8910256410256411,78
-polarity,Supply chain,Information Technology,2019,-0.8405797101449275,69
-polarity,Supply chain,Information Technology,2020,-0.9009661835748792,69
-polarity,Supply chain,Information Technology,2021,-1.0393518518518519,72
+polarity,Supply chain,Industrials,2024,-0.897119341563786,81
+polarity,Supply chain,Industrials,2025,-0.8991769547325102,81
+polarity,Supply chain,Information Technology,2019,-0.8476190476190476,70
+polarity,Supply chain,Information Technology,2020,-0.8943661971830986,71
+polarity,Supply chain,Information Technology,2021,-1.0439814814814816,72
 polarity,Supply chain,Information Technology,2022,-1.0388127853881277,73
 polarity,Supply chain,Information Technology,2023,-0.9863013698630136,73
-polarity,Supply chain,Information Technology,2024,-0.92018779342723,71
-polarity,Supply chain,Information Technology,2025,-0.9369369369369369,74
+polarity,Supply chain,Information Technology,2024,-0.9212962962962963,72
+polarity,Supply chain,Information Technology,2025,-0.9414414414414415,74
 polarity,Supply chain,Materials,2019,-0.9015151515151515,22
-polarity,Supply chain,Materials,2020,-0.9523809523809523,21
+polarity,Supply chain,Materials,2020,-0.9545454545454546,22
 polarity,Supply chain,Materials,2021,-0.9772727272727273,22
 polarity,Supply chain,Materials,2022,-1.1136363636363635,22
 polarity,Supply chain,Materials,2023,-0.8985507246376813,23
@@ -84,9 +84,9 @@ magnitude,Supply chain,Communication Services,2023,0.8039215686274509,17
 magnitude,Supply chain,Communication Services,2024,0.75,18
 magnitude,Supply chain,Communication Services,2025,0.8070175438596492,19
 magnitude,Supply chain,Consumer Discretionary,2019,1.0075757575757576,44
-magnitude,Supply chain,Consumer Discretionary,2020,1.1481481481481481,45
-magnitude,Supply chain,Consumer Discretionary,2021,1.3191489361702127,47
-magnitude,Supply chain,Consumer Discretionary,2022,1.2943262411347518,47
+magnitude,Supply chain,Consumer Discretionary,2020,1.1594202898550725,46
+magnitude,Supply chain,Consumer Discretionary,2021,1.3120567375886525,47
+magnitude,Supply chain,Consumer Discretionary,2022,1.2801418439716312,47
 magnitude,Supply chain,Consumer Discretionary,2023,1.1950354609929077,47
 magnitude,Supply chain,Consumer Discretionary,2024,1.099290780141844,47
 magnitude,Supply chain,Consumer Discretionary,2025,1.1524822695035462,47
@@ -112,28 +112,28 @@ magnitude,Supply chain,Financials,2023,0.5767195767195767,63
 magnitude,Supply chain,Financials,2024,0.609375,64
 magnitude,Supply chain,Financials,2025,0.5948717948717949,65
 magnitude,Supply chain,Health Care,2019,0.9707602339181287,57
-magnitude,Supply chain,Health Care,2020,1.2808641975308643,54
-magnitude,Supply chain,Health Care,2021,1.3908045977011496,58
-magnitude,Supply chain,Health Care,2022,1.4252873563218391,58
+magnitude,Supply chain,Health Care,2020,1.2836257309941521,57
+magnitude,Supply chain,Health Care,2021,1.4051724137931034,58
+magnitude,Supply chain,Health Care,2022,1.4281609195402298,58
 magnitude,Supply chain,Health Care,2023,1.2457627118644068,59
 magnitude,Supply chain,Health Care,2024,1.2062146892655368,59
 magnitude,Supply chain,Health Care,2025,1.2583333333333333,60
-magnitude,Supply chain,Industrials,2019,0.95662100456621,73
-magnitude,Supply chain,Industrials,2020,1.2377777777777776,75
-magnitude,Supply chain,Industrials,2021,1.3824786324786325,78
+magnitude,Supply chain,Industrials,2019,0.9533333333333334,75
+magnitude,Supply chain,Industrials,2020,1.2841880341880343,78
+magnitude,Supply chain,Industrials,2021,1.3782051282051282,78
 magnitude,Supply chain,Industrials,2022,1.344017094017094,78
 magnitude,Supply chain,Industrials,2023,1.2278481012658229,79
-magnitude,Supply chain,Industrials,2024,1.2616033755274263,79
-magnitude,Supply chain,Industrials,2025,1.1346153846153846,78
-magnitude,Supply chain,Information Technology,2019,1.140096618357488,69
-magnitude,Supply chain,Information Technology,2020,1.2149758454106279,69
-magnitude,Supply chain,Information Technology,2021,1.324074074074074,72
+magnitude,Supply chain,Industrials,2024,1.251028806584362,81
+magnitude,Supply chain,Industrials,2025,1.1419753086419753,81
+magnitude,Supply chain,Information Technology,2019,1.1523809523809525,70
+magnitude,Supply chain,Information Technology,2020,1.1948356807511737,71
+magnitude,Supply chain,Information Technology,2021,1.3333333333333333,72
 magnitude,Supply chain,Information Technology,2022,1.3333333333333333,73
 magnitude,Supply chain,Information Technology,2023,1.2922374429223744,73
-magnitude,Supply chain,Information Technology,2024,1.300469483568075,71
+magnitude,Supply chain,Information Technology,2024,1.300925925925926,72
 magnitude,Supply chain,Information Technology,2025,1.2567567567567568,74
 magnitude,Supply chain,Materials,2019,1.0378787878787878,22
-magnitude,Supply chain,Materials,2020,1.1349206349206349,21
+magnitude,Supply chain,Materials,2020,1.1287878787878787,22
 magnitude,Supply chain,Materials,2021,1.303030303030303,22
 magnitude,Supply chain,Materials,2022,1.2272727272727273,22
 magnitude,Supply chain,Materials,2023,1.144927536231884,23
@@ -161,9 +161,9 @@ realization,Supply chain,Communication Services,2023,1.0392156862745099,17
 realization,Supply chain,Communication Services,2024,0.9629629629629629,18
 realization,Supply chain,Communication Services,2025,0.8859649122807017,19
 realization,Supply chain,Consumer Discretionary,2019,0.8522727272727273,44
-realization,Supply chain,Consumer Discretionary,2020,0.9111111111111111,45
-realization,Supply chain,Consumer Discretionary,2021,1.2765957446808511,47
-realization,Supply chain,Consumer Discretionary,2022,1.202127659574468,47
+realization,Supply chain,Consumer Discretionary,2020,0.9347826086956522,46
+realization,Supply chain,Consumer Discretionary,2021,1.24822695035461,47
+realization,Supply chain,Consumer Discretionary,2022,1.2304964539007093,47
 realization,Supply chain,Consumer Discretionary,2023,1.1134751773049645,47
 realization,Supply chain,Consumer Discretionary,2024,1.0638297872340425,47
 realization,Supply chain,Consumer Discretionary,2025,1.2695035460992907,47
@@ -189,29 +189,29 @@ realization,Supply chain,Financials,2023,0.9391534391534391,63
 realization,Supply chain,Financials,2024,0.7708333333333334,64
 realization,Supply chain,Financials,2025,0.9179487179487179,65
 realization,Supply chain,Health Care,2019,0.652046783625731,57
-realization,Supply chain,Health Care,2020,0.9197530864197531,54
-realization,Supply chain,Health Care,2021,1.0574712643678161,58
+realization,Supply chain,Health Care,2020,0.9298245614035088,57
+realization,Supply chain,Health Care,2021,1.0517241379310345,58
 realization,Supply chain,Health Care,2022,1.1206896551724137,58
 realization,Supply chain,Health Care,2023,1.019774011299435,59
 realization,Supply chain,Health Care,2024,0.923728813559322,59
 realization,Supply chain,Health Care,2025,1.0166666666666666,60
-realization,Supply chain,Industrials,2019,0.8105022831050228,73
-realization,Supply chain,Industrials,2020,1.0911111111111111,75
-realization,Supply chain,Industrials,2021,1.3247863247863247,78
+realization,Supply chain,Industrials,2019,0.82,75
+realization,Supply chain,Industrials,2020,1.108974358974359,78
+realization,Supply chain,Industrials,2021,1.3333333333333333,78
 realization,Supply chain,Industrials,2022,1.4401709401709402,78
 realization,Supply chain,Industrials,2023,1.2151898734177216,79
-realization,Supply chain,Industrials,2024,1.1223628691983123,79
-realization,Supply chain,Industrials,2025,1.0405982905982907,78
-realization,Supply chain,Information Technology,2019,0.8574879227053139,69
-realization,Supply chain,Information Technology,2020,1.0821256038647342,69
-realization,Supply chain,Information Technology,2021,1.1828703703703705,72
-realization,Supply chain,Information Technology,2022,1.321917808219178,73
+realization,Supply chain,Industrials,2024,1.1193415637860082,81
+realization,Supply chain,Industrials,2025,1.059670781893004,81
+realization,Supply chain,Information Technology,2019,0.85,70
+realization,Supply chain,Information Technology,2020,1.056338028169014,71
+realization,Supply chain,Information Technology,2021,1.2013888888888888,72
+realization,Supply chain,Information Technology,2022,1.32648401826484,73
 realization,Supply chain,Information Technology,2023,1.221461187214612,73
-realization,Supply chain,Information Technology,2024,1.1924882629107982,71
+realization,Supply chain,Information Technology,2024,1.2037037037037037,72
 realization,Supply chain,Information Technology,2025,1.3445945945945945,74
 realization,Supply chain,Materials,2019,0.7651515151515151,22
-realization,Supply chain,Materials,2020,0.992063492063492,21
-realization,Supply chain,Materials,2021,1.0984848484848486,22
+realization,Supply chain,Materials,2020,1.0075757575757576,22
+realization,Supply chain,Materials,2021,1.1287878787878787,22
 realization,Supply chain,Materials,2022,1.2045454545454546,22
 realization,Supply chain,Materials,2023,0.9927536231884058,23
 realization,Supply chain,Materials,2024,0.8333333333333334,24
@@ -238,9 +238,9 @@ uncertainty,Supply chain,Communication Services,2023,1.4705882352941178,17
 uncertainty,Supply chain,Communication Services,2024,1.3425925925925926,18
 uncertainty,Supply chain,Communication Services,2025,1.5263157894736843,19
 uncertainty,Supply chain,Consumer Discretionary,2019,1.6022727272727273,44
-uncertainty,Supply chain,Consumer Discretionary,2020,1.8222222222222222,45
-uncertainty,Supply chain,Consumer Discretionary,2021,1.7624113475177303,47
-uncertainty,Supply chain,Consumer Discretionary,2022,1.677304964539007,47
+uncertainty,Supply chain,Consumer Discretionary,2020,1.8043478260869565,46
+uncertainty,Supply chain,Consumer Discretionary,2021,1.769503546099291,47
+uncertainty,Supply chain,Consumer Discretionary,2022,1.6631205673758866,47
 uncertainty,Supply chain,Consumer Discretionary,2023,1.7056737588652484,47
 uncertainty,Supply chain,Consumer Discretionary,2024,1.730496453900709,47
 uncertainty,Supply chain,Consumer Discretionary,2025,1.6879432624113475,47
@@ -266,29 +266,29 @@ uncertainty,Supply chain,Financials,2023,1.5343915343915344,63
 uncertainty,Supply chain,Financials,2024,1.5052083333333333,64
 uncertainty,Supply chain,Financials,2025,1.4461538461538461,65
 uncertainty,Supply chain,Health Care,2019,1.654970760233918,57
-uncertainty,Supply chain,Health Care,2020,1.9320987654320987,54
-uncertainty,Supply chain,Health Care,2021,1.9741379310344827,58
-uncertainty,Supply chain,Health Care,2022,2.0028735632183907,58
+uncertainty,Supply chain,Health Care,2020,1.9415204678362574,57
+uncertainty,Supply chain,Health Care,2021,1.9770114942528736,58
+uncertainty,Supply chain,Health Care,2022,2.014367816091954,58
 uncertainty,Supply chain,Health Care,2023,1.8728813559322033,59
 uncertainty,Supply chain,Health Care,2024,1.8926553672316384,59
 uncertainty,Supply chain,Health Care,2025,1.8527777777777779,60
-uncertainty,Supply chain,Industrials,2019,1.678082191780822,73
-uncertainty,Supply chain,Industrials,2020,1.8422222222222222,75
-uncertainty,Supply chain,Industrials,2021,1.9230769230769231,78
+uncertainty,Supply chain,Industrials,2019,1.6644444444444444,75
+uncertainty,Supply chain,Industrials,2020,1.8952991452991454,78
+uncertainty,Supply chain,Industrials,2021,1.893162393162393,78
 uncertainty,Supply chain,Industrials,2022,1.7628205128205128,78
 uncertainty,Supply chain,Industrials,2023,1.620253164556962,79
-uncertainty,Supply chain,Industrials,2024,1.7362869198312234,79
-uncertainty,Supply chain,Industrials,2025,1.7072649572649572,78
-uncertainty,Supply chain,Information Technology,2019,1.722222222222222,69
-uncertainty,Supply chain,Information Technology,2020,1.855072463768116,69
-uncertainty,Supply chain,Information Technology,2021,1.789351851851852,72
+uncertainty,Supply chain,Industrials,2024,1.7386831275720165,81
+uncertainty,Supply chain,Industrials,2025,1.7098765432098766,81
+uncertainty,Supply chain,Information Technology,2019,1.730952380952381,70
+uncertainty,Supply chain,Information Technology,2020,1.8497652582159625,71
+uncertainty,Supply chain,Information Technology,2021,1.7800925925925926,72
 uncertainty,Supply chain,Information Technology,2022,1.8013698630136987,73
 uncertainty,Supply chain,Information Technology,2023,1.7534246575342465,73
-uncertainty,Supply chain,Information Technology,2024,1.7136150234741785,71
-uncertainty,Supply chain,Information Technology,2025,1.6576576576576578,74
+uncertainty,Supply chain,Information Technology,2024,1.699074074074074,72
+uncertainty,Supply chain,Information Technology,2025,1.6666666666666665,74
 uncertainty,Supply chain,Materials,2019,1.8106060606060608,22
-uncertainty,Supply chain,Materials,2020,1.8333333333333333,21
-uncertainty,Supply chain,Materials,2021,1.9090909090909092,22
+uncertainty,Supply chain,Materials,2020,1.871212121212121,22
+uncertainty,Supply chain,Materials,2021,1.8939393939393938,22
 uncertainty,Supply chain,Materials,2022,1.9242424242424243,22
 uncertainty,Supply chain,Materials,2023,1.7971014492753625,23
 uncertainty,Supply chain,Materials,2024,1.9166666666666667,24
@@ -315,9 +315,9 @@ specificity,Supply chain,Communication Services,2023,1.450980392156863,17
 specificity,Supply chain,Communication Services,2024,1.4166666666666667,18
 specificity,Supply chain,Communication Services,2025,1.4035087719298247,19
 specificity,Supply chain,Consumer Discretionary,2019,1.6742424242424243,44
-specificity,Supply chain,Consumer Discretionary,2020,1.7185185185185183,45
-specificity,Supply chain,Consumer Discretionary,2021,1.6595744680851063,47
-specificity,Supply chain,Consumer Discretionary,2022,1.6737588652482271,47
+specificity,Supply chain,Consumer Discretionary,2020,1.7246376811594202,46
+specificity,Supply chain,Consumer Discretionary,2021,1.6524822695035462,47
+specificity,Supply chain,Consumer Discretionary,2022,1.6808510638297873,47
 specificity,Supply chain,Consumer Discretionary,2023,1.6560283687943262,47
 specificity,Supply chain,Consumer Discretionary,2024,1.677304964539007,47
 specificity,Supply chain,Consumer Discretionary,2025,1.6843971631205674,47
@@ -343,29 +343,29 @@ specificity,Supply chain,Financials,2023,1.2116402116402116,63
 specificity,Supply chain,Financials,2024,1.1015625,64
 specificity,Supply chain,Financials,2025,1.205128205128205,65
 specificity,Supply chain,Health Care,2019,1.6403508771929824,57
-specificity,Supply chain,Health Care,2020,1.6574074074074074,54
+specificity,Supply chain,Health Care,2020,1.6754385964912282,57
 specificity,Supply chain,Health Care,2021,1.7270114942528736,58
-specificity,Supply chain,Health Care,2022,1.704022988505747,58
+specificity,Supply chain,Health Care,2022,1.6982758620689655,58
 specificity,Supply chain,Health Care,2023,1.675141242937853,59
 specificity,Supply chain,Health Care,2024,1.6610169491525424,59
 specificity,Supply chain,Health Care,2025,1.6916666666666667,60
-specificity,Supply chain,Industrials,2019,1.6141552511415524,73
-specificity,Supply chain,Industrials,2020,1.5844444444444443,75
-specificity,Supply chain,Industrials,2021,1.6346153846153846,78
+specificity,Supply chain,Industrials,2019,1.6066666666666667,75
+specificity,Supply chain,Industrials,2020,1.6004273504273503,78
+specificity,Supply chain,Industrials,2021,1.643162393162393,78
 specificity,Supply chain,Industrials,2022,1.6880341880341878,78
 specificity,Supply chain,Industrials,2023,1.6751054852320677,79
-specificity,Supply chain,Industrials,2024,1.668776371308017,79
-specificity,Supply chain,Industrials,2025,1.6217948717948718,78
-specificity,Supply chain,Information Technology,2019,1.7463768115942029,69
-specificity,Supply chain,Information Technology,2020,1.7173913043478262,69
+specificity,Supply chain,Industrials,2024,1.6687242798353907,81
+specificity,Supply chain,Industrials,2025,1.6316872427983538,81
+specificity,Supply chain,Information Technology,2019,1.75,70
+specificity,Supply chain,Information Technology,2020,1.6971830985915493,71
 specificity,Supply chain,Information Technology,2021,1.7106481481481481,72
 specificity,Supply chain,Information Technology,2022,1.730593607305936,73
 specificity,Supply chain,Information Technology,2023,1.6894977168949772,73
-specificity,Supply chain,Information Technology,2024,1.6948356807511737,71
-specificity,Supply chain,Information Technology,2025,1.6756756756756757,74
+specificity,Supply chain,Information Technology,2024,1.699074074074074,72
+specificity,Supply chain,Information Technology,2025,1.6711711711711712,74
 specificity,Supply chain,Materials,2019,1.7272727272727273,22
-specificity,Supply chain,Materials,2020,1.6666666666666667,21
-specificity,Supply chain,Materials,2021,1.712121212121212,22
+specificity,Supply chain,Materials,2020,1.6818181818181819,22
+specificity,Supply chain,Materials,2021,1.696969696969697,22
 specificity,Supply chain,Materials,2022,1.6666666666666665,22
 specificity,Supply chain,Materials,2023,1.7246376811594202,23
 specificity,Supply chain,Materials,2024,1.6041666666666667,24
@@ -392,7 +392,7 @@ discussed,Supply chain,Communication Services,2023,1.0,17
 discussed,Supply chain,Communication Services,2024,1.0,18
 discussed,Supply chain,Communication Services,2025,1.0,19
 discussed,Supply chain,Consumer Discretionary,2019,0.9777777777777777,45
-discussed,Supply chain,Consumer Discretionary,2020,0.9782608695652174,46
+discussed,Supply chain,Consumer Discretionary,2020,0.9787234042553191,47
 discussed,Supply chain,Consumer Discretionary,2021,1.0,47
 discussed,Supply chain,Consumer Discretionary,2022,1.0,47
 discussed,Supply chain,Consumer Discretionary,2023,1.0,47
@@ -420,28 +420,28 @@ discussed,Supply chain,Financials,2023,0.84,75
 discussed,Supply chain,Financials,2024,0.8421052631578947,76
 discussed,Supply chain,Financials,2025,0.8552631578947368,76
 discussed,Supply chain,Health Care,2019,1.0,57
-discussed,Supply chain,Health Care,2020,0.9818181818181818,55
+discussed,Supply chain,Health Care,2020,0.9827586206896551,58
 discussed,Supply chain,Health Care,2021,1.0,58
 discussed,Supply chain,Health Care,2022,0.9830508474576272,59
 discussed,Supply chain,Health Care,2023,1.0,59
 discussed,Supply chain,Health Care,2024,0.9833333333333333,60
 discussed,Supply chain,Health Care,2025,1.0,60
-discussed,Supply chain,Industrials,2019,0.9864864864864865,74
-discussed,Supply chain,Industrials,2020,1.0,75
+discussed,Supply chain,Industrials,2019,0.9868421052631579,76
+discussed,Supply chain,Industrials,2020,1.0,78
 discussed,Supply chain,Industrials,2021,1.0,78
 discussed,Supply chain,Industrials,2022,1.0,78
 discussed,Supply chain,Industrials,2023,1.0,79
-discussed,Supply chain,Industrials,2024,1.0,79
-discussed,Supply chain,Industrials,2025,1.0,78
-discussed,Supply chain,Information Technology,2019,1.0,69
-discussed,Supply chain,Information Technology,2020,0.9857142857142858,70
+discussed,Supply chain,Industrials,2024,1.0,81
+discussed,Supply chain,Industrials,2025,1.0,81
+discussed,Supply chain,Information Technology,2019,1.0,70
+discussed,Supply chain,Information Technology,2020,0.9861111111111112,72
 discussed,Supply chain,Information Technology,2021,1.0,72
 discussed,Supply chain,Information Technology,2022,1.0,73
 discussed,Supply chain,Information Technology,2023,1.0,73
-discussed,Supply chain,Information Technology,2024,0.9861111111111112,72
+discussed,Supply chain,Information Technology,2024,0.9863013698630136,73
 discussed,Supply chain,Information Technology,2025,0.9866666666666667,75
 discussed,Supply chain,Materials,2019,1.0,22
-discussed,Supply chain,Materials,2020,1.0,21
+discussed,Supply chain,Materials,2020,1.0,22
 discussed,Supply chain,Materials,2021,1.0,22
 discussed,Supply chain,Materials,2022,1.0,22
 discussed,Supply chain,Materials,2023,1.0,23

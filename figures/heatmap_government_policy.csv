@@ -7,7 +7,7 @@ polarity,Government policy,Communication Services,2023,-1.0784313725490196,17
 polarity,Government policy,Communication Services,2024,-1.0555555555555556,18
 polarity,Government policy,Communication Services,2025,-1.105263157894737,19
 polarity,Government policy,Consumer Discretionary,2019,-0.7259259259259259,45
-polarity,Government policy,Consumer Discretionary,2020,-0.7681159420289856,46
+polarity,Government policy,Consumer Discretionary,2020,-0.7730496453900709,47
 polarity,Government policy,Consumer Discretionary,2021,-0.8581560283687943,47
 polarity,Government policy,Consumer Discretionary,2022,-0.8900709219858156,47
 polarity,Government policy,Consumer Discretionary,2023,-0.9432624113475178,47
@@ -21,7 +21,7 @@ polarity,Government policy,Consumer Staples,2023,-0.9393939393939394,33
 polarity,Government policy,Consumer Staples,2024,-0.9191919191919191,33
 polarity,Government policy,Consumer Staples,2025,-0.9292929292929293,33
 polarity,Government policy,Energy,2019,-0.9385964912280701,19
-polarity,Government policy,Energy,2020,-1.0416666666666665,20
+polarity,Government policy,Energy,2020,-1.025,20
 polarity,Government policy,Energy,2021,-0.9841269841269842,21
 polarity,Government policy,Energy,2022,-0.9682539682539681,21
 polarity,Government policy,Energy,2023,-0.992063492063492,21
@@ -35,28 +35,28 @@ polarity,Government policy,Financials,2023,-1.0044444444444445,75
 polarity,Government policy,Financials,2024,-0.9912280701754386,76
 polarity,Government policy,Financials,2025,-0.9429824561403509,76
 polarity,Government policy,Health Care,2019,-0.9941520467836257,57
-polarity,Government policy,Health Care,2020,-1.0606060606060606,55
-polarity,Government policy,Health Care,2021,-1.0517241379310345,58
-polarity,Government policy,Health Care,2022,-1.0847457627118644,59
+polarity,Government policy,Health Care,2020,-1.0517241379310345,58
+polarity,Government policy,Health Care,2021,-1.0574712643678161,58
+polarity,Government policy,Health Care,2022,-1.0903954802259885,59
 polarity,Government policy,Health Care,2023,-1.073446327683616,59
-polarity,Government policy,Health Care,2024,-1.0611111111111111,60
+polarity,Government policy,Health Care,2024,-1.0666666666666667,60
 polarity,Government policy,Health Care,2025,-1.0833333333333333,60
-polarity,Government policy,Industrials,2019,-0.7612612612612613,74
-polarity,Government policy,Industrials,2020,-0.7977777777777778,75
-polarity,Government policy,Industrials,2021,-0.8974358974358975,78
+polarity,Government policy,Industrials,2019,-0.7675438596491229,76
+polarity,Government policy,Industrials,2020,-0.797008547008547,78
+polarity,Government policy,Industrials,2021,-0.9017094017094016,78
 polarity,Government policy,Industrials,2022,-0.8653846153846154,78
 polarity,Government policy,Industrials,2023,-0.9050632911392406,79
-polarity,Government policy,Industrials,2024,-0.9831223628691984,79
-polarity,Government policy,Industrials,2025,-0.8782051282051282,78
-polarity,Government policy,Information Technology,2019,-0.893719806763285,69
-polarity,Government policy,Information Technology,2020,-0.9547619047619047,70
-polarity,Government policy,Information Technology,2021,-1.0,72
+polarity,Government policy,Industrials,2024,-0.9835390946502058,81
+polarity,Government policy,Industrials,2025,-0.8868312757201645,81
+polarity,Government policy,Information Technology,2019,-0.8952380952380952,70
+polarity,Government policy,Information Technology,2020,-0.9560185185185185,72
+polarity,Government policy,Information Technology,2021,-1.0046296296296295,72
 polarity,Government policy,Information Technology,2022,-0.9863013698630136,73
 polarity,Government policy,Information Technology,2023,-0.9817351598173517,73
-polarity,Government policy,Information Technology,2024,-0.9351851851851851,72
+polarity,Government policy,Information Technology,2024,-0.9360730593607305,73
 polarity,Government policy,Information Technology,2025,-0.9733333333333334,75
 polarity,Government policy,Materials,2019,-0.7878787878787878,22
-polarity,Government policy,Materials,2020,-0.7777777777777777,21
+polarity,Government policy,Materials,2020,-0.7878787878787878,22
 polarity,Government policy,Materials,2021,-0.7575757575757577,22
 polarity,Government policy,Materials,2022,-0.8181818181818182,22
 polarity,Government policy,Materials,2023,-0.8115942028985507,23
@@ -64,7 +64,7 @@ polarity,Government policy,Materials,2024,-0.8194444444444445,24
 polarity,Government policy,Materials,2025,-0.9027777777777778,24
 polarity,Government policy,Real Estate,2019,-0.9111111111111111,30
 polarity,Government policy,Real Estate,2020,-0.8777777777777778,30
-polarity,Government policy,Real Estate,2021,-0.9777777777777777,30
+polarity,Government policy,Real Estate,2021,-0.9888888888888889,30
 polarity,Government policy,Real Estate,2022,-0.9444444444444444,30
 polarity,Government policy,Real Estate,2023,-1.0222222222222224,30
 polarity,Government policy,Real Estate,2024,-0.9777777777777777,30
@@ -84,7 +84,7 @@ magnitude,Government policy,Communication Services,2023,1.411764705882353,17
 magnitude,Government policy,Communication Services,2024,1.4537037037037035,18
 magnitude,Government policy,Communication Services,2025,1.412280701754386,19
 magnitude,Government policy,Consumer Discretionary,2019,1.3777777777777778,45
-magnitude,Government policy,Consumer Discretionary,2020,1.2463768115942029,46
+magnitude,Government policy,Consumer Discretionary,2020,1.2411347517730498,47
 magnitude,Government policy,Consumer Discretionary,2021,1.2340425531914894,47
 magnitude,Government policy,Consumer Discretionary,2022,1.1631205673758864,47
 magnitude,Government policy,Consumer Discretionary,2023,1.1914893617021276,47
@@ -98,7 +98,7 @@ magnitude,Government policy,Consumer Staples,2023,1.1818181818181819,33
 magnitude,Government policy,Consumer Staples,2024,1.101010101010101,33
 magnitude,Government policy,Consumer Staples,2025,1.0707070707070707,33
 magnitude,Government policy,Energy,2019,1.2982456140350878,19
-magnitude,Government policy,Energy,2020,1.4,20
+magnitude,Government policy,Energy,2020,1.3666666666666667,20
 magnitude,Government policy,Energy,2021,1.2857142857142858,21
 magnitude,Government policy,Energy,2022,1.3174603174603174,21
 magnitude,Government policy,Energy,2023,1.380952380952381,21
@@ -112,28 +112,28 @@ magnitude,Government policy,Financials,2023,1.4022222222222223,75
 magnitude,Government policy,Financials,2024,1.4583333333333333,76
 magnitude,Government policy,Financials,2025,1.418859649122807,76
 magnitude,Government policy,Health Care,2019,1.4853801169590644,57
-magnitude,Government policy,Health Care,2020,1.490909090909091,55
-magnitude,Government policy,Health Care,2021,1.528735632183908,58
-magnitude,Government policy,Health Care,2022,1.4519774011299436,59
+magnitude,Government policy,Health Care,2020,1.454022988505747,58
+magnitude,Government policy,Health Care,2021,1.5229885057471264,58
+magnitude,Government policy,Health Care,2022,1.4576271186440677,59
 magnitude,Government policy,Health Care,2023,1.4576271186440677,59
 magnitude,Government policy,Health Care,2024,1.55,60
 magnitude,Government policy,Health Care,2025,1.5055555555555555,60
-magnitude,Government policy,Industrials,2019,1.207207207207207,74
-magnitude,Government policy,Industrials,2020,1.1755555555555557,75
-magnitude,Government policy,Industrials,2021,1.141025641025641,78
+magnitude,Government policy,Industrials,2019,1.2149122807017543,76
+magnitude,Government policy,Industrials,2020,1.1602564102564104,78
+magnitude,Government policy,Industrials,2021,1.158119658119658,78
 magnitude,Government policy,Industrials,2022,1.1623931623931625,78
 magnitude,Government policy,Industrials,2023,1.251054852320675,79
-magnitude,Government policy,Industrials,2024,1.2088607594936709,79
-magnitude,Government policy,Industrials,2025,1.2756410256410255,78
-magnitude,Government policy,Information Technology,2019,1.289855072463768,69
-magnitude,Government policy,Information Technology,2020,1.3071428571428572,70
+magnitude,Government policy,Industrials,2024,1.2119341563786008,81
+magnitude,Government policy,Industrials,2025,1.2818930041152263,81
+magnitude,Government policy,Information Technology,2019,1.2904761904761903,70
+magnitude,Government policy,Information Technology,2020,1.3125,72
 magnitude,Government policy,Information Technology,2021,1.3078703703703705,72
-magnitude,Government policy,Information Technology,2022,1.2671232876712328,73
+magnitude,Government policy,Information Technology,2022,1.2716894977168949,73
 magnitude,Government policy,Information Technology,2023,1.367579908675799,73
-magnitude,Government policy,Information Technology,2024,1.3981481481481481,72
+magnitude,Government policy,Information Technology,2024,1.3972602739726028,73
 magnitude,Government policy,Information Technology,2025,1.528888888888889,75
 magnitude,Government policy,Materials,2019,1.196969696969697,22
-magnitude,Government policy,Materials,2020,1.253968253968254,21
+magnitude,Government policy,Materials,2020,1.2272727272727273,22
 magnitude,Government policy,Materials,2021,1.3333333333333333,22
 magnitude,Government policy,Materials,2022,1.196969696969697,22
 magnitude,Government policy,Materials,2023,1.2608695652173914,23
@@ -141,7 +141,7 @@ magnitude,Government policy,Materials,2024,1.1944444444444444,24
 magnitude,Government policy,Materials,2025,1.1805555555555556,24
 magnitude,Government policy,Real Estate,2019,1.3944444444444446,30
 magnitude,Government policy,Real Estate,2020,1.2055555555555555,30
-magnitude,Government policy,Real Estate,2021,1.2444444444444445,30
+magnitude,Government policy,Real Estate,2021,1.2666666666666666,30
 magnitude,Government policy,Real Estate,2022,1.1888888888888889,30
 magnitude,Government policy,Real Estate,2023,1.1388888888888888,30
 magnitude,Government policy,Real Estate,2024,1.1,30
@@ -161,9 +161,9 @@ realization,Government policy,Communication Services,2023,0.9509803921568628,17
 realization,Government policy,Communication Services,2024,1.0370370370370372,18
 realization,Government policy,Communication Services,2025,1.0789473684210527,19
 realization,Government policy,Consumer Discretionary,2019,1.0703703703703704,45
-realization,Government policy,Consumer Discretionary,2020,1.144927536231884,46
-realization,Government policy,Consumer Discretionary,2021,1.0567375886524821,47
-realization,Government policy,Consumer Discretionary,2022,1.0070921985815604,47
+realization,Government policy,Consumer Discretionary,2020,1.148936170212766,47
+realization,Government policy,Consumer Discretionary,2021,1.0354609929078014,47
+realization,Government policy,Consumer Discretionary,2022,1.0141843971631206,47
 realization,Government policy,Consumer Discretionary,2023,0.9929078014184397,47
 realization,Government policy,Consumer Discretionary,2024,1.1205673758865247,47
 realization,Government policy,Consumer Discretionary,2025,1.0851063829787233,47
@@ -189,28 +189,28 @@ realization,Government policy,Financials,2023,1.0622222222222222,75
 realization,Government policy,Financials,2024,1.111842105263158,76
 realization,Government policy,Financials,2025,1.0328947368421053,76
 realization,Government policy,Health Care,2019,1.1929824561403508,57
-realization,Government policy,Health Care,2020,1.1515151515151514,55
+realization,Government policy,Health Care,2020,1.14367816091954,58
 realization,Government policy,Health Care,2021,1.0804597701149425,58
-realization,Government policy,Health Care,2022,0.9943502824858756,59
+realization,Government policy,Health Care,2022,1.0056497175141244,59
 realization,Government policy,Health Care,2023,1.096045197740113,59
-realization,Government policy,Health Care,2024,1.0666666666666667,60
+realization,Government policy,Health Care,2024,1.0722222222222222,60
 realization,Government policy,Health Care,2025,1.0722222222222222,60
-realization,Government policy,Industrials,2019,0.9639639639639639,74
-realization,Government policy,Industrials,2020,0.8577777777777778,75
-realization,Government policy,Industrials,2021,0.8589743589743589,78
+realization,Government policy,Industrials,2019,0.9561403508771931,76
+realization,Government policy,Industrials,2020,0.8376068376068375,78
+realization,Government policy,Industrials,2021,0.8632478632478632,78
 realization,Government policy,Industrials,2022,0.8482905982905984,78
 realization,Government policy,Industrials,2023,0.8270042194092826,79
-realization,Government policy,Industrials,2024,0.7742616033755274,79
-realization,Government policy,Industrials,2025,0.9123931623931625,78
-realization,Government policy,Information Technology,2019,1.0628019323671496,69
-realization,Government policy,Information Technology,2020,1.0285714285714285,70
-realization,Government policy,Information Technology,2021,0.8912037037037037,72
-realization,Government policy,Information Technology,2022,0.9611872146118722,73
+realization,Government policy,Industrials,2024,0.7716049382716049,81
+realization,Government policy,Industrials,2025,0.9074074074074074,81
+realization,Government policy,Information Technology,2019,1.061904761904762,70
+realization,Government policy,Information Technology,2020,1.0277777777777777,72
+realization,Government policy,Information Technology,2021,0.9050925925925927,72
+realization,Government policy,Information Technology,2022,0.952054794520548,73
 realization,Government policy,Information Technology,2023,0.9977168949771689,73
-realization,Government policy,Information Technology,2024,1.0555555555555556,72
-realization,Government policy,Information Technology,2025,1.151111111111111,75
+realization,Government policy,Information Technology,2024,1.0547945205479452,73
+realization,Government policy,Information Technology,2025,1.1466666666666667,75
 realization,Government policy,Materials,2019,1.0606060606060606,22
-realization,Government policy,Materials,2020,1.0317460317460319,21
+realization,Government policy,Materials,2020,1.0151515151515151,22
 realization,Government policy,Materials,2021,0.893939393939394,22
 realization,Government policy,Materials,2022,0.8787878787878788,22
 realization,Government policy,Materials,2023,0.8695652173913043,23
@@ -238,7 +238,7 @@ uncertainty,Government policy,Communication Services,2023,2.068627450980392,17
 uncertainty,Government policy,Communication Services,2024,2.148148148148148,18
 uncertainty,Government policy,Communication Services,2025,2.175438596491228,19
 uncertainty,Government policy,Consumer Discretionary,2019,1.8037037037037038,45
-uncertainty,Government policy,Consumer Discretionary,2020,1.931159420289855,46
+uncertainty,Government policy,Consumer Discretionary,2020,1.9397163120567378,47
 uncertainty,Government policy,Consumer Discretionary,2021,1.9645390070921984,47
 uncertainty,Government policy,Consumer Discretionary,2022,1.9893617021276595,47
 uncertainty,Government policy,Consumer Discretionary,2023,2.0496453900709217,47
@@ -252,7 +252,7 @@ uncertainty,Government policy,Consumer Staples,2023,2.0202020202020203,33
 uncertainty,Government policy,Consumer Staples,2024,1.9595959595959598,33
 uncertainty,Government policy,Consumer Staples,2025,2.0505050505050506,33
 uncertainty,Government policy,Energy,2019,2.1929824561403506,19
-uncertainty,Government policy,Energy,2020,2.2333333333333334,20
+uncertainty,Government policy,Energy,2020,2.25,20
 uncertainty,Government policy,Energy,2021,2.2857142857142856,21
 uncertainty,Government policy,Energy,2022,2.3333333333333335,21
 uncertainty,Government policy,Energy,2023,2.1746031746031744,21
@@ -266,29 +266,29 @@ uncertainty,Government policy,Financials,2023,2.1422222222222222,75
 uncertainty,Government policy,Financials,2024,2.1271929824561404,76
 uncertainty,Government policy,Financials,2025,2.098684210526316,76
 uncertainty,Government policy,Health Care,2019,2.1052631578947367,57
-uncertainty,Government policy,Health Care,2020,2.187878787878788,55
-uncertainty,Government policy,Health Care,2021,2.189655172413793,58
-uncertainty,Government policy,Health Care,2022,2.1751412429378534,59
+uncertainty,Government policy,Health Care,2020,2.1724137931034484,58
+uncertainty,Government policy,Health Care,2021,2.17816091954023,58
+uncertainty,Government policy,Health Care,2022,2.169491525423729,59
 uncertainty,Government policy,Health Care,2023,2.146892655367232,59
-uncertainty,Government policy,Health Care,2024,2.2222222222222223,60
+uncertainty,Government policy,Health Care,2024,2.2277777777777774,60
 uncertainty,Government policy,Health Care,2025,2.1722222222222225,60
-uncertainty,Government policy,Industrials,2019,1.963963963963964,74
-uncertainty,Government policy,Industrials,2020,2.0244444444444447,75
+uncertainty,Government policy,Industrials,2019,1.9649122807017545,76
+uncertainty,Government policy,Industrials,2020,2.0235042735042734,78
 uncertainty,Government policy,Industrials,2021,2.0256410256410255,78
 uncertainty,Government policy,Industrials,2022,2.0982905982905984,78
 uncertainty,Government policy,Industrials,2023,2.0232067510548526,79
-uncertainty,Government policy,Industrials,2024,2.1244725738396624,79
-uncertainty,Government policy,Industrials,2025,2.0726495726495724,78
-uncertainty,Government policy,Information Technology,2019,2.0144927536231885,69
-uncertainty,Government policy,Information Technology,2020,2.0404761904761908,70
+uncertainty,Government policy,Industrials,2024,2.1296296296296298,81
+uncertainty,Government policy,Industrials,2025,2.0617283950617282,81
+uncertainty,Government policy,Information Technology,2019,2.019047619047619,70
+uncertainty,Government policy,Information Technology,2020,2.039351851851852,72
 uncertainty,Government policy,Information Technology,2021,2.0740740740740744,72
 uncertainty,Government policy,Information Technology,2022,2.139269406392694,73
 uncertainty,Government policy,Information Technology,2023,2.089041095890411,73
-uncertainty,Government policy,Information Technology,2024,2.1064814814814814,72
+uncertainty,Government policy,Information Technology,2024,2.105022831050228,73
 uncertainty,Government policy,Information Technology,2025,2.062222222222222,75
 uncertainty,Government policy,Materials,2019,1.8939393939393938,22
-uncertainty,Government policy,Materials,2020,2.0793650793650795,21
-uncertainty,Government policy,Materials,2021,2.151515151515152,22
+uncertainty,Government policy,Materials,2020,2.075757575757576,22
+uncertainty,Government policy,Materials,2021,2.1666666666666665,22
 uncertainty,Government policy,Materials,2022,2.090909090909091,22
 uncertainty,Government policy,Materials,2023,2.0869565217391304,23
 uncertainty,Government policy,Materials,2024,2.111111111111111,24
@@ -315,9 +315,9 @@ specificity,Government policy,Communication Services,2023,1.9411764705882353,17
 specificity,Government policy,Communication Services,2024,1.8888888888888888,18
 specificity,Government policy,Communication Services,2025,1.8771929824561402,19
 specificity,Government policy,Consumer Discretionary,2019,1.8925925925925926,45
-specificity,Government policy,Consumer Discretionary,2020,1.8804347826086956,46
+specificity,Government policy,Consumer Discretionary,2020,1.8829787234042554,47
 specificity,Government policy,Consumer Discretionary,2021,1.8156028368794326,47
-specificity,Government policy,Consumer Discretionary,2022,1.8014184397163122,47
+specificity,Government policy,Consumer Discretionary,2022,1.7943262411347516,47
 specificity,Government policy,Consumer Discretionary,2023,1.7836879432624113,47
 specificity,Government policy,Consumer Discretionary,2024,1.8404255319148937,47
 specificity,Government policy,Consumer Discretionary,2025,1.8085106382978724,47
@@ -343,28 +343,28 @@ specificity,Government policy,Financials,2023,1.8666666666666667,75
 specificity,Government policy,Financials,2024,1.8771929824561402,76
 specificity,Government policy,Financials,2025,1.8793859649122808,76
 specificity,Government policy,Health Care,2019,1.9532163742690059,57
-specificity,Government policy,Health Care,2020,1.9575757575757577,55
-specificity,Government policy,Health Care,2021,1.971264367816092,58
-specificity,Government policy,Health Care,2022,1.9491525423728813,59
+specificity,Government policy,Health Care,2020,1.9597701149425288,58
+specificity,Government policy,Health Care,2021,1.9597701149425288,58
+specificity,Government policy,Health Care,2022,1.9548022598870056,59
 specificity,Government policy,Health Care,2023,1.96045197740113,59
 specificity,Government policy,Health Care,2024,1.9555555555555555,60
 specificity,Government policy,Health Care,2025,1.9555555555555555,60
-specificity,Government policy,Industrials,2019,1.8153153153153154,74
-specificity,Government policy,Industrials,2020,1.8088888888888888,75
-specificity,Government policy,Industrials,2021,1.7628205128205128,78
+specificity,Government policy,Industrials,2019,1.8201754385964914,76
+specificity,Government policy,Industrials,2020,1.8076923076923077,78
+specificity,Government policy,Industrials,2021,1.7670940170940173,78
 specificity,Government policy,Industrials,2022,1.7863247863247864,78
 specificity,Government policy,Industrials,2023,1.8291139240506329,79
-specificity,Government policy,Industrials,2024,1.7848101265822784,79
-specificity,Government policy,Industrials,2025,1.8397435897435896,78
-specificity,Government policy,Information Technology,2019,1.864734299516908,69
-specificity,Government policy,Information Technology,2020,1.9,70
-specificity,Government policy,Information Technology,2021,1.8726851851851853,72
-specificity,Government policy,Information Technology,2022,1.86986301369863,73
+specificity,Government policy,Industrials,2024,1.7901234567901234,81
+specificity,Government policy,Industrials,2025,1.845679012345679,81
+specificity,Government policy,Information Technology,2019,1.8666666666666665,70
+specificity,Government policy,Information Technology,2020,1.898148148148148,72
+specificity,Government policy,Information Technology,2021,1.8680555555555556,72
+specificity,Government policy,Information Technology,2022,1.865296803652968,73
 specificity,Government policy,Information Technology,2023,1.9109589041095891,73
-specificity,Government policy,Information Technology,2024,1.9212962962962965,72
+specificity,Government policy,Information Technology,2024,1.9223744292237444,73
 specificity,Government policy,Information Technology,2025,1.9333333333333333,75
 specificity,Government policy,Materials,2019,1.8939393939393938,22
-specificity,Government policy,Materials,2020,1.8888888888888888,21
+specificity,Government policy,Materials,2020,1.8939393939393938,22
 specificity,Government policy,Materials,2021,1.7272727272727273,22
 specificity,Government policy,Materials,2022,1.8181818181818181,22
 specificity,Government policy,Materials,2023,1.6666666666666667,23
@@ -392,7 +392,7 @@ discussed,Government policy,Communication Services,2023,1.0,17
 discussed,Government policy,Communication Services,2024,1.0,18
 discussed,Government policy,Communication Services,2025,1.0,19
 discussed,Government policy,Consumer Discretionary,2019,1.0,45
-discussed,Government policy,Consumer Discretionary,2020,1.0,46
+discussed,Government policy,Consumer Discretionary,2020,1.0,47
 discussed,Government policy,Consumer Discretionary,2021,1.0,47
 discussed,Government policy,Consumer Discretionary,2022,1.0,47
 discussed,Government policy,Consumer Discretionary,2023,1.0,47
@@ -420,28 +420,28 @@ discussed,Government policy,Financials,2023,1.0,75
 discussed,Government policy,Financials,2024,1.0,76
 discussed,Government policy,Financials,2025,1.0,76
 discussed,Government policy,Health Care,2019,1.0,57
-discussed,Government policy,Health Care,2020,1.0,55
+discussed,Government policy,Health Care,2020,1.0,58
 discussed,Government policy,Health Care,2021,1.0,58
 discussed,Government policy,Health Care,2022,1.0,59
 discussed,Government policy,Health Care,2023,1.0,59
 discussed,Government policy,Health Care,2024,1.0,60
 discussed,Government policy,Health Care,2025,1.0,60
-discussed,Government policy,Industrials,2019,1.0,74
-discussed,Government policy,Industrials,2020,1.0,75
+discussed,Government policy,Industrials,2019,1.0,76
+discussed,Government policy,Industrials,2020,1.0,78
 discussed,Government policy,Industrials,2021,1.0,78
 discussed,Government policy,Industrials,2022,1.0,78
 discussed,Government policy,Industrials,2023,1.0,79
-discussed,Government policy,Industrials,2024,1.0,79
-discussed,Government policy,Industrials,2025,1.0,78
-discussed,Government policy,Information Technology,2019,1.0,69
-discussed,Government policy,Information Technology,2020,1.0,70
+discussed,Government policy,Industrials,2024,1.0,81
+discussed,Government policy,Industrials,2025,1.0,81
+discussed,Government policy,Information Technology,2019,1.0,70
+discussed,Government policy,Information Technology,2020,1.0,72
 discussed,Government policy,Information Technology,2021,1.0,72
 discussed,Government policy,Information Technology,2022,1.0,73
 discussed,Government policy,Information Technology,2023,1.0,73
-discussed,Government policy,Information Technology,2024,1.0,72
+discussed,Government policy,Information Technology,2024,1.0,73
 discussed,Government policy,Information Technology,2025,1.0,75
 discussed,Government policy,Materials,2019,1.0,22
-discussed,Government policy,Materials,2020,1.0,21
+discussed,Government policy,Materials,2020,1.0,22
 discussed,Government policy,Materials,2021,1.0,22
 discussed,Government policy,Materials,2022,1.0,22
 discussed,Government policy,Materials,2023,1.0,23
