@@ -4,7 +4,7 @@ Usage:
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD          # chunk only (local, free)
     uv run python -m sec_filings_tone.ingest --tickers NVDA AMD --embed  # chunk, then embed (costs money)
     uv run python -m sec_filings_tone.ingest --embed --budget 30         # everything; stops first if over $30
-    uv run python -m sec_filings_tone.ingest --embed --batch --wait --budget 15 --no-rebuild  # Batch API: half price
+    uv run python -m sec_filings_tone.ingest --embed --batch --wait --budget 17 --no-rebuild  # Batch API: half price
     uv run python -m sec_filings_tone.ingest                             # chunk everything
 """
 

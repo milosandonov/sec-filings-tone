@@ -80,6 +80,10 @@ Filings whose sections are already in `data/cache/` are skipped, so reruns only 
 ## Known limitations
 
 - **Survivorship bias:** the sample uses today's S&P 500 list, so it leaves out companies that dropped out of the index or went bankrupt since 2019.
-- **Fiscal years don't line up:** some companies end their fiscal year in January (NVDA) or September (AAPL). Charts and event windows use the filing date.
+- **Fiscal years don't line up:** some companies end their fiscal year in January (NVDA) or September (AAPL). Charts are by fiscal year, labeled with the calendar year it ends in, so NVDA's year ending January 2024 is FY2024 though it mostly covers 2023. Event windows pick each company's 10-Ks by filing date and period end.
 - **Extraction isn't perfect:** a small share of sections come out too short (a few quarters for WM, GE, HCA and INTC), and some big-bank MD&As run long, likely into the financial statements. These are flagged in the manifests and excluded from analysis rather than fixed by hand.
 - Results are about how companies describe risk and performance. They make no claim that tone predicts returns.
+
+## License
+
+Code (`src/`, `tests/` and the Python scripts in `eval/`): [MIT](LICENSE). Data, labels, figures and documentation: [CC BY 4.0](LICENSE-DATA). Text quoted from SEC filings stays the filers' own; `LICENSE-DATA` lists what each license covers.

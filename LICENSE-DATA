@@ -1,0 +1,27 @@
+Data, labels, figures and documentation: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Miloš Andonov
+
+The code (src/, tests/ and the Python scripts in eval/) is under the MIT License; see LICENSE.
+Everything else in this repository is under CC BY 4.0, including:
+
+- the label sets and labeling guidelines (labels/)
+- the retrieval-eval questions (eval/tests.jsonl) and findings (eval/FINDINGS.md)
+- the event definitions (events.csv, events_quarterly.csv)
+- the filing manifests (data/filings.csv, data/filings_10q.csv)
+- the figures and the CSVs beside them (figures/)
+- the documentation and results (README.md, PLAN.md, RESULTS.md)
+- the data release that sec_filings_tone.export builds (data/release/), wherever it is published
+
+You may share and adapt this material for any purpose, including commercially, if you give
+appropriate credit, link to the license and say whether you made changes. Full terms:
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+Not covered (third-party material, under its own terms):
+
+- Text quoted from SEC filings (the passages in labels/ and in the data release) is the filers'
+  own text, obtained from SEC EDGAR. The license covers the labels, scores and annotations, not
+  that text.
+- data/companies.csv is taken from Wikipedia's "List of S&P 500 companies" (CC BY-SA 4.0).
+- The Loughran-McDonald Master Dictionary is not included, only per-passage word shares computed
+  from it. It is free for academic use; see https://sraf.nd.edu/loughranmcdonald-master-dictionary/
