@@ -15,3 +15,4 @@ data/*.parquet
 data/*.skipped.csv
 data/embed_batches*/
 data/lm/
+data/tone/

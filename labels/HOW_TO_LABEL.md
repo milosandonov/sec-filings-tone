@@ -63,8 +63,9 @@ correlations between dimensions with yours, would be comparing the LLM with itse
 After you finish a sheet:
 
 1. I merge your labels with the LLM's and list the items where you disagree.
-2. You look at only those items. For each, keep your label or change it, with a one-line note
-   either way.
+2. You look at only those items, in `gold_adjudication.csv`: one row per disagreement, with your
+   label, the model's label and the words it quoted. `final` starts as your label. Keep it or
+   change it, and write a one-line `note` either way.
 3. Both versions are kept. Your **blind** labels feed the halo check and the agreement numbers.
    The **adjudicated** labels are the final gold set that scorers are tested against.
 

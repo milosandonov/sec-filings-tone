@@ -15,6 +15,7 @@ Usage:
     uv run python -m sec_filings_tone.sentiment report                    # rescore the saved pilot, no API calls
     uv run python -m sec_filings_tone.sentiment baselines                 # FinBERT and LM on the pilot, local
     uv run python -m sec_filings_tone.sentiment gold                      # draw labels/gold_profiles.csv, 30 items
+    uv run python -m sec_filings_tone.sentiment gold-report --budget 0.1  # score the labeled items, compare, adjudication sheet
 """
 
 import argparse
@@ -66,6 +67,7 @@ TOPICS = {  # topic -> search query used to find passages about it
 # Phase 9 scores every topic for every company, except deposits and liquidity, for Financials only
 PRACTICE = Path(__file__).parents[2] / "labels" / "practice.csv"  # never sampled, so it stays a clean test
 GOLD = Path(__file__).parents[2] / "labels" / "gold_profiles.csv"
+ADJUDICATION = Path(__file__).parents[2] / "labels" / "gold_adjudication.csv"
 
 EXAMPLES = """\
 Short examples where the dimensions disagree (scores in the order polarity, magnitude, realization,
@@ -362,6 +364,124 @@ def gold(n: int, seed: int = 0) -> None:
           f"{(items.form == '10-Q').sum()} from 10-Qs")
 
 
+# ---------- gold benchmark ----------
+
+def labels(path: Path, final: pd.DataFrame | None = None) -> pd.DataFrame:
+    """A labeled sheet, checked: off_topic yes or no (a spreadsheet's TRUE/FALSE is accepted) and every
+    on-topic item scored on each dimension's scale. Stops with the cells to fix. With `final` (the
+    adjudication sheet), each of its rows replaces that item's label first."""
+    d = pd.read_csv(path, dtype=str, keep_default_na=False)
+    for r in (final.itertuples() if final is not None else ()):
+        d.loc[d.item_id == r.item_id, r.field] = r.final
+    ot = d.off_topic.str.strip().str.lower().map({"yes": True, "true": True, "no": False, "false": False})
+    bad = [f"{i} off_topic" for i in d.item_id[ot.isna()]]
+    on = ot.eq(False)
+    for c, scale in DIMENSIONS.items():
+        d[c] = pd.to_numeric(d[c], errors="coerce")
+        bad += [f"{i} {c}" for i, x in zip(d.item_id[on], d[c][on]) if x not in scale]
+    if bad:
+        raise SystemExit(f"{path.name}: fix {', '.join(bad)}")
+    return d.assign(off_topic=ot.astype(bool))
+
+
+def gold_scores(cap: Cap, model: str) -> pd.DataFrame:
+    """The scorer's profile of every labeled item (practice and gold sheets): one combined call each,
+    as Phase 9 scores. Saved, so the report reruns for free; delete the file to rescore."""
+    path = OUT / f"gold_scores_{model}.parquet"
+    if path.exists():
+        return pd.read_parquet(path)
+    items = pd.concat([pd.read_csv(p, usecols=["item_id", "topic", "chunk_id"]) for p in (PRACTICE, GOLD)])
+    rows = retrieve.chunks().loc[items.chunk_id]
+
+    def run(k):
+        try:
+            res = score(rows.iloc[k], items.topic.iloc[k], list(DIMENSIONS), cap, model)
+        except CapReached:
+            raise
+        except Exception as e:  # report every failure at once instead of stopping at the first
+            res = {"error": f"{type(e).__name__}: {e}"}
+        return {"item_id": items.item_id.iloc[k], "model": model, **res}
+
+    with ThreadPoolExecutor(8) as pool:
+        out = pd.DataFrame(pool.map(run, range(len(items))))
+    print(f"scored {len(out)} items with {model}: ${cap.spent():.3f}")
+    if "error" in out and out.error.notna().any():
+        raise SystemExit(f"{out.error.notna().sum()} calls failed, nothing saved:\n{out.error.dropna().to_string()}")
+    OUT.mkdir(parents=True, exist_ok=True)
+    out.to_parquet(path, index=False)
+    return out
+
+
+def kappa_ci(a, b, labels, n_boot: int = 2000, seed: int = 0) -> tuple[float, float, float]:
+    """Weighted kappa with a 95% bootstrap interval."""
+    a, b = np.asarray(a, int), np.asarray(b, int)
+    rng = np.random.default_rng(seed)
+    boot = [kappa(a[k], b[k], labels) for k in (rng.integers(0, len(a), len(a)) for _ in range(n_boot))]
+    return kappa(a, b, labels), *np.nanpercentile(boot, [2.5, 97.5])
+
+
+def gold_report(cap: Cap, model: str, adjudicated: bool = False) -> None:
+    """Phase 6 on the human labels: off-topic agreement, agreement per dimension, how the scores
+    spread, the halo and merge checks, and labels/gold_adjudication.csv with one row per
+    disagreement for the labeler to review. The gold sheet (random, labeled blind under the frozen
+    rules) is the main set; the practice items are hand-picked and were labeled before the rules
+    changed, so they're shown added in, not alone. `adjudicated` applies the labeler's decisions;
+    disagreements resolved toward the model raise agreement by construction, so the report counts them."""
+    final = pd.read_csv(ADJUDICATION, dtype=str, keep_default_na=False) if adjudicated else None
+    human = pd.concat([labels(PRACTICE, final), labels(GOLD, final)]).set_index("item_id")
+    llm = gold_scores(cap, model).set_index("item_id").loc[human.index]
+    llm["off_topic"] = llm.off_topic.astype(bool)
+    dims = list(DIMENSIONS)
+    print(f"\n{model} vs the {'adjudicated' if adjudicated else 'blind'} human labels: {len(human)} items")
+    if adjudicated:
+        changed = final.final.str.strip() != final.your_label.str.strip()
+        print(f"adjudication: {changed.sum()} of {len(final)} disagreements changed, "
+              f"{(changed & (final.final.str.strip() == final.model_label.str.strip())).sum()} to the model's label")
+    print("\nOff topic (rows: human, columns: model)")
+    print(pd.crosstab(human.off_topic, llm.off_topic).to_string())
+    on = human.index[~human.off_topic & ~llm.off_topic]
+    gold_on = on[on.str.startswith("G")]
+
+    def spread(v, scale):
+        return " ".join(f"{s}:{(v == s).sum()}" for s in scale)
+
+    print("\n| Dimension | Exact, gold | Within 1, gold | Weighted kappa, gold [95% CI] | Kappa, gold + practice | "
+          "Human scores, gold | Model scores, gold |\n|---|---|---|---|---|---|---|")
+    for d, scale in DIMENSIONS.items():
+        h, m = human.loc[gold_on, d].astype(int), llm.loc[gold_on, d].astype(int)
+        k, lo, hi = kappa_ci(h, m, scale)
+        print(f"| {d} | {(h == m).mean():.0%} | {((h - m).abs() <= 1).mean():.0%} | {k:.2f} [{lo:.2f}, {hi:.2f}] | "
+              f"{kappa(human.loc[on, d].astype(int), llm.loc[on, d].astype(int), scale):.2f} | "
+              f"{spread(h, scale)} | {spread(m, scale)} |")
+    print(f"\n{len(gold_on)} gold and {len(on) - len(gold_on)} practice items on topic for both. "
+          "Rule fixed in advance: drop a dimension with kappa below 0.6.")
+
+    print("\nCorrelation between dimensions (Spearman), gold + practice on topic. Halo: the model's clearly above "
+          "the human's. Merge: a human pair above 0.8. A dimension with one score throughout shows NaN.")
+    for name, frame in [("human", human.loc[on]), (model, llm.loc[on])]:
+        c = frame[dims].astype(float).corr(method="spearman")
+        pairs = c.where(np.triu(np.ones(c.shape, bool), 1)).stack()
+        print(f"\n{name}: mean |r| between dimensions {pairs.abs().mean():.2f}\n{c.round(2).to_string()}")
+        if name == "human" and (big := pairs[pairs.abs() > 0.8]).size:
+            print(f"merge candidates: {big.round(2).to_dict()}")
+
+    if ADJUDICATION.exists():
+        print(f"\n{ADJUDICATION.name} exists and may hold your decisions; not overwritten")
+        return
+    text = pd.concat([pd.read_csv(p) for p in (PRACTICE, GOLD)]).set_index("item_id")
+    out = []
+    for i in human.index:
+        h, m = human.loc[i], llm.loc[i]
+        fields = ["off_topic"] if h.off_topic != m.off_topic else [] if h.off_topic else [d for d in dims if h[d] != m[d]]
+        for f in fields:
+            yours, theirs = (("yes" if h[f] else "no"), ("yes" if m[f] else "no")) if f == "off_topic" else (int(h[f]), int(m[f]))
+            out.append({"item_id": i, **text.loc[i, ["topic", "company", "period", "section"]].to_dict(), "field": f,
+                        "your_label": yours, "model_label": theirs, "model_evidence": m.get(f"{f}_evidence", ""),
+                        "final": yours, "note": "", "passage": text.loc[i, "passage"]})
+    pd.DataFrame(out).to_csv(ADJUDICATION, index=False)
+    print(f"\nwrote {ADJUDICATION.name}: {len(out)} disagreements on {len({o['item_id'] for o in out})} items")
+
+
 def rerank_call_usd(n_input_tokens: float) -> float:
     """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
     return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
@@ -422,11 +542,12 @@ def report(n: int, model: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("command", choices=["pilot", "report", "baselines", "gold"])
+    p.add_argument("command", choices=["pilot", "report", "baselines", "gold", "gold-report"])
     p.add_argument("--n", type=int, help="items; default 100 (pilot), 30 (gold)")
     p.add_argument("--model", default=MODEL)
     p.add_argument("--budget", type=float, default=2.0, help="USD; stop before a call would pass it")
     p.add_argument("--max-minutes", type=float, default=60)
+    p.add_argument("--adjudicated", action="store_true", help="gold-report: apply labels/gold_adjudication.csv")
     a = p.parse_args()
     n = a.n or (30 if a.command == "gold" else 100)
     if a.command == "pilot":
@@ -435,6 +556,8 @@ def main() -> None:
         baselines(n, a.model)
     elif a.command == "gold":
         gold(n)
+    elif a.command == "gold-report":
+        gold_report(Cap(a.budget, a.max_minutes), a.model, a.adjudicated)
     else:
         report(n, a.model)
 

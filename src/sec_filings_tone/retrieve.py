@@ -89,11 +89,16 @@ def subset(filters: dict) -> tuple[np.ndarray, dict | None]:
     return mask, {"$and": clauses} if len(clauses) > 1 else clauses[0] if clauses else None
 
 
-def vector_search(query: str, where: dict | None, n: int) -> tuple[list[str], list[float]]:
+@cache
+def embed_query(query: str) -> list[float]:
+    """Cached, so Phase 9's ~42,000 searches over 13 topic queries embed each query once."""
     from openai import OpenAI
 
-    emb = OpenAI().embeddings.create(model=EMBED_MODEL, dimensions=EMBED_DIMS, input=[query]).data[0].embedding
-    res = collection().query(query_embeddings=[emb], n_results=n, where=where, include=["distances"])
+    return OpenAI().embeddings.create(model=EMBED_MODEL, dimensions=EMBED_DIMS, input=[query]).data[0].embedding
+
+
+def vector_search(query: str, where: dict | None, n: int) -> tuple[list[str], list[float]]:
+    res = collection().query(query_embeddings=[embed_query(query)], n_results=n, where=where, include=["distances"])
     return res["ids"][0], [1 - d for d in res["distances"][0]]  # cosine similarity
 
 

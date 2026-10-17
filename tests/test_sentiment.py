@@ -67,3 +67,29 @@ if LM_PATH.exists():  # downloaded on first use
     from sec_filings_tone.sentiment import lm_lists
     assert "NULL" in lm_lists()[0]  # read as a word, not as a missing value
     print("ok")
+
+# labeled sheets: yes/no or TRUE/FALSE read the same; a score off its scale or missing on an on-topic item stops
+import tempfile  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+from sec_filings_tone.sentiment import kappa_ci, labels  # noqa: E402
+
+head = "item_id,off_topic,polarity,magnitude,realization,uncertainty,specificity\n"
+with tempfile.TemporaryDirectory() as tmp:
+    ok, bad = Path(tmp, "ok.csv"), Path(tmp, "bad.csv")
+    ok.write_text(head + "G01,no,-2,3,2,0,1\nG02,TRUE,,,,,\nG03,FALSE,0,0,0,0,0\n")
+    d = labels(ok)
+    assert d.off_topic.tolist() == [False, True, False] and d.polarity.tolist()[0] == -2
+    final = pd.DataFrame({"item_id": ["G01", "G03"], "field": ["polarity", "off_topic"], "final": ["-1", "yes"]})
+    d = labels(ok, final)  # adjudicated: each final replaces that label
+    assert d.polarity.tolist()[0] == -1 and d.off_topic.tolist() == [False, True, True]
+    bad.write_text(head + "G01,no,-2,3,3,0,1\nG02,no,0,0,0,,0\nG03,maybe,0,0,0,0,0\n")
+    try:
+        labels(bad)
+        raise AssertionError("bad cells must stop the run")
+    except SystemExit as e:
+        assert all(c in str(e) for c in ("G01 realization", "G02 uncertainty", "G03 off_topic")), e
+
+k, lo, hi = kappa_ci([0, 1, 2, 2, 1, 0], [0, 1, 2, 2, 1, 0], (0, 1, 2))
+assert abs(k - 1) < 1e-9 and lo <= k <= hi
+print("ok")
