@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,Demand,Communication Services,2019,-0.7777777777777778,15
+polarity,Demand,Communication Services,2020,-0.9222222222222223,15
+polarity,Demand,Communication Services,2021,-0.9791666666666666,16
+polarity,Demand,Communication Services,2022,-1.0208333333333333,16
+polarity,Demand,Communication Services,2023,-0.8431372549019607,17
+polarity,Demand,Communication Services,2024,-0.9629629629629629,18
+polarity,Demand,Communication Services,2025,-1.0789473684210527,19
+polarity,Demand,Consumer Discretionary,2019,-0.9074074074074074,45
+polarity,Demand,Consumer Discretionary,2020,-0.963768115942029,46
+polarity,Demand,Consumer Discretionary,2021,-0.8971631205673758,47
+polarity,Demand,Consumer Discretionary,2022,-0.9609929078014184,47
+polarity,Demand,Consumer Discretionary,2023,-0.9468085106382979,47
+polarity,Demand,Consumer Discretionary,2024,-0.8829787234042553,47
+polarity,Demand,Consumer Discretionary,2025,-0.9787234042553191,47
+polarity,Demand,Consumer Staples,2019,-0.9193548387096774,31
+polarity,Demand,Consumer Staples,2020,-0.9892473118279569,31
+polarity,Demand,Consumer Staples,2021,-0.924731182795699,31
+polarity,Demand,Consumer Staples,2022,-0.9784946236559139,31
+polarity,Demand,Consumer Staples,2023,-0.9848484848484849,33
+polarity,Demand,Consumer Staples,2024,-0.9797979797979799,33
+polarity,Demand,Consumer Staples,2025,-0.9696969696969697,33
+polarity,Demand,Energy,2019,-0.8333333333333334,19
+polarity,Demand,Energy,2020,-1.1666666666666665,20
+polarity,Demand,Energy,2021,-0.888888888888889,21
+polarity,Demand,Energy,2022,-0.8333333333333334,21
+polarity,Demand,Energy,2023,-0.992063492063492,21
+polarity,Demand,Energy,2024,-0.8571428571428571,21
+polarity,Demand,Energy,2025,-0.9047619047619048,21
+polarity,Demand,Financials,2019,-0.8541666666666666,72
+polarity,Demand,Financials,2020,-0.9537037037037037,72
+polarity,Demand,Financials,2021,-0.8400900900900901,74
+polarity,Demand,Financials,2022,-0.8222222222222222,75
+polarity,Demand,Financials,2023,-0.9,75
+polarity,Demand,Financials,2024,-0.8486842105263158,76
+polarity,Demand,Financials,2025,-0.8552631578947368,76
+polarity,Demand,Health Care,2019,-0.8801169590643274,57
+polarity,Demand,Health Care,2020,-0.9848484848484848,55
+polarity,Demand,Health Care,2021,-0.8936781609195402,58
+polarity,Demand,Health Care,2022,-0.9661016949152542,59
+polarity,Demand,Health Care,2023,-1.0056497175141244,59
+polarity,Demand,Health Care,2024,-0.9527777777777777,60
+polarity,Demand,Health Care,2025,-1.0027777777777778,60
+polarity,Demand,Industrials,2019,-0.7995495495495495,74
+polarity,Demand,Industrials,2020,-0.971111111111111,75
+polarity,Demand,Industrials,2021,-0.7991452991452992,78
+polarity,Demand,Industrials,2022,-0.8397435897435898,78
+polarity,Demand,Industrials,2023,-0.8544303797468354,79
+polarity,Demand,Industrials,2024,-0.8523206751054851,79
+polarity,Demand,Industrials,2025,-0.8141025641025641,78
+polarity,Demand,Information Technology,2019,-0.893719806763285,69
+polarity,Demand,Information Technology,2020,-0.9666666666666668,70
+polarity,Demand,Information Technology,2021,-0.9120370370370371,72
+polarity,Demand,Information Technology,2022,-0.9771689497716894,73
+polarity,Demand,Information Technology,2023,-0.9863013698630136,73
+polarity,Demand,Information Technology,2024,-0.9699074074074073,72
+polarity,Demand,Information Technology,2025,-0.928888888888889,75
+polarity,Demand,Materials,2019,-0.7936507936507937,21
+polarity,Demand,Materials,2020,-0.9206349206349206,21
+polarity,Demand,Materials,2021,-0.856060606060606,22
+polarity,Demand,Materials,2022,-0.9696969696969696,22
+polarity,Demand,Materials,2023,-1.0217391304347827,23
+polarity,Demand,Materials,2024,-1.0486111111111112,24
+polarity,Demand,Materials,2025,-1.0138888888888888,24
+polarity,Demand,Real Estate,2019,-0.7611111111111111,30
+polarity,Demand,Real Estate,2020,-0.9555555555555555,30
+polarity,Demand,Real Estate,2021,-0.85,30
+polarity,Demand,Real Estate,2022,-0.8277777777777777,30
+polarity,Demand,Real Estate,2023,-0.8777777777777778,30
+polarity,Demand,Real Estate,2024,-0.888888888888889,30
+polarity,Demand,Real Estate,2025,-0.9,30
+polarity,Demand,Utilities,2019,-0.9055555555555556,30
+polarity,Demand,Utilities,2020,-1.0055555555555555,30
+polarity,Demand,Utilities,2021,-0.7849462365591398,31
+polarity,Demand,Utilities,2022,-0.7204301075268816,31
+polarity,Demand,Utilities,2023,-0.8655913978494624,31
+polarity,Demand,Utilities,2024,-0.6881720430107526,31
+polarity,Demand,Utilities,2025,-0.48924731182795694,31
+magnitude,Demand,Communication Services,2019,1.4555555555555555,15
+magnitude,Demand,Communication Services,2020,1.577777777777778,15
+magnitude,Demand,Communication Services,2021,1.4375,16
+magnitude,Demand,Communication Services,2022,1.40625,16
+magnitude,Demand,Communication Services,2023,1.4215686274509804,17
+magnitude,Demand,Communication Services,2024,1.4074074074074074,18
+magnitude,Demand,Communication Services,2025,1.3333333333333333,19
+magnitude,Demand,Consumer Discretionary,2019,1.2074074074074075,45
+magnitude,Demand,Consumer Discretionary,2020,1.4094202898550723,46
+magnitude,Demand,Consumer Discretionary,2021,1.4361702127659575,47
+magnitude,Demand,Consumer Discretionary,2022,1.273049645390071,47
+magnitude,Demand,Consumer Discretionary,2023,1.2659574468085106,47
+magnitude,Demand,Consumer Discretionary,2024,1.372340425531915,47
+magnitude,Demand,Consumer Discretionary,2025,1.301418439716312,47
+magnitude,Demand,Consumer Staples,2019,1.3064516129032258,31
+magnitude,Demand,Consumer Staples,2020,1.3279569892473118,31
+magnitude,Demand,Consumer Staples,2021,1.403225806451613,31
+magnitude,Demand,Consumer Staples,2022,1.3118279569892473,31
+magnitude,Demand,Consumer Staples,2023,1.2070707070707072,33
+magnitude,Demand,Consumer Staples,2024,1.2777777777777777,33
+magnitude,Demand,Consumer Staples,2025,1.191919191919192,33
+magnitude,Demand,Energy,2019,1.192982456140351,19
+magnitude,Demand,Energy,2020,1.75,20
+magnitude,Demand,Energy,2021,1.5238095238095237,21
+magnitude,Demand,Energy,2022,1.3571428571428572,21
+magnitude,Demand,Energy,2023,1.4365079365079363,21
+magnitude,Demand,Energy,2024,1.3968253968253967,21
+magnitude,Demand,Energy,2025,1.492063492063492,21
+magnitude,Demand,Financials,2019,1.1504629629629628,72
+magnitude,Demand,Financials,2020,1.1412037037037037,72
+magnitude,Demand,Financials,2021,1.234234234234234,74
+magnitude,Demand,Financials,2022,1.22,75
+magnitude,Demand,Financials,2023,1.24,75
+magnitude,Demand,Financials,2024,1.1776315789473684,76
+magnitude,Demand,Financials,2025,1.1951754385964912,76
+magnitude,Demand,Health Care,2019,1.1403508771929824,57
+magnitude,Demand,Health Care,2020,1.293939393939394,55
+magnitude,Demand,Health Care,2021,1.3908045977011496,58
+magnitude,Demand,Health Care,2022,1.4180790960451979,59
+magnitude,Demand,Health Care,2023,1.2740112994350283,59
+magnitude,Demand,Health Care,2024,1.2055555555555555,60
+magnitude,Demand,Health Care,2025,1.2277777777777779,60
+magnitude,Demand,Industrials,2019,1.2725225225225225,74
+magnitude,Demand,Industrials,2020,1.451111111111111,75
+magnitude,Demand,Industrials,2021,1.4166666666666667,78
+magnitude,Demand,Industrials,2022,1.3034188034188035,78
+magnitude,Demand,Industrials,2023,1.29957805907173,79
+magnitude,Demand,Industrials,2024,1.3438818565400845,79
+magnitude,Demand,Industrials,2025,1.2884615384615385,78
+magnitude,Demand,Information Technology,2019,1.3091787439613527,69
+magnitude,Demand,Information Technology,2020,1.292857142857143,70
+magnitude,Demand,Information Technology,2021,1.3912037037037037,72
+magnitude,Demand,Information Technology,2022,1.3105022831050228,73
+magnitude,Demand,Information Technology,2023,1.3059360730593608,73
+magnitude,Demand,Information Technology,2024,1.3125,72
+magnitude,Demand,Information Technology,2025,1.3733333333333333,75
+magnitude,Demand,Materials,2019,1.380952380952381,21
+magnitude,Demand,Materials,2020,1.5873015873015874,21
+magnitude,Demand,Materials,2021,1.4696969696969697,22
+magnitude,Demand,Materials,2022,1.3484848484848486,22
+magnitude,Demand,Materials,2023,1.3695652173913044,23
+magnitude,Demand,Materials,2024,1.4444444444444444,24
+magnitude,Demand,Materials,2025,1.388888888888889,24
+magnitude,Demand,Real Estate,2019,1.3222222222222222,30
+magnitude,Demand,Real Estate,2020,1.5888888888888888,30
+magnitude,Demand,Real Estate,2021,1.4444444444444444,30
+magnitude,Demand,Real Estate,2022,1.3,30
+magnitude,Demand,Real Estate,2023,1.4388888888888889,30
+magnitude,Demand,Real Estate,2024,1.3833333333333333,30
+magnitude,Demand,Real Estate,2025,1.3944444444444446,30
+magnitude,Demand,Utilities,2019,1.2333333333333334,30
+magnitude,Demand,Utilities,2020,1.3611111111111112,30
+magnitude,Demand,Utilities,2021,1.3279569892473118,31
+magnitude,Demand,Utilities,2022,1.3655913978494625,31
+magnitude,Demand,Utilities,2023,1.2956989247311828,31
+magnitude,Demand,Utilities,2024,1.3010752688172045,31
+magnitude,Demand,Utilities,2025,1.3225806451612903,31
+realization,Demand,Communication Services,2019,0.8666666666666667,15
+realization,Demand,Communication Services,2020,1.011111111111111,15
+realization,Demand,Communication Services,2021,1.0729166666666667,16
+realization,Demand,Communication Services,2022,0.8333333333333334,16
+realization,Demand,Communication Services,2023,0.8333333333333333,17
+realization,Demand,Communication Services,2024,0.8148148148148148,18
+realization,Demand,Communication Services,2025,0.8245614035087719,19
+realization,Demand,Consumer Discretionary,2019,0.537037037037037,45
+realization,Demand,Consumer Discretionary,2020,0.6992753623188406,46
+realization,Demand,Consumer Discretionary,2021,0.8049645390070922,47
+realization,Demand,Consumer Discretionary,2022,0.7092198581560284,47
+realization,Demand,Consumer Discretionary,2023,0.6453900709219857,47
+realization,Demand,Consumer Discretionary,2024,0.8049645390070922,47
+realization,Demand,Consumer Discretionary,2025,0.7163120567375886,47
+realization,Demand,Consumer Staples,2019,0.41935483870967744,31
+realization,Demand,Consumer Staples,2020,0.7043010752688171,31
+realization,Demand,Consumer Staples,2021,0.7365591397849462,31
+realization,Demand,Consumer Staples,2022,0.6236559139784946,31
+realization,Demand,Consumer Staples,2023,0.5151515151515151,33
+realization,Demand,Consumer Staples,2024,0.5606060606060606,33
+realization,Demand,Consumer Staples,2025,0.6818181818181818,33
+realization,Demand,Energy,2019,0.38596491228070173,19
+realization,Demand,Energy,2020,0.8833333333333332,20
+realization,Demand,Energy,2021,0.6984126984126984,21
+realization,Demand,Energy,2022,0.6825396825396824,21
+realization,Demand,Energy,2023,0.6587301587301587,21
+realization,Demand,Energy,2024,0.4603174603174603,21
+realization,Demand,Energy,2025,0.6031746031746031,21
+realization,Demand,Financials,2019,0.48379629629629634,72
+realization,Demand,Financials,2020,0.6435185185185186,72
+realization,Demand,Financials,2021,0.5945945945945946,74
+realization,Demand,Financials,2022,0.6,75
+realization,Demand,Financials,2023,0.591111111111111,75
+realization,Demand,Financials,2024,0.4956140350877193,76
+realization,Demand,Financials,2025,0.4978070175438596,76
+realization,Demand,Health Care,2019,0.47368421052631576,57
+realization,Demand,Health Care,2020,0.7242424242424241,55
+realization,Demand,Health Care,2021,0.735632183908046,58
+realization,Demand,Health Care,2022,0.7062146892655367,59
+realization,Demand,Health Care,2023,0.7485875706214689,59
+realization,Demand,Health Care,2024,0.6944444444444444,60
+realization,Demand,Health Care,2025,0.7777777777777778,60
+realization,Demand,Industrials,2019,0.6013513513513513,74
+realization,Demand,Industrials,2020,0.8111111111111111,75
+realization,Demand,Industrials,2021,0.8012820512820513,78
+realization,Demand,Industrials,2022,0.7948717948717948,78
+realization,Demand,Industrials,2023,0.7974683544303798,79
+realization,Demand,Industrials,2024,0.6455696202531646,79
+realization,Demand,Industrials,2025,0.6602564102564102,78
+realization,Demand,Information Technology,2019,0.5700483091787439,69
+realization,Demand,Information Technology,2020,0.6047619047619047,70
+realization,Demand,Information Technology,2021,0.6944444444444444,72
+realization,Demand,Information Technology,2022,0.680365296803653,73
+realization,Demand,Information Technology,2023,0.7031963470319634,73
+realization,Demand,Information Technology,2024,0.7962962962962963,72
+realization,Demand,Information Technology,2025,0.7622222222222222,75
+realization,Demand,Materials,2019,0.7380952380952381,21
+realization,Demand,Materials,2020,0.746031746031746,21
+realization,Demand,Materials,2021,0.553030303030303,22
+realization,Demand,Materials,2022,0.6818181818181818,22
+realization,Demand,Materials,2023,0.782608695652174,23
+realization,Demand,Materials,2024,0.7569444444444445,24
+realization,Demand,Materials,2025,0.7638888888888888,24
+realization,Demand,Real Estate,2019,0.5944444444444444,30
+realization,Demand,Real Estate,2020,0.7666666666666667,30
+realization,Demand,Real Estate,2021,0.6055555555555556,30
+realization,Demand,Real Estate,2022,0.6555555555555556,30
+realization,Demand,Real Estate,2023,0.5,30
+realization,Demand,Real Estate,2024,0.5444444444444444,30
+realization,Demand,Real Estate,2025,0.5777777777777777,30
+realization,Demand,Utilities,2019,0.5944444444444444,30
+realization,Demand,Utilities,2020,0.8166666666666667,30
+realization,Demand,Utilities,2021,0.8817204301075269,31
+realization,Demand,Utilities,2022,0.7311827956989247,31
+realization,Demand,Utilities,2023,0.48924731182795694,31
+realization,Demand,Utilities,2024,0.553763440860215,31
+realization,Demand,Utilities,2025,0.6827956989247311,31
+uncertainty,Demand,Communication Services,2019,1.8444444444444446,15
+uncertainty,Demand,Communication Services,2020,1.8666666666666667,15
+uncertainty,Demand,Communication Services,2021,1.9375,16
+uncertainty,Demand,Communication Services,2022,1.9583333333333333,16
+uncertainty,Demand,Communication Services,2023,1.8823529411764706,17
+uncertainty,Demand,Communication Services,2024,1.8888888888888888,18
+uncertainty,Demand,Communication Services,2025,1.9473684210526316,19
+uncertainty,Demand,Consumer Discretionary,2019,1.9518518518518517,45
+uncertainty,Demand,Consumer Discretionary,2020,2.0760869565217392,46
+uncertainty,Demand,Consumer Discretionary,2021,2.0354609929078014,47
+uncertainty,Demand,Consumer Discretionary,2022,2.0496453900709217,47
+uncertainty,Demand,Consumer Discretionary,2023,1.9822695035460993,47
+uncertainty,Demand,Consumer Discretionary,2024,1.950354609929078,47
+uncertainty,Demand,Consumer Discretionary,2025,1.950354609929078,47
+uncertainty,Demand,Consumer Staples,2019,1.9946236559139785,31
+uncertainty,Demand,Consumer Staples,2020,1.9301075268817205,31
+uncertainty,Demand,Consumer Staples,2021,1.967741935483871,31
+uncertainty,Demand,Consumer Staples,2022,2.0,31
+uncertainty,Demand,Consumer Staples,2023,1.9494949494949494,33
+uncertainty,Demand,Consumer Staples,2024,1.9393939393939394,33
+uncertainty,Demand,Consumer Staples,2025,1.9494949494949494,33
+uncertainty,Demand,Energy,2019,1.9561403508771928,19
+uncertainty,Demand,Energy,2020,1.9333333333333331,20
+uncertainty,Demand,Energy,2021,2.158730158730159,21
+uncertainty,Demand,Energy,2022,2.079365079365079,21
+uncertainty,Demand,Energy,2023,2.0714285714285716,21
+uncertainty,Demand,Energy,2024,1.9523809523809523,21
+uncertainty,Demand,Energy,2025,1.9206349206349207,21
+uncertainty,Demand,Financials,2019,1.849537037037037,72
+uncertainty,Demand,Financials,2020,1.9074074074074074,72
+uncertainty,Demand,Financials,2021,1.9166666666666667,74
+uncertainty,Demand,Financials,2022,1.9044444444444446,75
+uncertainty,Demand,Financials,2023,1.8733333333333333,75
+uncertainty,Demand,Financials,2024,1.8530701754385965,76
+uncertainty,Demand,Financials,2025,1.9035087719298245,76
+uncertainty,Demand,Health Care,2019,1.9502923976608189,57
+uncertainty,Demand,Health Care,2020,2.0484848484848484,55
+uncertainty,Demand,Health Care,2021,2.07183908045977,58
+uncertainty,Demand,Health Care,2022,2.0254237288135593,59
+uncertainty,Demand,Health Care,2023,2.0762711864406778,59
+uncertainty,Demand,Health Care,2024,2.047222222222222,60
+uncertainty,Demand,Health Care,2025,2.0083333333333333,60
+uncertainty,Demand,Industrials,2019,1.8581081081081081,74
+uncertainty,Demand,Industrials,2020,1.9866666666666666,75
+uncertainty,Demand,Industrials,2021,1.925213675213675,78
+uncertainty,Demand,Industrials,2022,1.9871794871794872,78
+uncertainty,Demand,Industrials,2023,1.8734177215189873,79
+uncertainty,Demand,Industrials,2024,1.9493670886075949,79
+uncertainty,Demand,Industrials,2025,1.8525641025641026,78
+uncertainty,Demand,Information Technology,2019,1.9420289855072463,69
+uncertainty,Demand,Information Technology,2020,2.0,70
+uncertainty,Demand,Information Technology,2021,1.990740740740741,72
+uncertainty,Demand,Information Technology,2022,1.9954337899543377,73
+uncertainty,Demand,Information Technology,2023,1.9817351598173514,73
+uncertainty,Demand,Information Technology,2024,2.0277777777777777,72
+uncertainty,Demand,Information Technology,2025,1.9688888888888887,75
+uncertainty,Demand,Materials,2019,1.9682539682539684,21
+uncertainty,Demand,Materials,2020,2.03968253968254,21
+uncertainty,Demand,Materials,2021,2.0454545454545454,22
+uncertainty,Demand,Materials,2022,2.015151515151515,22
+uncertainty,Demand,Materials,2023,2.0217391304347827,23
+uncertainty,Demand,Materials,2024,1.9444444444444444,24
+uncertainty,Demand,Materials,2025,1.9444444444444444,24
+uncertainty,Demand,Real Estate,2019,1.9,30
+uncertainty,Demand,Real Estate,2020,2.0833333333333335,30
+uncertainty,Demand,Real Estate,2021,2.0055555555555555,30
+uncertainty,Demand,Real Estate,2022,1.9333333333333333,30
+uncertainty,Demand,Real Estate,2023,1.972222222222222,30
+uncertainty,Demand,Real Estate,2024,1.8611111111111112,30
+uncertainty,Demand,Real Estate,2025,1.95,30
+uncertainty,Demand,Utilities,2019,1.8444444444444446,30
+uncertainty,Demand,Utilities,2020,1.922222222222222,30
+uncertainty,Demand,Utilities,2021,1.8763440860215053,31
+uncertainty,Demand,Utilities,2022,1.8387096774193548,31
+uncertainty,Demand,Utilities,2023,1.9623655913978495,31
+uncertainty,Demand,Utilities,2024,1.881720430107527,31
+uncertainty,Demand,Utilities,2025,1.8387096774193548,31
+specificity,Demand,Communication Services,2019,1.7333333333333334,15
+specificity,Demand,Communication Services,2020,1.7111111111111112,15
+specificity,Demand,Communication Services,2021,1.6666666666666667,16
+specificity,Demand,Communication Services,2022,1.7083333333333333,16
+specificity,Demand,Communication Services,2023,1.6078431372549018,17
+specificity,Demand,Communication Services,2024,1.6296296296296295,18
+specificity,Demand,Communication Services,2025,1.6228070175438596,19
+specificity,Demand,Consumer Discretionary,2019,1.425925925925926,45
+specificity,Demand,Consumer Discretionary,2020,1.5543478260869565,46
+specificity,Demand,Consumer Discretionary,2021,1.6241134751773048,47
+specificity,Demand,Consumer Discretionary,2022,1.5,47
+specificity,Demand,Consumer Discretionary,2023,1.5425531914893618,47
+specificity,Demand,Consumer Discretionary,2024,1.5567375886524824,47
+specificity,Demand,Consumer Discretionary,2025,1.5460992907801419,47
+specificity,Demand,Consumer Staples,2019,1.532258064516129,31
+specificity,Demand,Consumer Staples,2020,1.6236559139784947,31
+specificity,Demand,Consumer Staples,2021,1.5698924731182795,31
+specificity,Demand,Consumer Staples,2022,1.521505376344086,31
+specificity,Demand,Consumer Staples,2023,1.5151515151515151,33
+specificity,Demand,Consumer Staples,2024,1.5404040404040404,33
+specificity,Demand,Consumer Staples,2025,1.5404040404040404,33
+specificity,Demand,Energy,2019,1.3333333333333333,19
+specificity,Demand,Energy,2020,1.6,20
+specificity,Demand,Energy,2021,1.5873015873015874,21
+specificity,Demand,Energy,2022,1.5634920634920637,21
+specificity,Demand,Energy,2023,1.5793650793650793,21
+specificity,Demand,Energy,2024,1.5634920634920637,21
+specificity,Demand,Energy,2025,1.5555555555555554,21
+specificity,Demand,Financials,2019,1.3680555555555556,72
+specificity,Demand,Financials,2020,1.3703703703703705,72
+specificity,Demand,Financials,2021,1.4256756756756757,74
+specificity,Demand,Financials,2022,1.4355555555555557,75
+specificity,Demand,Financials,2023,1.4088888888888889,75
+specificity,Demand,Financials,2024,1.3793859649122806,76
+specificity,Demand,Financials,2025,1.4605263157894737,76
+specificity,Demand,Health Care,2019,1.4444444444444444,57
+specificity,Demand,Health Care,2020,1.587878787878788,55
+specificity,Demand,Health Care,2021,1.5747126436781609,58
+specificity,Demand,Health Care,2022,1.5338983050847457,59
+specificity,Demand,Health Care,2023,1.5593220338983051,59
+specificity,Demand,Health Care,2024,1.452777777777778,60
+specificity,Demand,Health Care,2025,1.4833333333333334,60
+specificity,Demand,Industrials,2019,1.5135135135135136,74
+specificity,Demand,Industrials,2020,1.56,75
+specificity,Demand,Industrials,2021,1.4743589743589745,78
+specificity,Demand,Industrials,2022,1.4273504273504274,78
+specificity,Demand,Industrials,2023,1.4282700421940928,79
+specificity,Demand,Industrials,2024,1.4852320675105484,79
+specificity,Demand,Industrials,2025,1.4658119658119657,78
+specificity,Demand,Information Technology,2019,1.468599033816425,69
+specificity,Demand,Information Technology,2020,1.5047619047619047,70
+specificity,Demand,Information Technology,2021,1.5023148148148149,72
+specificity,Demand,Information Technology,2022,1.4680365296803655,73
+specificity,Demand,Information Technology,2023,1.4497716894977168,73
+specificity,Demand,Information Technology,2024,1.511574074074074,72
+specificity,Demand,Information Technology,2025,1.4955555555555555,75
+specificity,Demand,Materials,2019,1.6746031746031744,21
+specificity,Demand,Materials,2020,1.619047619047619,21
+specificity,Demand,Materials,2021,1.5303030303030303,22
+specificity,Demand,Materials,2022,1.5757575757575757,22
+specificity,Demand,Materials,2023,1.7173913043478262,23
+specificity,Demand,Materials,2024,1.638888888888889,24
+specificity,Demand,Materials,2025,1.5902777777777777,24
+specificity,Demand,Real Estate,2019,1.6055555555555556,30
+specificity,Demand,Real Estate,2020,1.65,30
+specificity,Demand,Real Estate,2021,1.6222222222222222,30
+specificity,Demand,Real Estate,2022,1.577777777777778,30
+specificity,Demand,Real Estate,2023,1.5888888888888888,30
+specificity,Demand,Real Estate,2024,1.5944444444444446,30
+specificity,Demand,Real Estate,2025,1.5666666666666667,30
+specificity,Demand,Utilities,2019,1.5,30
+specificity,Demand,Utilities,2020,1.6555555555555554,30
+specificity,Demand,Utilities,2021,1.7043010752688172,31
+specificity,Demand,Utilities,2022,1.6720430107526882,31
+specificity,Demand,Utilities,2023,1.5913978494623657,31
+specificity,Demand,Utilities,2024,1.6451612903225807,31
+specificity,Demand,Utilities,2025,1.6935483870967742,31
+discussed,Demand,Communication Services,2019,1.0,15
+discussed,Demand,Communication Services,2020,1.0,15
+discussed,Demand,Communication Services,2021,1.0,16
+discussed,Demand,Communication Services,2022,1.0,16
+discussed,Demand,Communication Services,2023,1.0,17
+discussed,Demand,Communication Services,2024,1.0,18
+discussed,Demand,Communication Services,2025,1.0,19
+discussed,Demand,Consumer Discretionary,2019,1.0,45
+discussed,Demand,Consumer Discretionary,2020,1.0,46
+discussed,Demand,Consumer Discretionary,2021,1.0,47
+discussed,Demand,Consumer Discretionary,2022,1.0,47
+discussed,Demand,Consumer Discretionary,2023,1.0,47
+discussed,Demand,Consumer Discretionary,2024,1.0,47
+discussed,Demand,Consumer Discretionary,2025,1.0,47
+discussed,Demand,Consumer Staples,2019,1.0,31
+discussed,Demand,Consumer Staples,2020,1.0,31
+discussed,Demand,Consumer Staples,2021,1.0,31
+discussed,Demand,Consumer Staples,2022,1.0,31
+discussed,Demand,Consumer Staples,2023,1.0,33
+discussed,Demand,Consumer Staples,2024,1.0,33
+discussed,Demand,Consumer Staples,2025,1.0,33
+discussed,Demand,Energy,2019,1.0,19
+discussed,Demand,Energy,2020,1.0,20
+discussed,Demand,Energy,2021,1.0,21
+discussed,Demand,Energy,2022,1.0,21
+discussed,Demand,Energy,2023,1.0,21
+discussed,Demand,Energy,2024,1.0,21
+discussed,Demand,Energy,2025,1.0,21
+discussed,Demand,Financials,2019,1.0,72
+discussed,Demand,Financials,2020,1.0,72
+discussed,Demand,Financials,2021,1.0,74
+discussed,Demand,Financials,2022,1.0,75
+discussed,Demand,Financials,2023,1.0,75
+discussed,Demand,Financials,2024,1.0,76
+discussed,Demand,Financials,2025,1.0,76
+discussed,Demand,Health Care,2019,1.0,57
+discussed,Demand,Health Care,2020,1.0,55
+discussed,Demand,Health Care,2021,1.0,58
+discussed,Demand,Health Care,2022,1.0,59
+discussed,Demand,Health Care,2023,1.0,59
+discussed,Demand,Health Care,2024,1.0,60
+discussed,Demand,Health Care,2025,1.0,60
+discussed,Demand,Industrials,2019,1.0,74
+discussed,Demand,Industrials,2020,1.0,75
+discussed,Demand,Industrials,2021,1.0,78
+discussed,Demand,Industrials,2022,1.0,78
+discussed,Demand,Industrials,2023,1.0,79
+discussed,Demand,Industrials,2024,1.0,79
+discussed,Demand,Industrials,2025,1.0,78
+discussed,Demand,Information Technology,2019,1.0,69
+discussed,Demand,Information Technology,2020,1.0,70
+discussed,Demand,Information Technology,2021,1.0,72
+discussed,Demand,Information Technology,2022,1.0,73
+discussed,Demand,Information Technology,2023,1.0,73
+discussed,Demand,Information Technology,2024,1.0,72
+discussed,Demand,Information Technology,2025,1.0,75
+discussed,Demand,Materials,2019,0.9545454545454546,22
+discussed,Demand,Materials,2020,1.0,21
+discussed,Demand,Materials,2021,1.0,22
+discussed,Demand,Materials,2022,1.0,22
+discussed,Demand,Materials,2023,1.0,23
+discussed,Demand,Materials,2024,1.0,24
+discussed,Demand,Materials,2025,1.0,24
+discussed,Demand,Real Estate,2019,1.0,30
+discussed,Demand,Real Estate,2020,1.0,30
+discussed,Demand,Real Estate,2021,1.0,30
+discussed,Demand,Real Estate,2022,1.0,30
+discussed,Demand,Real Estate,2023,1.0,30
+discussed,Demand,Real Estate,2024,1.0,30
+discussed,Demand,Real Estate,2025,1.0,30
+discussed,Demand,Utilities,2019,1.0,30
+discussed,Demand,Utilities,2020,1.0,30
+discussed,Demand,Utilities,2021,1.0,31
+discussed,Demand,Utilities,2022,1.0,31
+discussed,Demand,Utilities,2023,1.0,31
+discussed,Demand,Utilities,2024,1.0,31
+discussed,Demand,Utilities,2025,1.0,31

@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,Tariffs,Communication Services,2019,-1.0625,8
+polarity,Tariffs,Communication Services,2020,-0.875,8
+polarity,Tariffs,Communication Services,2021,-1.0,7
+polarity,Tariffs,Communication Services,2022,-0.9375,8
+polarity,Tariffs,Communication Services,2023,-0.7142857142857143,7
+polarity,Tariffs,Communication Services,2024,-1.0,7
+polarity,Tariffs,Communication Services,2025,-1.0,14
+polarity,Tariffs,Consumer Discretionary,2019,-1.0637254901960784,34
+polarity,Tariffs,Consumer Discretionary,2020,-1.0101010101010102,33
+polarity,Tariffs,Consumer Discretionary,2021,-1.0698924731182795,31
+polarity,Tariffs,Consumer Discretionary,2022,-1.0722222222222222,30
+polarity,Tariffs,Consumer Discretionary,2023,-1.0402298850574714,29
+polarity,Tariffs,Consumer Discretionary,2024,-1.054054054054054,37
+polarity,Tariffs,Consumer Discretionary,2025,-1.0982905982905984,39
+polarity,Tariffs,Consumer Staples,2019,-1.0064102564102564,26
+polarity,Tariffs,Consumer Staples,2020,-1.064102564102564,26
+polarity,Tariffs,Consumer Staples,2021,-1.0,26
+polarity,Tariffs,Consumer Staples,2022,-1.0,25
+polarity,Tariffs,Consumer Staples,2023,-0.9038461538461539,26
+polarity,Tariffs,Consumer Staples,2024,-0.9583333333333333,28
+polarity,Tariffs,Consumer Staples,2025,-1.03125,32
+polarity,Tariffs,Energy,2019,-1.0,7
+polarity,Tariffs,Energy,2020,-0.9523809523809524,7
+polarity,Tariffs,Energy,2021,-1.0,9
+polarity,Tariffs,Energy,2022,-1.0,10
+polarity,Tariffs,Energy,2023,-1.0,8
+polarity,Tariffs,Energy,2024,-1.0,17
+polarity,Tariffs,Energy,2025,-1.0083333333333333,20
+polarity,Tariffs,Financials,2019,-0.984375,32
+polarity,Tariffs,Financials,2020,-1.0,23
+polarity,Tariffs,Financials,2021,-1.0434782608695652,23
+polarity,Tariffs,Financials,2022,-1.0454545454545454,22
+polarity,Tariffs,Financials,2023,-1.0384615384615385,26
+polarity,Tariffs,Financials,2024,-1.0,46
+polarity,Tariffs,Financials,2025,-0.9916666666666667,60
+polarity,Tariffs,Health Care,2019,-1.0,41
+polarity,Tariffs,Health Care,2020,-1.027027027027027,37
+polarity,Tariffs,Health Care,2021,-0.9878048780487805,41
+polarity,Tariffs,Health Care,2022,-0.9166666666666666,42
+polarity,Tariffs,Health Care,2023,-1.0,38
+polarity,Tariffs,Health Care,2024,-1.011111111111111,45
+polarity,Tariffs,Health Care,2025,-1.0123456790123457,54
+polarity,Tariffs,Industrials,2019,-1.0,60
+polarity,Tariffs,Industrials,2020,-0.9781420765027322,61
+polarity,Tariffs,Industrials,2021,-0.9838709677419355,62
+polarity,Tariffs,Industrials,2022,-1.0298507462686568,67
+polarity,Tariffs,Industrials,2023,-1.0277777777777777,66
+polarity,Tariffs,Industrials,2024,-1.0,69
+polarity,Tariffs,Industrials,2025,-1.0644444444444443,75
+polarity,Tariffs,Information Technology,2019,-1.037037037037037,63
+polarity,Tariffs,Information Technology,2020,-1.0300546448087433,61
+polarity,Tariffs,Information Technology,2021,-1.0310734463276836,59
+polarity,Tariffs,Information Technology,2022,-1.0416666666666667,64
+polarity,Tariffs,Information Technology,2023,-1.0916666666666666,60
+polarity,Tariffs,Information Technology,2024,-1.0241935483870968,62
+polarity,Tariffs,Information Technology,2025,-1.1103603603603605,74
+polarity,Tariffs,Materials,2019,-0.9035087719298246,19
+polarity,Tariffs,Materials,2020,-0.8333333333333334,18
+polarity,Tariffs,Materials,2021,-0.8947368421052632,19
+polarity,Tariffs,Materials,2022,-0.9523809523809523,21
+polarity,Tariffs,Materials,2023,-0.95,20
+polarity,Tariffs,Materials,2024,-1.0,20
+polarity,Tariffs,Materials,2025,-0.8405797101449275,23
+polarity,Tariffs,Real Estate,2019,-1.0,12
+polarity,Tariffs,Real Estate,2020,-1.0,11
+polarity,Tariffs,Real Estate,2021,-1.0,10
+polarity,Tariffs,Real Estate,2022,-1.0,9
+polarity,Tariffs,Real Estate,2023,-1.0,9
+polarity,Tariffs,Real Estate,2024,-1.0,19
+polarity,Tariffs,Real Estate,2025,-1.0357142857142858,28
+polarity,Tariffs,Utilities,2019,-0.9166666666666666,12
+polarity,Tariffs,Utilities,2020,-0.7272727272727273,11
+polarity,Tariffs,Utilities,2021,-0.75,16
+polarity,Tariffs,Utilities,2022,-0.9166666666666666,16
+polarity,Tariffs,Utilities,2023,-1.0666666666666667,15
+polarity,Tariffs,Utilities,2024,-0.9733333333333333,25
+polarity,Tariffs,Utilities,2025,-0.9930555555555555,24
+magnitude,Tariffs,Communication Services,2019,0.625,8
+magnitude,Tariffs,Communication Services,2020,0.375,8
+magnitude,Tariffs,Communication Services,2021,0.5,7
+magnitude,Tariffs,Communication Services,2022,0.6041666666666666,8
+magnitude,Tariffs,Communication Services,2023,0.2857142857142857,7
+magnitude,Tariffs,Communication Services,2024,0.21428571428571427,7
+magnitude,Tariffs,Communication Services,2025,0.42857142857142855,14
+magnitude,Tariffs,Consumer Discretionary,2019,0.7205882352941176,34
+magnitude,Tariffs,Consumer Discretionary,2020,0.7525252525252525,33
+magnitude,Tariffs,Consumer Discretionary,2021,0.5591397849462365,31
+magnitude,Tariffs,Consumer Discretionary,2022,0.6611111111111111,30
+magnitude,Tariffs,Consumer Discretionary,2023,0.7471264367816093,29
+magnitude,Tariffs,Consumer Discretionary,2024,0.7207207207207208,37
+magnitude,Tariffs,Consumer Discretionary,2025,0.9059829059829061,39
+magnitude,Tariffs,Consumer Staples,2019,0.5961538461538461,26
+magnitude,Tariffs,Consumer Staples,2020,0.717948717948718,26
+magnitude,Tariffs,Consumer Staples,2021,0.7435897435897435,26
+magnitude,Tariffs,Consumer Staples,2022,0.62,25
+magnitude,Tariffs,Consumer Staples,2023,0.5,26
+magnitude,Tariffs,Consumer Staples,2024,0.5833333333333333,28
+magnitude,Tariffs,Consumer Staples,2025,0.9895833333333333,32
+magnitude,Tariffs,Energy,2019,0.35714285714285715,7
+magnitude,Tariffs,Energy,2020,0.19047619047619047,7
+magnitude,Tariffs,Energy,2021,0.14814814814814814,9
+magnitude,Tariffs,Energy,2022,0.45,10
+magnitude,Tariffs,Energy,2023,0.125,8
+magnitude,Tariffs,Energy,2024,0.5294117647058824,17
+magnitude,Tariffs,Energy,2025,0.55,20
+magnitude,Tariffs,Financials,2019,0.4270833333333333,32
+magnitude,Tariffs,Financials,2020,0.6086956521739131,23
+magnitude,Tariffs,Financials,2021,0.2608695652173913,23
+magnitude,Tariffs,Financials,2022,0.5,22
+magnitude,Tariffs,Financials,2023,0.40384615384615385,26
+magnitude,Tariffs,Financials,2024,0.4710144927536232,46
+magnitude,Tariffs,Financials,2025,0.5666666666666667,60
+magnitude,Tariffs,Health Care,2019,0.4146341463414634,41
+magnitude,Tariffs,Health Care,2020,0.33783783783783783,37
+magnitude,Tariffs,Health Care,2021,0.4349593495934959,41
+magnitude,Tariffs,Health Care,2022,0.4246031746031746,42
+magnitude,Tariffs,Health Care,2023,0.5,38
+magnitude,Tariffs,Health Care,2024,0.6111111111111112,45
+magnitude,Tariffs,Health Care,2025,1.0771604938271604,54
+magnitude,Tariffs,Industrials,2019,0.6555555555555556,60
+magnitude,Tariffs,Industrials,2020,0.6147540983606558,61
+magnitude,Tariffs,Industrials,2021,0.6048387096774194,62
+magnitude,Tariffs,Industrials,2022,0.6467661691542289,67
+magnitude,Tariffs,Industrials,2023,0.6590909090909091,66
+magnitude,Tariffs,Industrials,2024,0.6690821256038647,69
+magnitude,Tariffs,Industrials,2025,0.9,75
+magnitude,Tariffs,Information Technology,2019,0.6534391534391534,63
+magnitude,Tariffs,Information Technology,2020,0.7103825136612022,61
+magnitude,Tariffs,Information Technology,2021,0.655367231638418,59
+magnitude,Tariffs,Information Technology,2022,0.6510416666666666,64
+magnitude,Tariffs,Information Technology,2023,0.8972222222222223,60
+magnitude,Tariffs,Information Technology,2024,0.7715053763440861,62
+magnitude,Tariffs,Information Technology,2025,0.9346846846846848,74
+magnitude,Tariffs,Materials,2019,0.5526315789473685,19
+magnitude,Tariffs,Materials,2020,0.6574074074074074,18
+magnitude,Tariffs,Materials,2021,0.587719298245614,19
+magnitude,Tariffs,Materials,2022,0.5158730158730159,21
+magnitude,Tariffs,Materials,2023,0.6083333333333333,20
+magnitude,Tariffs,Materials,2024,0.7,20
+magnitude,Tariffs,Materials,2025,0.8260869565217391,23
+magnitude,Tariffs,Real Estate,2019,0.4166666666666667,12
+magnitude,Tariffs,Real Estate,2020,0.36363636363636365,11
+magnitude,Tariffs,Real Estate,2021,0.5,10
+magnitude,Tariffs,Real Estate,2022,0.5555555555555556,9
+magnitude,Tariffs,Real Estate,2023,0.5555555555555556,9
+magnitude,Tariffs,Real Estate,2024,0.47368421052631576,19
+magnitude,Tariffs,Real Estate,2025,0.49404761904761907,28
+magnitude,Tariffs,Utilities,2019,0.25,12
+magnitude,Tariffs,Utilities,2020,0.13636363636363635,11
+magnitude,Tariffs,Utilities,2021,0.25,16
+magnitude,Tariffs,Utilities,2022,0.6145833333333334,16
+magnitude,Tariffs,Utilities,2023,0.6888888888888889,15
+magnitude,Tariffs,Utilities,2024,0.5933333333333333,25
+magnitude,Tariffs,Utilities,2025,0.7083333333333334,24
+realization,Tariffs,Communication Services,2019,0.5,8
+realization,Tariffs,Communication Services,2020,0.6666666666666666,8
+realization,Tariffs,Communication Services,2021,0.5714285714285714,7
+realization,Tariffs,Communication Services,2022,0.375,8
+realization,Tariffs,Communication Services,2023,0.2857142857142857,7
+realization,Tariffs,Communication Services,2024,0.14285714285714285,7
+realization,Tariffs,Communication Services,2025,0.5357142857142857,14
+realization,Tariffs,Consumer Discretionary,2019,0.5196078431372549,34
+realization,Tariffs,Consumer Discretionary,2020,0.44949494949494945,33
+realization,Tariffs,Consumer Discretionary,2021,0.532258064516129,31
+realization,Tariffs,Consumer Discretionary,2022,0.5722222222222223,30
+realization,Tariffs,Consumer Discretionary,2023,0.5402298850574713,29
+realization,Tariffs,Consumer Discretionary,2024,0.527027027027027,37
+realization,Tariffs,Consumer Discretionary,2025,0.7564102564102564,39
+realization,Tariffs,Consumer Staples,2019,0.4358974358974359,26
+realization,Tariffs,Consumer Staples,2020,0.4230769230769231,26
+realization,Tariffs,Consumer Staples,2021,0.4935897435897436,26
+realization,Tariffs,Consumer Staples,2022,0.32666666666666666,25
+realization,Tariffs,Consumer Staples,2023,0.28846153846153844,26
+realization,Tariffs,Consumer Staples,2024,0.49404761904761907,28
+realization,Tariffs,Consumer Staples,2025,1.0572916666666667,32
+realization,Tariffs,Energy,2019,0.2857142857142857,7
+realization,Tariffs,Energy,2020,0.42857142857142855,7
+realization,Tariffs,Energy,2021,0.18518518518518517,9
+realization,Tariffs,Energy,2022,0.2,10
+realization,Tariffs,Energy,2023,0.1875,8
+realization,Tariffs,Energy,2024,0.29411764705882354,17
+realization,Tariffs,Energy,2025,0.7166666666666667,20
+realization,Tariffs,Financials,2019,0.33854166666666663,32
+realization,Tariffs,Financials,2020,0.3695652173913043,23
+realization,Tariffs,Financials,2021,0.30434782608695654,23
+realization,Tariffs,Financials,2022,0.4772727272727273,22
+realization,Tariffs,Financials,2023,0.38461538461538464,26
+realization,Tariffs,Financials,2024,0.33333333333333337,46
+realization,Tariffs,Financials,2025,0.4472222222222222,60
+realization,Tariffs,Health Care,2019,0.4552845528455285,41
+realization,Tariffs,Health Care,2020,0.4594594594594595,37
+realization,Tariffs,Health Care,2021,0.5121951219512195,41
+realization,Tariffs,Health Care,2022,0.40476190476190477,42
+realization,Tariffs,Health Care,2023,0.4912280701754386,38
+realization,Tariffs,Health Care,2024,0.6481481481481481,45
+realization,Tariffs,Health Care,2025,1.0864197530864197,54
+realization,Tariffs,Industrials,2019,0.6,60
+realization,Tariffs,Industrials,2020,0.47267759562841527,61
+realization,Tariffs,Industrials,2021,0.47043010752688175,62
+realization,Tariffs,Industrials,2022,0.5074626865671642,67
+realization,Tariffs,Industrials,2023,0.5631313131313131,66
+realization,Tariffs,Industrials,2024,0.4879227053140096,69
+realization,Tariffs,Industrials,2025,0.8733333333333333,75
+realization,Tariffs,Information Technology,2019,0.6402116402116402,63
+realization,Tariffs,Information Technology,2020,0.7131147540983607,61
+realization,Tariffs,Information Technology,2021,0.6581920903954802,59
+realization,Tariffs,Information Technology,2022,0.5130208333333334,64
+realization,Tariffs,Information Technology,2023,0.6416666666666667,60
+realization,Tariffs,Information Technology,2024,0.674731182795699,62
+realization,Tariffs,Information Technology,2025,0.8648648648648649,74
+realization,Tariffs,Materials,2019,0.5087719298245613,19
+realization,Tariffs,Materials,2020,0.5092592592592592,18
+realization,Tariffs,Materials,2021,0.543859649122807,19
+realization,Tariffs,Materials,2022,0.5873015873015873,21
+realization,Tariffs,Materials,2023,0.4583333333333333,20
+realization,Tariffs,Materials,2024,0.5416666666666667,20
+realization,Tariffs,Materials,2025,0.9710144927536232,23
+realization,Tariffs,Real Estate,2019,0.2916666666666667,12
+realization,Tariffs,Real Estate,2020,0.5454545454545454,11
+realization,Tariffs,Real Estate,2021,0.4,10
+realization,Tariffs,Real Estate,2022,0.16666666666666666,9
+realization,Tariffs,Real Estate,2023,0.3888888888888889,9
+realization,Tariffs,Real Estate,2024,0.23684210526315788,19
+realization,Tariffs,Real Estate,2025,0.5476190476190477,28
+realization,Tariffs,Utilities,2019,0.3611111111111111,12
+realization,Tariffs,Utilities,2020,0.6818181818181818,11
+realization,Tariffs,Utilities,2021,0.4375,16
+realization,Tariffs,Utilities,2022,0.7083333333333334,16
+realization,Tariffs,Utilities,2023,0.6777777777777777,15
+realization,Tariffs,Utilities,2024,0.5866666666666667,25
+realization,Tariffs,Utilities,2025,0.7986111111111112,24
+uncertainty,Tariffs,Communication Services,2019,2.0,8
+uncertainty,Tariffs,Communication Services,2020,1.75,8
+uncertainty,Tariffs,Communication Services,2021,2.0,7
+uncertainty,Tariffs,Communication Services,2022,1.875,8
+uncertainty,Tariffs,Communication Services,2023,2.0,7
+uncertainty,Tariffs,Communication Services,2024,2.142857142857143,7
+uncertainty,Tariffs,Communication Services,2025,2.0952380952380953,14
+uncertainty,Tariffs,Consumer Discretionary,2019,2.156862745098039,34
+uncertainty,Tariffs,Consumer Discretionary,2020,2.1666666666666665,33
+uncertainty,Tariffs,Consumer Discretionary,2021,2.1559139784946235,31
+uncertainty,Tariffs,Consumer Discretionary,2022,2.155555555555556,30
+uncertainty,Tariffs,Consumer Discretionary,2023,2.1954022988505746,29
+uncertainty,Tariffs,Consumer Discretionary,2024,2.1396396396396398,37
+uncertainty,Tariffs,Consumer Discretionary,2025,2.175213675213675,39
+uncertainty,Tariffs,Consumer Staples,2019,1.9487179487179487,26
+uncertainty,Tariffs,Consumer Staples,2020,2.0,26
+uncertainty,Tariffs,Consumer Staples,2021,2.0705128205128207,26
+uncertainty,Tariffs,Consumer Staples,2022,1.9333333333333333,25
+uncertainty,Tariffs,Consumer Staples,2023,1.9551282051282053,26
+uncertainty,Tariffs,Consumer Staples,2024,2.0416666666666665,28
+uncertainty,Tariffs,Consumer Staples,2025,2.0677083333333335,32
+uncertainty,Tariffs,Energy,2019,2.0714285714285716,7
+uncertainty,Tariffs,Energy,2020,2.0952380952380953,7
+uncertainty,Tariffs,Energy,2021,2.0,9
+uncertainty,Tariffs,Energy,2022,1.8,10
+uncertainty,Tariffs,Energy,2023,2.0,8
+uncertainty,Tariffs,Energy,2024,2.235294117647059,17
+uncertainty,Tariffs,Energy,2025,2.1,20
+uncertainty,Tariffs,Financials,2019,2.046875,32
+uncertainty,Tariffs,Financials,2020,2.0217391304347827,23
+uncertainty,Tariffs,Financials,2021,2.0942028985507246,23
+uncertainty,Tariffs,Financials,2022,2.0454545454545454,22
+uncertainty,Tariffs,Financials,2023,2.0576923076923075,26
+uncertainty,Tariffs,Financials,2024,2.0869565217391304,46
+uncertainty,Tariffs,Financials,2025,2.0833333333333335,60
+uncertainty,Tariffs,Health Care,2019,2.130081300813008,41
+uncertainty,Tariffs,Health Care,2020,2.1126126126126126,37
+uncertainty,Tariffs,Health Care,2021,2.182926829268293,41
+uncertainty,Tariffs,Health Care,2022,2.0634920634920637,42
+uncertainty,Tariffs,Health Care,2023,2.100877192982456,38
+uncertainty,Tariffs,Health Care,2024,2.2037037037037037,45
+uncertainty,Tariffs,Health Care,2025,2.0987654320987654,54
+uncertainty,Tariffs,Industrials,2019,2.011111111111111,60
+uncertainty,Tariffs,Industrials,2020,2.0655737704918034,61
+uncertainty,Tariffs,Industrials,2021,2.0483870967741935,62
+uncertainty,Tariffs,Industrials,2022,2.09452736318408,67
+uncertainty,Tariffs,Industrials,2023,2.103535353535354,66
+uncertainty,Tariffs,Industrials,2024,2.1449275362318843,69
+uncertainty,Tariffs,Industrials,2025,2.071111111111111,75
+uncertainty,Tariffs,Information Technology,2019,2.0767195767195767,63
+uncertainty,Tariffs,Information Technology,2020,2.0491803278688523,61
+uncertainty,Tariffs,Information Technology,2021,2.036723163841808,59
+uncertainty,Tariffs,Information Technology,2022,2.078125,64
+uncertainty,Tariffs,Information Technology,2023,2.091666666666667,60
+uncertainty,Tariffs,Information Technology,2024,2.0860215053763445,62
+uncertainty,Tariffs,Information Technology,2025,2.1576576576576576,74
+uncertainty,Tariffs,Materials,2019,1.9736842105263157,19
+uncertainty,Tariffs,Materials,2020,1.9166666666666667,18
+uncertainty,Tariffs,Materials,2021,2.008771929824561,19
+uncertainty,Tariffs,Materials,2022,1.9682539682539684,21
+uncertainty,Tariffs,Materials,2023,1.9916666666666667,20
+uncertainty,Tariffs,Materials,2024,2.0,20
+uncertainty,Tariffs,Materials,2025,2.0942028985507246,23
+uncertainty,Tariffs,Real Estate,2019,2.0416666666666665,12
+uncertainty,Tariffs,Real Estate,2020,2.090909090909091,11
+uncertainty,Tariffs,Real Estate,2021,2.1333333333333333,10
+uncertainty,Tariffs,Real Estate,2022,2.2222222222222223,9
+uncertainty,Tariffs,Real Estate,2023,2.0555555555555554,9
+uncertainty,Tariffs,Real Estate,2024,2.1052631578947367,19
+uncertainty,Tariffs,Real Estate,2025,2.0654761904761907,28
+uncertainty,Tariffs,Utilities,2019,1.75,12
+uncertainty,Tariffs,Utilities,2020,1.6818181818181819,11
+uncertainty,Tariffs,Utilities,2021,1.6875,16
+uncertainty,Tariffs,Utilities,2022,1.8020833333333333,16
+uncertainty,Tariffs,Utilities,2023,1.9444444444444444,15
+uncertainty,Tariffs,Utilities,2024,1.9933333333333334,25
+uncertainty,Tariffs,Utilities,2025,2.0347222222222223,24
+specificity,Tariffs,Communication Services,2019,0.8125,8
+specificity,Tariffs,Communication Services,2020,0.8333333333333334,8
+specificity,Tariffs,Communication Services,2021,0.7857142857142857,7
+specificity,Tariffs,Communication Services,2022,0.6666666666666666,8
+specificity,Tariffs,Communication Services,2023,0.7142857142857143,7
+specificity,Tariffs,Communication Services,2024,0.35714285714285715,7
+specificity,Tariffs,Communication Services,2025,0.7976190476190476,14
+specificity,Tariffs,Consumer Discretionary,2019,1.2794117647058822,34
+specificity,Tariffs,Consumer Discretionary,2020,1.2424242424242424,33
+specificity,Tariffs,Consumer Discretionary,2021,1.2365591397849462,31
+specificity,Tariffs,Consumer Discretionary,2022,1.222222222222222,30
+specificity,Tariffs,Consumer Discretionary,2023,1.1781609195402298,29
+specificity,Tariffs,Consumer Discretionary,2024,1.2702702702702702,37
+specificity,Tariffs,Consumer Discretionary,2025,1.2350427350427349,39
+specificity,Tariffs,Consumer Staples,2019,1.044871794871795,26
+specificity,Tariffs,Consumer Staples,2020,0.967948717948718,26
+specificity,Tariffs,Consumer Staples,2021,0.9807692307692307,26
+specificity,Tariffs,Consumer Staples,2022,0.9,25
+specificity,Tariffs,Consumer Staples,2023,0.967948717948718,26
+specificity,Tariffs,Consumer Staples,2024,1.0833333333333333,28
+specificity,Tariffs,Consumer Staples,2025,1.1822916666666667,32
+specificity,Tariffs,Energy,2019,0.8571428571428571,7
+specificity,Tariffs,Energy,2020,0.6904761904761905,7
+specificity,Tariffs,Energy,2021,0.6296296296296297,9
+specificity,Tariffs,Energy,2022,0.55,10
+specificity,Tariffs,Energy,2023,0.625,8
+specificity,Tariffs,Energy,2024,0.7156862745098039,17
+specificity,Tariffs,Energy,2025,1.0916666666666666,20
+specificity,Tariffs,Financials,2019,0.875,32
+specificity,Tariffs,Financials,2020,0.8695652173913043,23
+specificity,Tariffs,Financials,2021,0.8115942028985508,23
+specificity,Tariffs,Financials,2022,0.6818181818181818,22
+specificity,Tariffs,Financials,2023,0.7115384615384616,26
+specificity,Tariffs,Financials,2024,0.8043478260869565,46
+specificity,Tariffs,Financials,2025,0.8027777777777777,60
+specificity,Tariffs,Health Care,2019,1.024390243902439,41
+specificity,Tariffs,Health Care,2020,1.018018018018018,37
+specificity,Tariffs,Health Care,2021,1.089430894308943,41
+specificity,Tariffs,Health Care,2022,1.0357142857142858,42
+specificity,Tariffs,Health Care,2023,0.9956140350877194,38
+specificity,Tariffs,Health Care,2024,1.1444444444444444,45
+specificity,Tariffs,Health Care,2025,1.3425925925925926,54
+specificity,Tariffs,Industrials,2019,1.152777777777778,60
+specificity,Tariffs,Industrials,2020,1.109289617486339,61
+specificity,Tariffs,Industrials,2021,1.0241935483870968,62
+specificity,Tariffs,Industrials,2022,1.0945273631840795,67
+specificity,Tariffs,Industrials,2023,1.0252525252525253,66
+specificity,Tariffs,Industrials,2024,1.0169082125603865,69
+specificity,Tariffs,Industrials,2025,1.1488888888888888,75
+specificity,Tariffs,Information Technology,2019,1.08994708994709,63
+specificity,Tariffs,Information Technology,2020,1.185792349726776,61
+specificity,Tariffs,Information Technology,2021,1.1073446327683616,59
+specificity,Tariffs,Information Technology,2022,1.0729166666666667,64
+specificity,Tariffs,Information Technology,2023,1.2055555555555555,60
+specificity,Tariffs,Information Technology,2024,1.2123655913978495,62
+specificity,Tariffs,Information Technology,2025,1.1689189189189189,74
+specificity,Tariffs,Materials,2019,1.043859649122807,19
+specificity,Tariffs,Materials,2020,1.1111111111111112,18
+specificity,Tariffs,Materials,2021,1.1228070175438596,19
+specificity,Tariffs,Materials,2022,1.2063492063492063,21
+specificity,Tariffs,Materials,2023,1.1083333333333334,20
+specificity,Tariffs,Materials,2024,1.1583333333333334,20
+specificity,Tariffs,Materials,2025,1.2318840579710144,23
+specificity,Tariffs,Real Estate,2019,0.625,12
+specificity,Tariffs,Real Estate,2020,0.8181818181818182,11
+specificity,Tariffs,Real Estate,2021,0.8,10
+specificity,Tariffs,Real Estate,2022,0.8333333333333334,9
+specificity,Tariffs,Real Estate,2023,0.7777777777777778,9
+specificity,Tariffs,Real Estate,2024,0.8421052631578947,19
+specificity,Tariffs,Real Estate,2025,0.8214285714285714,28
+specificity,Tariffs,Utilities,2019,0.8055555555555555,12
+specificity,Tariffs,Utilities,2020,0.7727272727272727,11
+specificity,Tariffs,Utilities,2021,1.0625,16
+specificity,Tariffs,Utilities,2022,1.2708333333333333,16
+specificity,Tariffs,Utilities,2023,1.2333333333333334,15
+specificity,Tariffs,Utilities,2024,0.9333333333333332,25
+specificity,Tariffs,Utilities,2025,1.0694444444444444,24
+discussed,Tariffs,Communication Services,2019,0.5333333333333333,15
+discussed,Tariffs,Communication Services,2020,0.5333333333333333,15
+discussed,Tariffs,Communication Services,2021,0.4375,16
+discussed,Tariffs,Communication Services,2022,0.5,16
+discussed,Tariffs,Communication Services,2023,0.4117647058823529,17
+discussed,Tariffs,Communication Services,2024,0.3888888888888889,18
+discussed,Tariffs,Communication Services,2025,0.7368421052631579,19
+discussed,Tariffs,Consumer Discretionary,2019,0.7555555555555555,45
+discussed,Tariffs,Consumer Discretionary,2020,0.717391304347826,46
+discussed,Tariffs,Consumer Discretionary,2021,0.6595744680851063,47
+discussed,Tariffs,Consumer Discretionary,2022,0.6382978723404256,47
+discussed,Tariffs,Consumer Discretionary,2023,0.6170212765957447,47
+discussed,Tariffs,Consumer Discretionary,2024,0.7872340425531915,47
+discussed,Tariffs,Consumer Discretionary,2025,0.8297872340425532,47
+discussed,Tariffs,Consumer Staples,2019,0.8387096774193549,31
+discussed,Tariffs,Consumer Staples,2020,0.8387096774193549,31
+discussed,Tariffs,Consumer Staples,2021,0.8387096774193549,31
+discussed,Tariffs,Consumer Staples,2022,0.8064516129032258,31
+discussed,Tariffs,Consumer Staples,2023,0.7878787878787878,33
+discussed,Tariffs,Consumer Staples,2024,0.8484848484848485,33
+discussed,Tariffs,Consumer Staples,2025,0.9696969696969697,33
+discussed,Tariffs,Energy,2019,0.3684210526315789,19
+discussed,Tariffs,Energy,2020,0.35,20
+discussed,Tariffs,Energy,2021,0.42857142857142855,21
+discussed,Tariffs,Energy,2022,0.47619047619047616,21
+discussed,Tariffs,Energy,2023,0.38095238095238093,21
+discussed,Tariffs,Energy,2024,0.8095238095238095,21
+discussed,Tariffs,Energy,2025,0.9523809523809523,21
+discussed,Tariffs,Financials,2019,0.4444444444444444,72
+discussed,Tariffs,Financials,2020,0.3194444444444444,72
+discussed,Tariffs,Financials,2021,0.3108108108108108,74
+discussed,Tariffs,Financials,2022,0.29333333333333333,75
+discussed,Tariffs,Financials,2023,0.3466666666666667,75
+discussed,Tariffs,Financials,2024,0.6052631578947368,76
+discussed,Tariffs,Financials,2025,0.7894736842105263,76
+discussed,Tariffs,Health Care,2019,0.7192982456140351,57
+discussed,Tariffs,Health Care,2020,0.6727272727272727,55
+discussed,Tariffs,Health Care,2021,0.7068965517241379,58
+discussed,Tariffs,Health Care,2022,0.711864406779661,59
+discussed,Tariffs,Health Care,2023,0.6440677966101694,59
+discussed,Tariffs,Health Care,2024,0.75,60
+discussed,Tariffs,Health Care,2025,0.9,60
+discussed,Tariffs,Industrials,2019,0.8108108108108109,74
+discussed,Tariffs,Industrials,2020,0.8133333333333334,75
+discussed,Tariffs,Industrials,2021,0.7948717948717948,78
+discussed,Tariffs,Industrials,2022,0.8589743589743589,78
+discussed,Tariffs,Industrials,2023,0.8354430379746836,79
+discussed,Tariffs,Industrials,2024,0.8734177215189873,79
+discussed,Tariffs,Industrials,2025,0.9615384615384616,78
+discussed,Tariffs,Information Technology,2019,0.9130434782608695,69
+discussed,Tariffs,Information Technology,2020,0.8714285714285714,70
+discussed,Tariffs,Information Technology,2021,0.8194444444444444,72
+discussed,Tariffs,Information Technology,2022,0.8767123287671232,73
+discussed,Tariffs,Information Technology,2023,0.821917808219178,73
+discussed,Tariffs,Information Technology,2024,0.8611111111111112,72
+discussed,Tariffs,Information Technology,2025,0.9866666666666667,75
+discussed,Tariffs,Materials,2019,0.8636363636363636,22
+discussed,Tariffs,Materials,2020,0.8571428571428571,21
+discussed,Tariffs,Materials,2021,0.8636363636363636,22
+discussed,Tariffs,Materials,2022,0.9545454545454546,22
+discussed,Tariffs,Materials,2023,0.8695652173913043,23
+discussed,Tariffs,Materials,2024,0.8333333333333334,24
+discussed,Tariffs,Materials,2025,0.9583333333333334,24
+discussed,Tariffs,Real Estate,2019,0.4,30
+discussed,Tariffs,Real Estate,2020,0.36666666666666664,30
+discussed,Tariffs,Real Estate,2021,0.3333333333333333,30
+discussed,Tariffs,Real Estate,2022,0.3,30
+discussed,Tariffs,Real Estate,2023,0.3,30
+discussed,Tariffs,Real Estate,2024,0.6333333333333333,30
+discussed,Tariffs,Real Estate,2025,0.9333333333333333,30
+discussed,Tariffs,Utilities,2019,0.4,30
+discussed,Tariffs,Utilities,2020,0.36666666666666664,30
+discussed,Tariffs,Utilities,2021,0.5161290322580645,31
+discussed,Tariffs,Utilities,2022,0.5161290322580645,31
+discussed,Tariffs,Utilities,2023,0.4838709677419355,31
+discussed,Tariffs,Utilities,2024,0.8064516129032258,31
+discussed,Tariffs,Utilities,2025,0.7741935483870968,31

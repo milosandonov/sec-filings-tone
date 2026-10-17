@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,Energy transition and climate,Communication Services,2019,-1.0,7
+polarity,Energy transition and climate,Communication Services,2020,-0.8571428571428571,7
+polarity,Energy transition and climate,Communication Services,2021,-0.7878787878787878,11
+polarity,Energy transition and climate,Communication Services,2022,-0.8846153846153846,13
+polarity,Energy transition and climate,Communication Services,2023,-0.8974358974358974,13
+polarity,Energy transition and climate,Communication Services,2024,-0.9,15
+polarity,Energy transition and climate,Communication Services,2025,-0.8974358974358974,13
+polarity,Energy transition and climate,Consumer Discretionary,2019,-0.7675438596491229,38
+polarity,Energy transition and climate,Consumer Discretionary,2020,-0.8738738738738739,37
+polarity,Energy transition and climate,Consumer Discretionary,2021,-0.9037037037037037,45
+polarity,Energy transition and climate,Consumer Discretionary,2022,-0.9777777777777777,45
+polarity,Energy transition and climate,Consumer Discretionary,2023,-0.9361702127659575,47
+polarity,Energy transition and climate,Consumer Discretionary,2024,-0.9384057971014492,46
+polarity,Energy transition and climate,Consumer Discretionary,2025,-0.9609929078014184,47
+polarity,Energy transition and climate,Consumer Staples,2019,-0.9540229885057472,29
+polarity,Energy transition and climate,Consumer Staples,2020,-0.9482758620689655,29
+polarity,Energy transition and climate,Consumer Staples,2021,-0.9444444444444444,30
+polarity,Energy transition and climate,Consumer Staples,2022,-0.8924731182795699,31
+polarity,Energy transition and climate,Consumer Staples,2023,-0.9292929292929293,33
+polarity,Energy transition and climate,Consumer Staples,2024,-0.9393939393939394,33
+polarity,Energy transition and climate,Consumer Staples,2025,-0.9848484848484849,33
+polarity,Energy transition and climate,Energy,2019,-0.9473684210526315,19
+polarity,Energy transition and climate,Energy,2020,-0.8666666666666666,20
+polarity,Energy transition and climate,Energy,2021,-0.8730158730158729,21
+polarity,Energy transition and climate,Energy,2022,-0.9523809523809523,21
+polarity,Energy transition and climate,Energy,2023,-1.0476190476190477,21
+polarity,Energy transition and climate,Energy,2024,-0.9523809523809523,21
+polarity,Energy transition and climate,Energy,2025,-0.9126984126984128,21
+polarity,Energy transition and climate,Financials,2019,-0.8130081300813009,41
+polarity,Energy transition and climate,Financials,2020,-0.8571428571428571,49
+polarity,Energy transition and climate,Financials,2021,-0.860655737704918,61
+polarity,Energy transition and climate,Financials,2022,-0.9154228855721394,67
+polarity,Energy transition and climate,Financials,2023,-0.9547619047619047,70
+polarity,Energy transition and climate,Financials,2024,-0.9366197183098591,71
+polarity,Energy transition and climate,Financials,2025,-0.9214285714285714,70
+polarity,Energy transition and climate,Health Care,2019,-0.8157894736842105,19
+polarity,Energy transition and climate,Health Care,2020,-0.9080459770114943,29
+polarity,Energy transition and climate,Health Care,2021,-0.9703703703703703,45
+polarity,Energy transition and climate,Health Care,2022,-0.9183006535947713,51
+polarity,Energy transition and climate,Health Care,2023,-0.925531914893617,47
+polarity,Energy transition and climate,Health Care,2024,-1.0,48
+polarity,Energy transition and climate,Health Care,2025,-0.9967948717948718,52
+polarity,Energy transition and climate,Industrials,2019,-0.8277777777777777,60
+polarity,Energy transition and climate,Industrials,2020,-0.7626262626262627,66
+polarity,Energy transition and climate,Industrials,2021,-0.7824074074074074,72
+polarity,Energy transition and climate,Industrials,2022,-0.8088888888888889,75
+polarity,Energy transition and climate,Industrials,2023,-0.8696581196581196,78
+polarity,Energy transition and climate,Industrials,2024,-0.8375527426160339,79
+polarity,Energy transition and climate,Industrials,2025,-0.8203463203463203,77
+polarity,Energy transition and climate,Information Technology,2019,-0.9340277777777778,48
+polarity,Energy transition and climate,Information Technology,2020,-0.84,50
+polarity,Energy transition and climate,Information Technology,2021,-0.9047619047619048,63
+polarity,Energy transition and climate,Information Technology,2022,-0.8980099502487562,67
+polarity,Energy transition and climate,Information Technology,2023,-0.9116161616161615,66
+polarity,Energy transition and climate,Information Technology,2024,-0.9413145539906103,71
+polarity,Energy transition and climate,Information Technology,2025,-0.9624413145539905,71
+polarity,Energy transition and climate,Materials,2019,-0.9545454545454546,22
+polarity,Energy transition and climate,Materials,2020,-0.9047619047619048,21
+polarity,Energy transition and climate,Materials,2021,-0.8787878787878788,22
+polarity,Energy transition and climate,Materials,2022,-0.7878787878787878,22
+polarity,Energy transition and climate,Materials,2023,-0.782608695652174,23
+polarity,Energy transition and climate,Materials,2024,-0.8055555555555555,24
+polarity,Energy transition and climate,Materials,2025,-0.9027777777777778,24
+polarity,Energy transition and climate,Real Estate,2019,-0.9615384615384616,26
+polarity,Energy transition and climate,Real Estate,2020,-0.9135802469135803,27
+polarity,Energy transition and climate,Real Estate,2021,-0.9320987654320988,27
+polarity,Energy transition and climate,Real Estate,2022,-0.8722222222222222,30
+polarity,Energy transition and climate,Real Estate,2023,-0.8390804597701149,29
+polarity,Energy transition and climate,Real Estate,2024,-0.896551724137931,29
+polarity,Energy transition and climate,Real Estate,2025,-0.8505747126436782,29
+polarity,Energy transition and climate,Utilities,2019,-0.6444444444444444,30
+polarity,Energy transition and climate,Utilities,2020,-0.6333333333333333,30
+polarity,Energy transition and climate,Utilities,2021,-0.6666666666666667,31
+polarity,Energy transition and climate,Utilities,2022,-0.6129032258064516,31
+polarity,Energy transition and climate,Utilities,2023,-0.6774193548387096,31
+polarity,Energy transition and climate,Utilities,2024,-0.6989247311827957,31
+polarity,Energy transition and climate,Utilities,2025,-0.8172043010752688,31
+magnitude,Energy transition and climate,Communication Services,2019,0.5714285714285714,7
+magnitude,Energy transition and climate,Communication Services,2020,0.7857142857142857,7
+magnitude,Energy transition and climate,Communication Services,2021,0.5606060606060606,11
+magnitude,Energy transition and climate,Communication Services,2022,0.7307692307692307,13
+magnitude,Energy transition and climate,Communication Services,2023,0.7564102564102565,13
+magnitude,Energy transition and climate,Communication Services,2024,0.7777777777777778,15
+magnitude,Energy transition and climate,Communication Services,2025,0.6666666666666666,13
+magnitude,Energy transition and climate,Consumer Discretionary,2019,0.6754385964912281,38
+magnitude,Energy transition and climate,Consumer Discretionary,2020,0.7702702702702703,37
+magnitude,Energy transition and climate,Consumer Discretionary,2021,0.8037037037037037,45
+magnitude,Energy transition and climate,Consumer Discretionary,2022,0.9481481481481481,45
+magnitude,Energy transition and climate,Consumer Discretionary,2023,1.127659574468085,47
+magnitude,Energy transition and climate,Consumer Discretionary,2024,1.0471014492753623,46
+magnitude,Energy transition and climate,Consumer Discretionary,2025,1.0,47
+magnitude,Energy transition and climate,Consumer Staples,2019,0.7413793103448276,29
+magnitude,Energy transition and climate,Consumer Staples,2020,0.7298850574712644,29
+magnitude,Energy transition and climate,Consumer Staples,2021,0.8111111111111111,30
+magnitude,Energy transition and climate,Consumer Staples,2022,1.053763440860215,31
+magnitude,Energy transition and climate,Consumer Staples,2023,1.0,33
+magnitude,Energy transition and climate,Consumer Staples,2024,0.9444444444444444,33
+magnitude,Energy transition and climate,Consumer Staples,2025,0.9898989898989898,33
+magnitude,Energy transition and climate,Energy,2019,1.280701754385965,19
+magnitude,Energy transition and climate,Energy,2020,1.4833333333333334,20
+magnitude,Energy transition and climate,Energy,2021,1.5317460317460316,21
+magnitude,Energy transition and climate,Energy,2022,1.5396825396825398,21
+magnitude,Energy transition and climate,Energy,2023,1.5952380952380953,21
+magnitude,Energy transition and climate,Energy,2024,1.6507936507936507,21
+magnitude,Energy transition and climate,Energy,2025,1.4047619047619047,21
+magnitude,Energy transition and climate,Financials,2019,0.8414634146341463,41
+magnitude,Energy transition and climate,Financials,2020,0.8945578231292517,49
+magnitude,Energy transition and climate,Financials,2021,0.912568306010929,61
+magnitude,Energy transition and climate,Financials,2022,0.8532338308457711,67
+magnitude,Energy transition and climate,Financials,2023,0.9523809523809524,70
+magnitude,Energy transition and climate,Financials,2024,0.9507042253521126,71
+magnitude,Energy transition and climate,Financials,2025,0.9047619047619048,70
+magnitude,Energy transition and climate,Health Care,2019,0.6052631578947368,19
+magnitude,Energy transition and climate,Health Care,2020,0.6896551724137931,29
+magnitude,Energy transition and climate,Health Care,2021,0.6888888888888889,45
+magnitude,Energy transition and climate,Health Care,2022,0.7287581699346405,51
+magnitude,Energy transition and climate,Health Care,2023,0.875886524822695,47
+magnitude,Energy transition and climate,Health Care,2024,0.9444444444444445,48
+magnitude,Energy transition and climate,Health Care,2025,0.8269230769230769,52
+magnitude,Energy transition and climate,Industrials,2019,0.9722222222222222,60
+magnitude,Energy transition and climate,Industrials,2020,0.9646464646464648,66
+magnitude,Energy transition and climate,Industrials,2021,1.0439814814814816,72
+magnitude,Energy transition and climate,Industrials,2022,1.028888888888889,75
+magnitude,Energy transition and climate,Industrials,2023,1.061965811965812,78
+magnitude,Energy transition and climate,Industrials,2024,1.0654008438818565,79
+magnitude,Energy transition and climate,Industrials,2025,1.0541125541125542,77
+magnitude,Energy transition and climate,Information Technology,2019,0.7118055555555555,48
+magnitude,Energy transition and climate,Information Technology,2020,0.8733333333333333,50
+magnitude,Energy transition and climate,Information Technology,2021,0.8597883597883598,63
+magnitude,Energy transition and climate,Information Technology,2022,0.9228855721393036,67
+magnitude,Energy transition and climate,Information Technology,2023,0.9166666666666666,66
+magnitude,Energy transition and climate,Information Technology,2024,0.8943661971830986,71
+magnitude,Energy transition and climate,Information Technology,2025,0.812206572769953,71
+magnitude,Energy transition and climate,Materials,2019,1.1893939393939394,22
+magnitude,Energy transition and climate,Materials,2020,1.2142857142857142,21
+magnitude,Energy transition and climate,Materials,2021,1.325757575757576,22
+magnitude,Energy transition and climate,Materials,2022,1.1666666666666667,22
+magnitude,Energy transition and climate,Materials,2023,1.3985507246376812,23
+magnitude,Energy transition and climate,Materials,2024,1.3055555555555556,24
+magnitude,Energy transition and climate,Materials,2025,1.361111111111111,24
+magnitude,Energy transition and climate,Real Estate,2019,1.032051282051282,26
+magnitude,Energy transition and climate,Real Estate,2020,0.882716049382716,27
+magnitude,Energy transition and climate,Real Estate,2021,1.0740740740740742,27
+magnitude,Energy transition and climate,Real Estate,2022,0.9388888888888889,30
+magnitude,Energy transition and climate,Real Estate,2023,1.1551724137931034,29
+magnitude,Energy transition and climate,Real Estate,2024,1.1149425287356323,29
+magnitude,Energy transition and climate,Real Estate,2025,1.1896551724137931,29
+magnitude,Energy transition and climate,Utilities,2019,1.577777777777778,30
+magnitude,Energy transition and climate,Utilities,2020,1.6444444444444446,30
+magnitude,Energy transition and climate,Utilities,2021,1.6559139784946237,31
+magnitude,Energy transition and climate,Utilities,2022,1.6451612903225807,31
+magnitude,Energy transition and climate,Utilities,2023,1.7204301075268817,31
+magnitude,Energy transition and climate,Utilities,2024,1.6666666666666665,31
+magnitude,Energy transition and climate,Utilities,2025,1.5591397849462367,31
+realization,Energy transition and climate,Communication Services,2019,0.5714285714285714,7
+realization,Energy transition and climate,Communication Services,2020,0.5714285714285714,7
+realization,Energy transition and climate,Communication Services,2021,0.25757575757575757,11
+realization,Energy transition and climate,Communication Services,2022,0.6153846153846154,13
+realization,Energy transition and climate,Communication Services,2023,0.43589743589743585,13
+realization,Energy transition and climate,Communication Services,2024,0.6888888888888888,15
+realization,Energy transition and climate,Communication Services,2025,0.641025641025641,13
+realization,Energy transition and climate,Consumer Discretionary,2019,0.7149122807017544,38
+realization,Energy transition and climate,Consumer Discretionary,2020,0.5855855855855856,37
+realization,Energy transition and climate,Consumer Discretionary,2021,0.5629629629629629,45
+realization,Energy transition and climate,Consumer Discretionary,2022,0.5851851851851851,45
+realization,Energy transition and climate,Consumer Discretionary,2023,0.6808510638297872,47
+realization,Energy transition and climate,Consumer Discretionary,2024,0.8188405797101449,46
+realization,Energy transition and climate,Consumer Discretionary,2025,0.8226950354609929,47
+realization,Energy transition and climate,Consumer Staples,2019,0.20689655172413793,29
+realization,Energy transition and climate,Consumer Staples,2020,0.24712643678160917,29
+realization,Energy transition and climate,Consumer Staples,2021,0.3722222222222222,30
+realization,Energy transition and climate,Consumer Staples,2022,0.6129032258064516,31
+realization,Energy transition and climate,Consumer Staples,2023,0.5858585858585859,33
+realization,Energy transition and climate,Consumer Staples,2024,0.7323232323232324,33
+realization,Energy transition and climate,Consumer Staples,2025,0.6313131313131313,33
+realization,Energy transition and climate,Energy,2019,0.8771929824561402,19
+realization,Energy transition and climate,Energy,2020,0.95,20
+realization,Energy transition and climate,Energy,2021,0.9444444444444444,21
+realization,Energy transition and climate,Energy,2022,1.0158730158730158,21
+realization,Energy transition and climate,Energy,2023,1.126984126984127,21
+realization,Energy transition and climate,Energy,2024,1.1746031746031746,21
+realization,Energy transition and climate,Energy,2025,0.9841269841269842,21
+realization,Energy transition and climate,Financials,2019,0.5934959349593496,41
+realization,Energy transition and climate,Financials,2020,0.54421768707483,49
+realization,Energy transition and climate,Financials,2021,0.5409836065573771,61
+realization,Energy transition and climate,Financials,2022,0.5373134328358209,67
+realization,Energy transition and climate,Financials,2023,0.6,70
+realization,Energy transition and climate,Financials,2024,0.5375586854460094,71
+realization,Energy transition and climate,Financials,2025,0.6357142857142857,70
+realization,Energy transition and climate,Health Care,2019,0.2894736842105263,19
+realization,Energy transition and climate,Health Care,2020,0.339080459770115,29
+realization,Energy transition and climate,Health Care,2021,0.28148148148148144,45
+realization,Energy transition and climate,Health Care,2022,0.4084967320261438,51
+realization,Energy transition and climate,Health Care,2023,0.6099290780141844,47
+realization,Energy transition and climate,Health Care,2024,0.6805555555555555,48
+realization,Energy transition and climate,Health Care,2025,0.6185897435897435,52
+realization,Energy transition and climate,Industrials,2019,0.6305555555555556,60
+realization,Energy transition and climate,Industrials,2020,0.6666666666666666,66
+realization,Energy transition and climate,Industrials,2021,0.6435185185185186,72
+realization,Energy transition and climate,Industrials,2022,0.6666666666666666,75
+realization,Energy transition and climate,Industrials,2023,0.7200854700854701,78
+realization,Energy transition and climate,Industrials,2024,0.6940928270042195,79
+realization,Energy transition and climate,Industrials,2025,0.7554112554112554,77
+realization,Energy transition and climate,Information Technology,2019,0.517361111111111,48
+realization,Energy transition and climate,Information Technology,2020,0.6533333333333333,50
+realization,Energy transition and climate,Information Technology,2021,0.6666666666666666,63
+realization,Energy transition and climate,Information Technology,2022,0.6766169154228856,67
+realization,Energy transition and climate,Information Technology,2023,0.6237373737373737,66
+realization,Energy transition and climate,Information Technology,2024,0.6009389671361502,71
+realization,Energy transition and climate,Information Technology,2025,0.6549295774647887,71
+realization,Energy transition and climate,Materials,2019,0.8636363636363636,22
+realization,Energy transition and climate,Materials,2020,0.7380952380952381,21
+realization,Energy transition and climate,Materials,2021,0.8409090909090909,22
+realization,Energy transition and climate,Materials,2022,0.9015151515151515,22
+realization,Energy transition and climate,Materials,2023,0.8840579710144927,23
+realization,Energy transition and climate,Materials,2024,0.8472222222222222,24
+realization,Energy transition and climate,Materials,2025,0.9097222222222222,24
+realization,Energy transition and climate,Real Estate,2019,0.38461538461538464,26
+realization,Energy transition and climate,Real Estate,2020,0.32098765432098764,27
+realization,Energy transition and climate,Real Estate,2021,0.41358024691358025,27
+realization,Energy transition and climate,Real Estate,2022,0.5555555555555556,30
+realization,Energy transition and climate,Real Estate,2023,0.660919540229885,29
+realization,Energy transition and climate,Real Estate,2024,0.7068965517241379,29
+realization,Energy transition and climate,Real Estate,2025,0.7816091954022989,29
+realization,Energy transition and climate,Utilities,2019,0.9222222222222222,30
+realization,Energy transition and climate,Utilities,2020,0.9944444444444444,30
+realization,Energy transition and climate,Utilities,2021,0.9354838709677419,31
+realization,Energy transition and climate,Utilities,2022,0.9139784946236559,31
+realization,Energy transition and climate,Utilities,2023,0.9032258064516129,31
+realization,Energy transition and climate,Utilities,2024,1.086021505376344,31
+realization,Energy transition and climate,Utilities,2025,1.032258064516129,31
+uncertainty,Energy transition and climate,Communication Services,2019,2.142857142857143,7
+uncertainty,Energy transition and climate,Communication Services,2020,2.0714285714285716,7
+uncertainty,Energy transition and climate,Communication Services,2021,1.6515151515151516,11
+uncertainty,Energy transition and climate,Communication Services,2022,2.0256410256410255,13
+uncertainty,Energy transition and climate,Communication Services,2023,1.987179487179487,13
+uncertainty,Energy transition and climate,Communication Services,2024,1.8111111111111111,15
+uncertainty,Energy transition and climate,Communication Services,2025,2.076923076923077,13
+uncertainty,Energy transition and climate,Consumer Discretionary,2019,1.8245614035087718,38
+uncertainty,Energy transition and climate,Consumer Discretionary,2020,1.90990990990991,37
+uncertainty,Energy transition and climate,Consumer Discretionary,2021,1.9666666666666666,45
+uncertainty,Energy transition and climate,Consumer Discretionary,2022,2.125925925925926,45
+uncertainty,Energy transition and climate,Consumer Discretionary,2023,2.00354609929078,47
+uncertainty,Energy transition and climate,Consumer Discretionary,2024,1.9746376811594202,46
+uncertainty,Energy transition and climate,Consumer Discretionary,2025,1.9964539007092197,47
+uncertainty,Energy transition and climate,Consumer Staples,2019,1.9022988505747125,29
+uncertainty,Energy transition and climate,Consumer Staples,2020,1.9252873563218391,29
+uncertainty,Energy transition and climate,Consumer Staples,2021,1.9833333333333334,30
+uncertainty,Energy transition and climate,Consumer Staples,2022,1.9623655913978495,31
+uncertainty,Energy transition and climate,Consumer Staples,2023,1.9595959595959598,33
+uncertainty,Energy transition and climate,Consumer Staples,2024,1.9696969696969697,33
+uncertainty,Energy transition and climate,Consumer Staples,2025,2.04040404040404,33
+uncertainty,Energy transition and climate,Energy,2019,2.3684210526315788,19
+uncertainty,Energy transition and climate,Energy,2020,2.341666666666667,20
+uncertainty,Energy transition and climate,Energy,2021,2.2698412698412698,21
+uncertainty,Energy transition and climate,Energy,2022,2.2857142857142856,21
+uncertainty,Energy transition and climate,Energy,2023,2.3333333333333335,21
+uncertainty,Energy transition and climate,Energy,2024,2.3333333333333335,21
+uncertainty,Energy transition and climate,Energy,2025,2.126984126984127,21
+uncertainty,Energy transition and climate,Financials,2019,2.004065040650407,41
+uncertainty,Energy transition and climate,Financials,2020,1.9795918367346939,49
+uncertainty,Energy transition and climate,Financials,2021,2.021857923497268,61
+uncertainty,Energy transition and climate,Financials,2022,2.027363184079602,67
+uncertainty,Energy transition and climate,Financials,2023,2.0666666666666664,70
+uncertainty,Energy transition and climate,Financials,2024,2.056338028169014,71
+uncertainty,Energy transition and climate,Financials,2025,1.988095238095238,70
+uncertainty,Energy transition and climate,Health Care,2019,1.7894736842105263,19
+uncertainty,Energy transition and climate,Health Care,2020,1.764367816091954,29
+uncertainty,Energy transition and climate,Health Care,2021,1.9962962962962962,45
+uncertainty,Energy transition and climate,Health Care,2022,2.0065359477124183,51
+uncertainty,Energy transition and climate,Health Care,2023,1.9964539007092197,47
+uncertainty,Energy transition and climate,Health Care,2024,2.0520833333333335,48
+uncertainty,Energy transition and climate,Health Care,2025,2.0576923076923075,52
+uncertainty,Energy transition and climate,Industrials,2019,1.9972222222222222,60
+uncertainty,Energy transition and climate,Industrials,2020,1.9621212121212122,66
+uncertainty,Energy transition and climate,Industrials,2021,2.013888888888889,72
+uncertainty,Energy transition and climate,Industrials,2022,1.98,75
+uncertainty,Energy transition and climate,Industrials,2023,1.9572649572649572,78
+uncertainty,Energy transition and climate,Industrials,2024,1.99789029535865,79
+uncertainty,Energy transition and climate,Industrials,2025,2.0064935064935066,77
+uncertainty,Energy transition and climate,Information Technology,2019,2.0416666666666665,48
+uncertainty,Energy transition and climate,Information Technology,2020,1.94,50
+uncertainty,Energy transition and climate,Information Technology,2021,1.9973544973544972,63
+uncertainty,Energy transition and climate,Information Technology,2022,2.012437810945274,67
+uncertainty,Energy transition and climate,Information Technology,2023,1.9873737373737372,66
+uncertainty,Energy transition and climate,Information Technology,2024,1.9624413145539907,71
+uncertainty,Energy transition and climate,Information Technology,2025,2.007042253521127,71
+uncertainty,Energy transition and climate,Materials,2019,2.1893939393939394,22
+uncertainty,Energy transition and climate,Materials,2020,2.2063492063492065,21
+uncertainty,Energy transition and climate,Materials,2021,2.227272727272727,22
+uncertainty,Energy transition and climate,Materials,2022,2.159090909090909,22
+uncertainty,Energy transition and climate,Materials,2023,2.0942028985507246,23
+uncertainty,Energy transition and climate,Materials,2024,2.0833333333333335,24
+uncertainty,Energy transition and climate,Materials,2025,2.069444444444444,24
+uncertainty,Energy transition and climate,Real Estate,2019,2.0064102564102564,26
+uncertainty,Energy transition and climate,Real Estate,2020,2.0925925925925926,27
+uncertainty,Energy transition and climate,Real Estate,2021,2.0617283950617282,27
+uncertainty,Energy transition and climate,Real Estate,2022,1.9944444444444445,30
+uncertainty,Energy transition and climate,Real Estate,2023,1.971264367816092,29
+uncertainty,Energy transition and climate,Real Estate,2024,2.0114942528735633,29
+uncertainty,Energy transition and climate,Real Estate,2025,2.0689655172413794,29
+uncertainty,Energy transition and climate,Utilities,2019,2.0944444444444446,30
+uncertainty,Energy transition and climate,Utilities,2020,2.194444444444444,30
+uncertainty,Energy transition and climate,Utilities,2021,2.193548387096774,31
+uncertainty,Energy transition and climate,Utilities,2022,2.10752688172043,31
+uncertainty,Energy transition and climate,Utilities,2023,2.053763440860215,31
+uncertainty,Energy transition and climate,Utilities,2024,2.1182795698924735,31
+uncertainty,Energy transition and climate,Utilities,2025,2.1505376344086025,31
+specificity,Energy transition and climate,Communication Services,2019,0.7857142857142857,7
+specificity,Energy transition and climate,Communication Services,2020,1.0714285714285714,7
+specificity,Energy transition and climate,Communication Services,2021,0.9090909090909091,11
+specificity,Energy transition and climate,Communication Services,2022,1.2948717948717947,13
+specificity,Energy transition and climate,Communication Services,2023,1.217948717948718,13
+specificity,Energy transition and climate,Communication Services,2024,1.3888888888888888,15
+specificity,Energy transition and climate,Communication Services,2025,1.0384615384615385,13
+specificity,Energy transition and climate,Consumer Discretionary,2019,1.162280701754386,38
+specificity,Energy transition and climate,Consumer Discretionary,2020,1.2882882882882882,37
+specificity,Energy transition and climate,Consumer Discretionary,2021,1.2259259259259259,45
+specificity,Energy transition and climate,Consumer Discretionary,2022,1.4148148148148147,45
+specificity,Energy transition and climate,Consumer Discretionary,2023,1.5212765957446808,47
+specificity,Energy transition and climate,Consumer Discretionary,2024,1.4637681159420288,46
+specificity,Energy transition and climate,Consumer Discretionary,2025,1.4113475177304964,47
+specificity,Energy transition and climate,Consumer Staples,2019,1.103448275862069,29
+specificity,Energy transition and climate,Consumer Staples,2020,1.1954022988505746,29
+specificity,Energy transition and climate,Consumer Staples,2021,1.1777777777777778,30
+specificity,Energy transition and climate,Consumer Staples,2022,1.5483870967741935,31
+specificity,Energy transition and climate,Consumer Staples,2023,1.47979797979798,33
+specificity,Energy transition and climate,Consumer Staples,2024,1.5252525252525253,33
+specificity,Energy transition and climate,Consumer Staples,2025,1.505050505050505,33
+specificity,Energy transition and climate,Energy,2019,1.7894736842105263,19
+specificity,Energy transition and climate,Energy,2020,1.8333333333333335,20
+specificity,Energy transition and climate,Energy,2021,1.9206349206349207,21
+specificity,Energy transition and climate,Energy,2022,1.873015873015873,21
+specificity,Energy transition and climate,Energy,2023,1.8333333333333333,21
+specificity,Energy transition and climate,Energy,2024,1.9206349206349207,21
+specificity,Energy transition and climate,Energy,2025,1.7698412698412698,21
+specificity,Energy transition and climate,Financials,2019,1.1341463414634145,41
+specificity,Energy transition and climate,Financials,2020,1.2142857142857142,49
+specificity,Energy transition and climate,Financials,2021,1.3087431693989071,61
+specificity,Energy transition and climate,Financials,2022,1.3980099502487562,67
+specificity,Energy transition and climate,Financials,2023,1.4166666666666667,70
+specificity,Energy transition and climate,Financials,2024,1.4553990610328638,71
+specificity,Energy transition and climate,Financials,2025,1.4047619047619047,70
+specificity,Energy transition and climate,Health Care,2019,0.9649122807017543,19
+specificity,Energy transition and climate,Health Care,2020,0.7471264367816093,29
+specificity,Energy transition and climate,Health Care,2021,1.0814814814814815,45
+specificity,Energy transition and climate,Health Care,2022,1.2516339869281046,51
+specificity,Energy transition and climate,Health Care,2023,1.4858156028368794,47
+specificity,Energy transition and climate,Health Care,2024,1.5833333333333333,48
+specificity,Energy transition and climate,Health Care,2025,1.483974358974359,52
+specificity,Energy transition and climate,Industrials,2019,1.3166666666666667,60
+specificity,Energy transition and climate,Industrials,2020,1.3964646464646466,66
+specificity,Energy transition and climate,Industrials,2021,1.5208333333333333,72
+specificity,Energy transition and climate,Industrials,2022,1.4977777777777777,75
+specificity,Energy transition and climate,Industrials,2023,1.5726495726495726,78
+specificity,Energy transition and climate,Industrials,2024,1.5274261603375527,79
+specificity,Energy transition and climate,Industrials,2025,1.525974025974026,77
+specificity,Energy transition and climate,Information Technology,2019,1.222222222222222,48
+specificity,Energy transition and climate,Information Technology,2020,1.3366666666666667,50
+specificity,Energy transition and climate,Information Technology,2021,1.343915343915344,63
+specificity,Energy transition and climate,Information Technology,2022,1.427860696517413,67
+specificity,Energy transition and climate,Information Technology,2023,1.4823232323232323,66
+specificity,Energy transition and climate,Information Technology,2024,1.4014084507042253,71
+specificity,Energy transition and climate,Information Technology,2025,1.4014084507042253,71
+specificity,Energy transition and climate,Materials,2019,1.4848484848484846,22
+specificity,Energy transition and climate,Materials,2020,1.5476190476190477,21
+specificity,Energy transition and climate,Materials,2021,1.6742424242424243,22
+specificity,Energy transition and climate,Materials,2022,1.7575757575757576,22
+specificity,Energy transition and climate,Materials,2023,1.7463768115942029,23
+specificity,Energy transition and climate,Materials,2024,1.6597222222222223,24
+specificity,Energy transition and climate,Materials,2025,1.7430555555555556,24
+specificity,Energy transition and climate,Real Estate,2019,1.3717948717948718,26
+specificity,Energy transition and climate,Real Estate,2020,1.4074074074074074,27
+specificity,Energy transition and climate,Real Estate,2021,1.4382716049382718,27
+specificity,Energy transition and climate,Real Estate,2022,1.4555555555555555,30
+specificity,Energy transition and climate,Real Estate,2023,1.6379310344827587,29
+specificity,Energy transition and climate,Real Estate,2024,1.5747126436781609,29
+specificity,Energy transition and climate,Real Estate,2025,1.574712643678161,29
+specificity,Energy transition and climate,Utilities,2019,1.8888888888888888,30
+specificity,Energy transition and climate,Utilities,2020,1.9555555555555555,30
+specificity,Energy transition and climate,Utilities,2021,1.903225806451613,31
+specificity,Energy transition and climate,Utilities,2022,1.9247311827956988,31
+specificity,Energy transition and climate,Utilities,2023,1.935483870967742,31
+specificity,Energy transition and climate,Utilities,2024,1.946236559139785,31
+specificity,Energy transition and climate,Utilities,2025,1.935483870967742,31
+discussed,Energy transition and climate,Communication Services,2019,0.4666666666666667,15
+discussed,Energy transition and climate,Communication Services,2020,0.4666666666666667,15
+discussed,Energy transition and climate,Communication Services,2021,0.6875,16
+discussed,Energy transition and climate,Communication Services,2022,0.8125,16
+discussed,Energy transition and climate,Communication Services,2023,0.7647058823529411,17
+discussed,Energy transition and climate,Communication Services,2024,0.8333333333333334,18
+discussed,Energy transition and climate,Communication Services,2025,0.6842105263157895,19
+discussed,Energy transition and climate,Consumer Discretionary,2019,0.8444444444444444,45
+discussed,Energy transition and climate,Consumer Discretionary,2020,0.8043478260869565,46
+discussed,Energy transition and climate,Consumer Discretionary,2021,0.9574468085106383,47
+discussed,Energy transition and climate,Consumer Discretionary,2022,0.9574468085106383,47
+discussed,Energy transition and climate,Consumer Discretionary,2023,1.0,47
+discussed,Energy transition and climate,Consumer Discretionary,2024,0.9787234042553191,47
+discussed,Energy transition and climate,Consumer Discretionary,2025,1.0,47
+discussed,Energy transition and climate,Consumer Staples,2019,0.9354838709677419,31
+discussed,Energy transition and climate,Consumer Staples,2020,0.9354838709677419,31
+discussed,Energy transition and climate,Consumer Staples,2021,0.967741935483871,31
+discussed,Energy transition and climate,Consumer Staples,2022,1.0,31
+discussed,Energy transition and climate,Consumer Staples,2023,1.0,33
+discussed,Energy transition and climate,Consumer Staples,2024,1.0,33
+discussed,Energy transition and climate,Consumer Staples,2025,1.0,33
+discussed,Energy transition and climate,Energy,2019,1.0,19
+discussed,Energy transition and climate,Energy,2020,1.0,20
+discussed,Energy transition and climate,Energy,2021,1.0,21
+discussed,Energy transition and climate,Energy,2022,1.0,21
+discussed,Energy transition and climate,Energy,2023,1.0,21
+discussed,Energy transition and climate,Energy,2024,1.0,21
+discussed,Energy transition and climate,Energy,2025,1.0,21
+discussed,Energy transition and climate,Financials,2019,0.5694444444444444,72
+discussed,Energy transition and climate,Financials,2020,0.6805555555555556,72
+discussed,Energy transition and climate,Financials,2021,0.8243243243243243,74
+discussed,Energy transition and climate,Financials,2022,0.8933333333333333,75
+discussed,Energy transition and climate,Financials,2023,0.9333333333333333,75
+discussed,Energy transition and climate,Financials,2024,0.9342105263157895,76
+discussed,Energy transition and climate,Financials,2025,0.9210526315789473,76
+discussed,Energy transition and climate,Health Care,2019,0.3333333333333333,57
+discussed,Energy transition and climate,Health Care,2020,0.5272727272727272,55
+discussed,Energy transition and climate,Health Care,2021,0.7758620689655172,58
+discussed,Energy transition and climate,Health Care,2022,0.864406779661017,59
+discussed,Energy transition and climate,Health Care,2023,0.7966101694915254,59
+discussed,Energy transition and climate,Health Care,2024,0.8,60
+discussed,Energy transition and climate,Health Care,2025,0.8666666666666667,60
+discussed,Energy transition and climate,Industrials,2019,0.8108108108108109,74
+discussed,Energy transition and climate,Industrials,2020,0.88,75
+discussed,Energy transition and climate,Industrials,2021,0.9230769230769231,78
+discussed,Energy transition and climate,Industrials,2022,0.9615384615384616,78
+discussed,Energy transition and climate,Industrials,2023,0.9873417721518988,79
+discussed,Energy transition and climate,Industrials,2024,1.0,79
+discussed,Energy transition and climate,Industrials,2025,0.9871794871794872,78
+discussed,Energy transition and climate,Information Technology,2019,0.6956521739130435,69
+discussed,Energy transition and climate,Information Technology,2020,0.7142857142857143,70
+discussed,Energy transition and climate,Information Technology,2021,0.875,72
+discussed,Energy transition and climate,Information Technology,2022,0.9178082191780822,73
+discussed,Energy transition and climate,Information Technology,2023,0.9041095890410958,73
+discussed,Energy transition and climate,Information Technology,2024,0.9861111111111112,72
+discussed,Energy transition and climate,Information Technology,2025,0.9466666666666667,75
+discussed,Energy transition and climate,Materials,2019,1.0,22
+discussed,Energy transition and climate,Materials,2020,1.0,21
+discussed,Energy transition and climate,Materials,2021,1.0,22
+discussed,Energy transition and climate,Materials,2022,1.0,22
+discussed,Energy transition and climate,Materials,2023,1.0,23
+discussed,Energy transition and climate,Materials,2024,1.0,24
+discussed,Energy transition and climate,Materials,2025,1.0,24
+discussed,Energy transition and climate,Real Estate,2019,0.8666666666666667,30
+discussed,Energy transition and climate,Real Estate,2020,0.9,30
+discussed,Energy transition and climate,Real Estate,2021,0.9,30
+discussed,Energy transition and climate,Real Estate,2022,1.0,30
+discussed,Energy transition and climate,Real Estate,2023,0.9666666666666667,30
+discussed,Energy transition and climate,Real Estate,2024,0.9666666666666667,30
+discussed,Energy transition and climate,Real Estate,2025,0.9666666666666667,30
+discussed,Energy transition and climate,Utilities,2019,1.0,30
+discussed,Energy transition and climate,Utilities,2020,1.0,30
+discussed,Energy transition and climate,Utilities,2021,1.0,31
+discussed,Energy transition and climate,Utilities,2022,1.0,31
+discussed,Energy transition and climate,Utilities,2023,1.0,31
+discussed,Energy transition and climate,Utilities,2024,1.0,31
+discussed,Energy transition and climate,Utilities,2025,1.0,31

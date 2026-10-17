@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,China,Communication Services,2019,-1.0714285714285714,7
+polarity,China,Communication Services,2020,-0.375,4
+polarity,China,Communication Services,2021,-0.8333333333333334,6
+polarity,China,Communication Services,2022,-0.875,4
+polarity,China,Communication Services,2023,-0.9166666666666666,6
+polarity,China,Communication Services,2024,-1.0,7
+polarity,China,Communication Services,2025,-0.9375,8
+polarity,China,Consumer Discretionary,2019,-1.0632183908045976,29
+polarity,China,Consumer Discretionary,2020,-0.9310344827586207,29
+polarity,China,Consumer Discretionary,2021,-0.9583333333333333,28
+polarity,China,Consumer Discretionary,2022,-0.9770114942528735,29
+polarity,China,Consumer Discretionary,2023,-1.0166666666666666,30
+polarity,China,Consumer Discretionary,2024,-1.053763440860215,31
+polarity,China,Consumer Discretionary,2025,-0.9635416666666666,32
+polarity,China,Consumer Staples,2019,-0.8412698412698413,21
+polarity,China,Consumer Staples,2020,-0.7745098039215685,17
+polarity,China,Consumer Staples,2021,-0.5714285714285714,14
+polarity,China,Consumer Staples,2022,-0.9333333333333333,15
+polarity,China,Consumer Staples,2023,-0.8863636363636364,22
+polarity,China,Consumer Staples,2024,-0.8409090909090909,22
+polarity,China,Consumer Staples,2025,-0.9420289855072465,23
+polarity,China,Energy,2019,-1.0,3
+polarity,China,Energy,2020,-1.0,2
+polarity,China,Energy,2021,-0.5,2
+polarity,China,Energy,2022,-0.6666666666666666,3
+polarity,China,Energy,2023,-0.6666666666666666,3
+polarity,China,Energy,2024,-1.0,2
+polarity,China,Energy,2025,-1.0,4
+polarity,China,Financials,2019,-0.845679012345679,27
+polarity,China,Financials,2020,-0.88,25
+polarity,China,Financials,2021,-0.94,25
+polarity,China,Financials,2022,-0.994047619047619,28
+polarity,China,Financials,2023,-1.038888888888889,30
+polarity,China,Financials,2024,-1.0416666666666667,36
+polarity,China,Financials,2025,-1.0161290322580645,31
+polarity,China,Health Care,2019,-1.0161290322580645,31
+polarity,China,Health Care,2020,-1.0,32
+polarity,China,Health Care,2021,-1.0303030303030303,33
+polarity,China,Health Care,2022,-1.0571428571428572,35
+polarity,China,Health Care,2023,-1.0135135135135136,37
+polarity,China,Health Care,2024,-1.1153846153846154,39
+polarity,China,Health Care,2025,-1.0952380952380953,42
+polarity,China,Industrials,2019,-0.9728682170542636,43
+polarity,China,Industrials,2020,-0.9791666666666666,40
+polarity,China,Industrials,2021,-0.8658536585365854,41
+polarity,China,Industrials,2022,-0.9492753623188406,46
+polarity,China,Industrials,2023,-0.9666666666666667,45
+polarity,China,Industrials,2024,-1.0451388888888888,48
+polarity,China,Industrials,2025,-1.0253623188405796,46
+polarity,China,Information Technology,2019,-1.03125,48
+polarity,China,Information Technology,2020,-1.0757575757575757,55
+polarity,China,Information Technology,2021,-1.0994152046783625,57
+polarity,China,Information Technology,2022,-1.1303030303030304,55
+polarity,China,Information Technology,2023,-1.1578947368421053,57
+polarity,China,Information Technology,2024,-1.1783625730994154,57
+polarity,China,Information Technology,2025,-1.1638888888888888,60
+polarity,China,Materials,2019,-1.0333333333333334,15
+polarity,China,Materials,2020,-0.8461538461538461,13
+polarity,China,Materials,2021,-1.0,12
+polarity,China,Materials,2022,-1.0,15
+polarity,China,Materials,2023,-0.96875,16
+polarity,China,Materials,2024,-1.03125,16
+polarity,China,Materials,2025,-0.8529411764705882,17
+polarity,China,Real Estate,2019,-1.0,5
+polarity,China,Real Estate,2020,-0.8571428571428571,7
+polarity,China,Real Estate,2021,-1.0,5
+polarity,China,Real Estate,2022,-1.0,5
+polarity,China,Real Estate,2023,-1.0,5
+polarity,China,Real Estate,2024,-0.8571428571428571,7
+polarity,China,Real Estate,2025,-1.0,10
+polarity,China,Utilities,2019,-1.0,2
+polarity,China,Utilities,2020,-0.6666666666666666,3
+polarity,China,Utilities,2021,-0.6666666666666666,3
+polarity,China,Utilities,2022,-1.0,6
+polarity,China,Utilities,2023,-1.0,7
+polarity,China,Utilities,2024,-1.0,7
+polarity,China,Utilities,2025,-1.1666666666666667,6
+magnitude,China,Communication Services,2019,1.0,7
+magnitude,China,Communication Services,2020,0.625,4
+magnitude,China,Communication Services,2021,1.0,6
+magnitude,China,Communication Services,2022,1.25,4
+magnitude,China,Communication Services,2023,0.9166666666666666,6
+magnitude,China,Communication Services,2024,0.7857142857142857,7
+magnitude,China,Communication Services,2025,0.8125,8
+magnitude,China,Consumer Discretionary,2019,1.247126436781609,29
+magnitude,China,Consumer Discretionary,2020,1.293103448275862,29
+magnitude,China,Consumer Discretionary,2021,1.2321428571428572,28
+magnitude,China,Consumer Discretionary,2022,1.2298850574712643,29
+magnitude,China,Consumer Discretionary,2023,1.077777777777778,30
+magnitude,China,Consumer Discretionary,2024,1.1612903225806452,31
+magnitude,China,Consumer Discretionary,2025,1.0416666666666667,32
+magnitude,China,Consumer Staples,2019,0.8809523809523809,21
+magnitude,China,Consumer Staples,2020,0.9215686274509803,17
+magnitude,China,Consumer Staples,2021,1.023809523809524,14
+magnitude,China,Consumer Staples,2022,0.7777777777777778,15
+magnitude,China,Consumer Staples,2023,0.7196969696969697,22
+magnitude,China,Consumer Staples,2024,0.9090909090909091,22
+magnitude,China,Consumer Staples,2025,0.8405797101449275,23
+magnitude,China,Energy,2019,0.5,3
+magnitude,China,Energy,2020,0.0,2
+magnitude,China,Energy,2021,0.0,2
+magnitude,China,Energy,2022,0.3333333333333333,3
+magnitude,China,Energy,2023,0.0,3
+magnitude,China,Energy,2024,0.0,2
+magnitude,China,Energy,2025,0.0,4
+magnitude,China,Financials,2019,0.7901234567901234,27
+magnitude,China,Financials,2020,0.78,25
+magnitude,China,Financials,2021,0.82,25
+magnitude,China,Financials,2022,0.755952380952381,28
+magnitude,China,Financials,2023,0.6888888888888889,30
+magnitude,China,Financials,2024,0.6666666666666666,36
+magnitude,China,Financials,2025,0.7043010752688171,31
+magnitude,China,Health Care,2019,0.8118279569892474,31
+magnitude,China,Health Care,2020,0.96875,32
+magnitude,China,Health Care,2021,1.0151515151515151,33
+magnitude,China,Health Care,2022,0.8523809523809524,35
+magnitude,China,Health Care,2023,0.8873873873873874,37
+magnitude,China,Health Care,2024,0.9145299145299145,39
+magnitude,China,Health Care,2025,1.0317460317460319,42
+magnitude,China,Industrials,2019,0.817829457364341,43
+magnitude,China,Industrials,2020,0.9958333333333333,40
+magnitude,China,Industrials,2021,0.9552845528455284,41
+magnitude,China,Industrials,2022,0.894927536231884,46
+magnitude,China,Industrials,2023,1.0,45
+magnitude,China,Industrials,2024,0.9166666666666666,48
+magnitude,China,Industrials,2025,0.9601449275362318,46
+magnitude,China,Information Technology,2019,1.1666666666666667,48
+magnitude,China,Information Technology,2020,1.0757575757575757,55
+magnitude,China,Information Technology,2021,1.152046783625731,57
+magnitude,China,Information Technology,2022,1.2727272727272727,55
+magnitude,China,Information Technology,2023,1.1842105263157894,57
+magnitude,China,Information Technology,2024,1.2543859649122806,57
+magnitude,China,Information Technology,2025,1.277777777777778,60
+magnitude,China,Materials,2019,0.9333333333333333,15
+magnitude,China,Materials,2020,0.8461538461538461,13
+magnitude,China,Materials,2021,0.625,12
+magnitude,China,Materials,2022,1.1666666666666667,15
+magnitude,China,Materials,2023,0.8333333333333334,16
+magnitude,China,Materials,2024,0.9375,16
+magnitude,China,Materials,2025,0.8333333333333333,17
+magnitude,China,Real Estate,2019,0.7333333333333333,5
+magnitude,China,Real Estate,2020,0.5,7
+magnitude,China,Real Estate,2021,0.5333333333333333,5
+magnitude,China,Real Estate,2022,0.8,5
+magnitude,China,Real Estate,2023,0.6,5
+magnitude,China,Real Estate,2024,1.1428571428571428,7
+magnitude,China,Real Estate,2025,0.85,10
+magnitude,China,Utilities,2019,1.25,2
+magnitude,China,Utilities,2020,0.6666666666666666,3
+magnitude,China,Utilities,2021,0.6666666666666666,3
+magnitude,China,Utilities,2022,1.361111111111111,6
+magnitude,China,Utilities,2023,1.0714285714285714,7
+magnitude,China,Utilities,2024,1.0,7
+magnitude,China,Utilities,2025,0.9166666666666666,6
+realization,China,Communication Services,2019,1.1428571428571428,7
+realization,China,Communication Services,2020,1.75,4
+realization,China,Communication Services,2021,1.4166666666666667,6
+realization,China,Communication Services,2022,1.75,4
+realization,China,Communication Services,2023,0.8333333333333334,6
+realization,China,Communication Services,2024,0.7142857142857143,7
+realization,China,Communication Services,2025,0.8125,8
+realization,China,Consumer Discretionary,2019,0.9367816091954023,29
+realization,China,Consumer Discretionary,2020,1.0517241379310345,29
+realization,China,Consumer Discretionary,2021,0.8571428571428571,28
+realization,China,Consumer Discretionary,2022,1.0689655172413792,29
+realization,China,Consumer Discretionary,2023,0.8,30
+realization,China,Consumer Discretionary,2024,0.8387096774193549,31
+realization,China,Consumer Discretionary,2025,0.8229166666666666,32
+realization,China,Consumer Staples,2019,0.7619047619047619,21
+realization,China,Consumer Staples,2020,0.7254901960784313,17
+realization,China,Consumer Staples,2021,1.0357142857142858,14
+realization,China,Consumer Staples,2022,0.6,15
+realization,China,Consumer Staples,2023,0.6742424242424242,22
+realization,China,Consumer Staples,2024,0.6742424242424242,22
+realization,China,Consumer Staples,2025,0.8768115942028984,23
+realization,China,Energy,2019,0.5,3
+realization,China,Energy,2020,0.5,2
+realization,China,Energy,2021,0.0,2
+realization,China,Energy,2022,0.6666666666666666,3
+realization,China,Energy,2023,0.3333333333333333,3
+realization,China,Energy,2024,0.0,2
+realization,China,Energy,2025,0.25,4
+realization,China,Financials,2019,1.0864197530864197,27
+realization,China,Financials,2020,0.88,25
+realization,China,Financials,2021,0.9666666666666667,25
+realization,China,Financials,2022,0.880952380952381,28
+realization,China,Financials,2023,0.7833333333333333,30
+realization,China,Financials,2024,0.7037037037037037,36
+realization,China,Financials,2025,0.6612903225806451,31
+realization,China,Health Care,2019,1.0430107526881722,31
+realization,China,Health Care,2020,1.0677083333333333,32
+realization,China,Health Care,2021,1.303030303030303,33
+realization,China,Health Care,2022,0.9952380952380953,35
+realization,China,Health Care,2023,1.063063063063063,37
+realization,China,Health Care,2024,1.064102564102564,39
+realization,China,Health Care,2025,1.0436507936507937,42
+realization,China,Industrials,2019,1.0620155038759689,43
+realization,China,Industrials,2020,1.0833333333333335,40
+realization,China,Industrials,2021,0.8861788617886179,41
+realization,China,Industrials,2022,0.9311594202898551,46
+realization,China,Industrials,2023,1.0,45
+realization,China,Industrials,2024,0.9895833333333334,48
+realization,China,Industrials,2025,0.9057971014492753,46
+realization,China,Information Technology,2019,1.1770833333333333,48
+realization,China,Information Technology,2020,1.2575757575757576,55
+realization,China,Information Technology,2021,1.1345029239766082,57
+realization,China,Information Technology,2022,1.0363636363636364,55
+realization,China,Information Technology,2023,1.0380116959064327,57
+realization,China,Information Technology,2024,0.9941520467836257,57
+realization,China,Information Technology,2025,1.1055555555555554,60
+realization,China,Materials,2019,0.9888888888888889,15
+realization,China,Materials,2020,1.0,13
+realization,China,Materials,2021,1.125,12
+realization,China,Materials,2022,1.2333333333333334,15
+realization,China,Materials,2023,1.0833333333333333,16
+realization,China,Materials,2024,0.8958333333333334,16
+realization,China,Materials,2025,0.8235294117647058,17
+realization,China,Real Estate,2019,0.9666666666666666,5
+realization,China,Real Estate,2020,0.8571428571428571,7
+realization,China,Real Estate,2021,1.1333333333333333,5
+realization,China,Real Estate,2022,1.2,5
+realization,China,Real Estate,2023,0.4,5
+realization,China,Real Estate,2024,0.5714285714285714,7
+realization,China,Real Estate,2025,0.8,10
+realization,China,Utilities,2019,1.0,2
+realization,China,Utilities,2020,0.6666666666666666,3
+realization,China,Utilities,2021,1.3333333333333333,3
+realization,China,Utilities,2022,1.3333333333333333,6
+realization,China,Utilities,2023,1.0,7
+realization,China,Utilities,2024,0.9047619047619048,7
+realization,China,Utilities,2025,1.0833333333333333,6
+uncertainty,China,Communication Services,2019,1.6428571428571428,7
+uncertainty,China,Communication Services,2020,1.0,4
+uncertainty,China,Communication Services,2021,1.0833333333333333,6
+uncertainty,China,Communication Services,2022,1.875,4
+uncertainty,China,Communication Services,2023,1.5,6
+uncertainty,China,Communication Services,2024,1.4285714285714286,7
+uncertainty,China,Communication Services,2025,2.125,8
+uncertainty,China,Consumer Discretionary,2019,2.0229885057471266,29
+uncertainty,China,Consumer Discretionary,2020,1.9310344827586208,29
+uncertainty,China,Consumer Discretionary,2021,1.994047619047619,28
+uncertainty,China,Consumer Discretionary,2022,2.0804597701149428,29
+uncertainty,China,Consumer Discretionary,2023,2.1055555555555556,30
+uncertainty,China,Consumer Discretionary,2024,2.0483870967741935,31
+uncertainty,China,Consumer Discretionary,2025,2.1041666666666665,32
+uncertainty,China,Consumer Staples,2019,1.9523809523809523,21
+uncertainty,China,Consumer Staples,2020,1.7058823529411764,17
+uncertainty,China,Consumer Staples,2021,1.75,14
+uncertainty,China,Consumer Staples,2022,1.7555555555555555,15
+uncertainty,China,Consumer Staples,2023,1.8863636363636365,22
+uncertainty,China,Consumer Staples,2024,1.946969696969697,22
+uncertainty,China,Consumer Staples,2025,1.9130434782608696,23
+uncertainty,China,Energy,2019,2.3333333333333335,3
+uncertainty,China,Energy,2020,2.0,2
+uncertainty,China,Energy,2021,1.0,2
+uncertainty,China,Energy,2022,1.3333333333333333,3
+uncertainty,China,Energy,2023,1.3333333333333333,3
+uncertainty,China,Energy,2024,2.0,2
+uncertainty,China,Energy,2025,2.0,4
+uncertainty,China,Financials,2019,1.8888888888888888,27
+uncertainty,China,Financials,2020,1.82,25
+uncertainty,China,Financials,2021,1.8666666666666665,25
+uncertainty,China,Financials,2022,1.8452380952380951,28
+uncertainty,China,Financials,2023,2.022222222222222,30
+uncertainty,China,Financials,2024,1.9583333333333333,36
+uncertainty,China,Financials,2025,1.946236559139785,31
+uncertainty,China,Health Care,2019,1.9247311827956988,31
+uncertainty,China,Health Care,2020,1.640625,32
+uncertainty,China,Health Care,2021,1.888888888888889,33
+uncertainty,China,Health Care,2022,1.8904761904761906,35
+uncertainty,China,Health Care,2023,1.8873873873873872,37
+uncertainty,China,Health Care,2024,1.9829059829059827,39
+uncertainty,China,Health Care,2025,2.0555555555555554,42
+uncertainty,China,Industrials,2019,2.046511627906977,43
+uncertainty,China,Industrials,2020,1.9041666666666668,40
+uncertainty,China,Industrials,2021,1.9878048780487805,41
+uncertainty,China,Industrials,2022,1.9855072463768115,46
+uncertainty,China,Industrials,2023,1.8407407407407406,45
+uncertainty,China,Industrials,2024,2.1041666666666665,48
+uncertainty,China,Industrials,2025,2.057971014492754,46
+uncertainty,China,Information Technology,2019,1.9895833333333333,48
+uncertainty,China,Information Technology,2020,2.0969696969696967,55
+uncertainty,China,Information Technology,2021,2.1315789473684212,57
+uncertainty,China,Information Technology,2022,2.06969696969697,55
+uncertainty,China,Information Technology,2023,2.0409356725146197,57
+uncertainty,China,Information Technology,2024,2.038011695906433,57
+uncertainty,China,Information Technology,2025,2.0805555555555553,60
+uncertainty,China,Materials,2019,2.033333333333333,15
+uncertainty,China,Materials,2020,1.6538461538461537,13
+uncertainty,China,Materials,2021,1.6666666666666667,12
+uncertainty,China,Materials,2022,1.5333333333333334,15
+uncertainty,China,Materials,2023,1.8020833333333333,16
+uncertainty,China,Materials,2024,1.9375,16
+uncertainty,China,Materials,2025,1.9411764705882353,17
+uncertainty,China,Real Estate,2019,2.066666666666667,5
+uncertainty,China,Real Estate,2020,1.1428571428571428,7
+uncertainty,China,Real Estate,2021,1.6666666666666667,5
+uncertainty,China,Real Estate,2022,1.8,5
+uncertainty,China,Real Estate,2023,1.7,5
+uncertainty,China,Real Estate,2024,1.8571428571428572,7
+uncertainty,China,Real Estate,2025,1.8,10
+uncertainty,China,Utilities,2019,2.25,2
+uncertainty,China,Utilities,2020,1.5,3
+uncertainty,China,Utilities,2021,1.8333333333333333,3
+uncertainty,China,Utilities,2022,2.1944444444444446,6
+uncertainty,China,Utilities,2023,2.2142857142857144,7
+uncertainty,China,Utilities,2024,2.238095238095238,7
+uncertainty,China,Utilities,2025,2.25,6
+specificity,China,Communication Services,2019,1.7857142857142858,7
+specificity,China,Communication Services,2020,1.375,4
+specificity,China,Communication Services,2021,1.8333333333333333,6
+specificity,China,Communication Services,2022,1.625,4
+specificity,China,Communication Services,2023,1.6666666666666667,6
+specificity,China,Communication Services,2024,1.5,7
+specificity,China,Communication Services,2025,1.4375,8
+specificity,China,Consumer Discretionary,2019,1.6264367816091954,29
+specificity,China,Consumer Discretionary,2020,1.6666666666666667,29
+specificity,China,Consumer Discretionary,2021,1.6964285714285714,28
+specificity,China,Consumer Discretionary,2022,1.7126436781609196,29
+specificity,China,Consumer Discretionary,2023,1.6222222222222222,30
+specificity,China,Consumer Discretionary,2024,1.7956989247311828,31
+specificity,China,Consumer Discretionary,2025,1.703125,32
+specificity,China,Consumer Staples,2019,1.4285714285714286,21
+specificity,China,Consumer Staples,2020,1.215686274509804,17
+specificity,China,Consumer Staples,2021,1.3214285714285714,14
+specificity,China,Consumer Staples,2022,1.3333333333333333,15
+specificity,China,Consumer Staples,2023,1.2651515151515151,22
+specificity,China,Consumer Staples,2024,1.3333333333333333,22
+specificity,China,Consumer Staples,2025,1.608695652173913,23
+specificity,China,Energy,2019,1.3333333333333333,3
+specificity,China,Energy,2020,1.5,2
+specificity,China,Energy,2021,1.0,2
+specificity,China,Energy,2022,1.0,3
+specificity,China,Energy,2023,1.3333333333333333,3
+specificity,China,Energy,2024,1.0,2
+specificity,China,Energy,2025,1.25,4
+specificity,China,Financials,2019,1.5,27
+specificity,China,Financials,2020,1.4666666666666666,25
+specificity,China,Financials,2021,1.64,25
+specificity,China,Financials,2022,1.625,28
+specificity,China,Financials,2023,1.5444444444444445,30
+specificity,China,Financials,2024,1.4814814814814816,36
+specificity,China,Financials,2025,1.478494623655914,31
+specificity,China,Health Care,2019,1.5161290322580645,31
+specificity,China,Health Care,2020,1.7291666666666667,32
+specificity,China,Health Care,2021,1.7424242424242424,33
+specificity,China,Health Care,2022,1.6238095238095238,35
+specificity,China,Health Care,2023,1.6081081081081081,37
+specificity,China,Health Care,2024,1.6025641025641026,39
+specificity,China,Health Care,2025,1.623015873015873,42
+specificity,China,Industrials,2019,1.6046511627906976,43
+specificity,China,Industrials,2020,1.5625,40
+specificity,China,Industrials,2021,1.4796747967479673,41
+specificity,China,Industrials,2022,1.4818840579710146,46
+specificity,China,Industrials,2023,1.3962962962962964,45
+specificity,China,Industrials,2024,1.388888888888889,48
+specificity,China,Industrials,2025,1.565217391304348,46
+specificity,China,Information Technology,2019,1.6458333333333333,48
+specificity,China,Information Technology,2020,1.7272727272727273,55
+specificity,China,Information Technology,2021,1.7660818713450293,57
+specificity,China,Information Technology,2022,1.7303030303030305,55
+specificity,China,Information Technology,2023,1.6578947368421053,57
+specificity,China,Information Technology,2024,1.698830409356725,57
+specificity,China,Information Technology,2025,1.6833333333333333,60
+specificity,China,Materials,2019,1.4888888888888887,15
+specificity,China,Materials,2020,1.487179487179487,13
+specificity,China,Materials,2021,1.5833333333333333,12
+specificity,China,Materials,2022,1.6555555555555554,15
+specificity,China,Materials,2023,1.6458333333333333,16
+specificity,China,Materials,2024,1.5625,16
+specificity,China,Materials,2025,1.4705882352941178,17
+specificity,China,Real Estate,2019,1.6,5
+specificity,China,Real Estate,2020,1.4285714285714286,7
+specificity,China,Real Estate,2021,1.5333333333333334,5
+specificity,China,Real Estate,2022,1.8,5
+specificity,China,Real Estate,2023,1.3,5
+specificity,China,Real Estate,2024,1.4285714285714286,7
+specificity,China,Real Estate,2025,1.45,10
+specificity,China,Utilities,2019,1.0,2
+specificity,China,Utilities,2020,1.3333333333333333,3
+specificity,China,Utilities,2021,1.6666666666666667,3
+specificity,China,Utilities,2022,2.0,6
+specificity,China,Utilities,2023,1.5714285714285714,7
+specificity,China,Utilities,2024,1.523809523809524,7
+specificity,China,Utilities,2025,1.6666666666666667,6
+discussed,China,Communication Services,2019,0.4666666666666667,15
+discussed,China,Communication Services,2020,0.26666666666666666,15
+discussed,China,Communication Services,2021,0.375,16
+discussed,China,Communication Services,2022,0.25,16
+discussed,China,Communication Services,2023,0.35294117647058826,17
+discussed,China,Communication Services,2024,0.3888888888888889,18
+discussed,China,Communication Services,2025,0.42105263157894735,19
+discussed,China,Consumer Discretionary,2019,0.6444444444444445,45
+discussed,China,Consumer Discretionary,2020,0.6304347826086957,46
+discussed,China,Consumer Discretionary,2021,0.5957446808510638,47
+discussed,China,Consumer Discretionary,2022,0.6170212765957447,47
+discussed,China,Consumer Discretionary,2023,0.6382978723404256,47
+discussed,China,Consumer Discretionary,2024,0.6595744680851063,47
+discussed,China,Consumer Discretionary,2025,0.6808510638297872,47
+discussed,China,Consumer Staples,2019,0.6774193548387096,31
+discussed,China,Consumer Staples,2020,0.5483870967741935,31
+discussed,China,Consumer Staples,2021,0.45161290322580644,31
+discussed,China,Consumer Staples,2022,0.4838709677419355,31
+discussed,China,Consumer Staples,2023,0.6666666666666666,33
+discussed,China,Consumer Staples,2024,0.6666666666666666,33
+discussed,China,Consumer Staples,2025,0.696969696969697,33
+discussed,China,Energy,2019,0.15789473684210525,19
+discussed,China,Energy,2020,0.1,20
+discussed,China,Energy,2021,0.09523809523809523,21
+discussed,China,Energy,2022,0.14285714285714285,21
+discussed,China,Energy,2023,0.14285714285714285,21
+discussed,China,Energy,2024,0.09523809523809523,21
+discussed,China,Energy,2025,0.19047619047619047,21
+discussed,China,Financials,2019,0.375,72
+discussed,China,Financials,2020,0.3472222222222222,72
+discussed,China,Financials,2021,0.33783783783783783,74
+discussed,China,Financials,2022,0.37333333333333335,75
+discussed,China,Financials,2023,0.4,75
+discussed,China,Financials,2024,0.47368421052631576,76
+discussed,China,Financials,2025,0.40789473684210525,76
+discussed,China,Health Care,2019,0.543859649122807,57
+discussed,China,Health Care,2020,0.5818181818181818,55
+discussed,China,Health Care,2021,0.5689655172413793,58
+discussed,China,Health Care,2022,0.5932203389830508,59
+discussed,China,Health Care,2023,0.6271186440677966,59
+discussed,China,Health Care,2024,0.65,60
+discussed,China,Health Care,2025,0.7,60
+discussed,China,Industrials,2019,0.581081081081081,74
+discussed,China,Industrials,2020,0.5333333333333333,75
+discussed,China,Industrials,2021,0.5256410256410257,78
+discussed,China,Industrials,2022,0.5897435897435898,78
+discussed,China,Industrials,2023,0.569620253164557,79
+discussed,China,Industrials,2024,0.6075949367088608,79
+discussed,China,Industrials,2025,0.5897435897435898,78
+discussed,China,Information Technology,2019,0.6956521739130435,69
+discussed,China,Information Technology,2020,0.7857142857142857,70
+discussed,China,Information Technology,2021,0.7916666666666666,72
+discussed,China,Information Technology,2022,0.7534246575342466,73
+discussed,China,Information Technology,2023,0.7808219178082192,73
+discussed,China,Information Technology,2024,0.7916666666666666,72
+discussed,China,Information Technology,2025,0.8,75
+discussed,China,Materials,2019,0.6818181818181818,22
+discussed,China,Materials,2020,0.6190476190476191,21
+discussed,China,Materials,2021,0.5454545454545454,22
+discussed,China,Materials,2022,0.6818181818181818,22
+discussed,China,Materials,2023,0.6956521739130435,23
+discussed,China,Materials,2024,0.6666666666666666,24
+discussed,China,Materials,2025,0.7083333333333334,24
+discussed,China,Real Estate,2019,0.16666666666666666,30
+discussed,China,Real Estate,2020,0.23333333333333334,30
+discussed,China,Real Estate,2021,0.16666666666666666,30
+discussed,China,Real Estate,2022,0.16666666666666666,30
+discussed,China,Real Estate,2023,0.16666666666666666,30
+discussed,China,Real Estate,2024,0.23333333333333334,30
+discussed,China,Real Estate,2025,0.3333333333333333,30
+discussed,China,Utilities,2019,0.06666666666666667,30
+discussed,China,Utilities,2020,0.1,30
+discussed,China,Utilities,2021,0.0967741935483871,31
+discussed,China,Utilities,2022,0.1935483870967742,31
+discussed,China,Utilities,2023,0.22580645161290322,31
+discussed,China,Utilities,2024,0.22580645161290322,31
+discussed,China,Utilities,2025,0.1935483870967742,31

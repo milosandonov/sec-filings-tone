@@ -11,12 +11,16 @@ change elsewhere, with a 95% bootstrap interval over companies. Where there's no
 in the affected sectors is reported instead.
 
 With --quarterly, the same tests on the 10-Q cells (PLAN.md option B5) and events_quarterly.csv.
+With --named, the word-checked version: a passage of a TOPIC_WORDS topic counts only if it names the
+topic, since the model calls many passages on topic that don't (RESULTS.md, limitations).
 
 Usage:
     uv run python -m sec_filings_tone.events
     uv run python -m sec_filings_tone.events --quarterly
+    uv run python -m sec_filings_tone.events --named
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -30,16 +34,33 @@ from sec_filings_tone.tone import FILES, KEY, OUT
 EVENTS = Path(__file__).parents[2] / "events.csv"
 RESULTS = OUT / "events.csv"
 QUARTERLY = (EVENTS.with_name("events_quarterly.csv"), "10-Q", OUT / "q_events.csv")  # report()'s arguments for B5
+# topics with a clear vocabulary; added 2026-10-17 after the model was found calling passages on topic that name none of it
+TOPIC_WORDS = {
+    "AI": r"(?i:artificial intelligence|machine learning|deep learning|neural network|large language model|genai)|\bA\.?I\.?\b",
+    "China": r"(?i)\bchina\b|chinese|\bPRC\b|hong kong|beijing|shanghai|huawei",
+    "Tariffs": r"(?i)tariff|section 301|section 232|anti-dumping|countervailing dut|import dut|customs dut|trade war",
+}
 DIMS = list(DIMENSIONS)
 # baseline -> the dimension whose expected direction it's tested against
 BASELINE_FOR = {"finbert_polarity": "polarity", "lm_polarity": "polarity", "lm_uncertainty": "uncertainty",
                 "details_per_100w": "specificity"}
 
 
-def cells(items: list[str] | None = None, form: str = "10-K") -> pd.DataFrame:
+def named(form: str = "10-K") -> set[int]:
+    """Passages (pid: row number in the passages file) that pass the word check: all of a topic without
+    a vocabulary, and those of a TOPIC_WORDS topic whose text names it."""
+    p = pd.read_parquet(FILES[form][0]).reset_index(names="pid")
+    q = p[p.topic.isin(TOPIC_WORDS)]
+    text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"],
+                           filters=[("chunk_id", "in", q.chunk_id.unique().tolist())]).set_index("chunk_id").text
+    ok = [bool(re.search(TOPIC_WORDS[t], text[c])) for c, t in zip(q.chunk_id, q.topic)]
+    return set(p.pid[~p.topic.isin(TOPIC_WORDS)]) | set(q.pid[ok])
+
+
+def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None = None) -> pd.DataFrame:
     """One row per cell (a 10-K: ticker, fy, topic; a 10-Q: ticker, report_date, topic): sector, dates,
     `discussed`, and the mean of each dimension (and each baseline, once computed for every chunk)
-    over the on-topic passages, using only passages from `items` if given."""
+    over the on-topic passages, using only passages from `items`, and only passages (pid) in `keep`, if given."""
     passages, scores, _, baselines = FILES[form]
     p = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
     p = p.merge(pd.read_parquet(CHUNKS, columns=["chunk_id", *[x for x in ("filing_date", "report_date", "item")
@@ -52,7 +73,7 @@ def cells(items: list[str] | None = None, form: str = "10-K") -> pd.DataFrame:
     key = [*KEY[form], "topic"]
     grid = p.groupby([*key, "sector"], as_index=False)[[x for x in ("fy", "filing_date", "report_date")
                                                         if x not in key]].first()
-    on = p[~p.off_topic & (p["item"].isin(items) if items else True)]
+    on = p[~p.off_topic & (p["item"].isin(items) if items else True) & (p.pid.isin(keep) if keep is not None else True)]
     grid = grid.merge(on.groupby(key)[cols].mean().reset_index(), on=key, how="left")
     return grid.assign(discussed=grid[DIMS[0]].notna().astype(float))
 
@@ -79,13 +100,13 @@ def did(a: pd.Series, u: pd.Series, n_boot: int = 2000, seed: int = 0) -> tuple[
     return est, *np.percentile(boot, [2.5, 97.5])
 
 
-def report(events: Path = EVENTS, form: str = "10-K", results: Path = RESULTS) -> None:
+def report(events: Path = EVENTS, form: str = "10-K", results: Path = RESULTS, keep: set | None = None) -> None:
     ev = pd.read_csv(events, dtype=str, keep_default_na=False)
     sub = pd.read_csv(Path(__file__).parents[2] / "data" / "companies.csv").set_index("ticker").sub_industry
     rows = []
     for e in ev.itertuples():
         items = e.items.split(";") if e.items else None
-        ch = changes(cells(items, form), e.date, e.topics.split(";"), e.after)
+        ch = changes(cells(items, form, keep), e.date, e.topics.split(";"), e.after)
         hit = ch.sector.isin(e.sectors.split(";")) if e.sectors != "all" else pd.Series(True, ch.index)
         if e.sub_industries:
             hit &= sub.reindex(ch.index).fillna("").str.contains("|".join(e.sub_industries.split(";")))
@@ -118,4 +139,9 @@ def report(events: Path = EVENTS, form: str = "10-K", results: Path = RESULTS) -
 
 
 if __name__ == "__main__":
-    report(*QUARTERLY) if "--quarterly" in sys.argv else report()
+    if "--quarterly" in sys.argv:
+        report(*QUARTERLY)
+    elif "--named" in sys.argv:
+        report(results=OUT / "events_named.csv", keep=named())
+    else:
+        report()

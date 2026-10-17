@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,AI,Communication Services,2019,-1.0,1
+polarity,AI,Communication Services,2020,-1.0,2
+polarity,AI,Communication Services,2021,-1.0,2
+polarity,AI,Communication Services,2022,-0.33333333333333337,2
+polarity,AI,Communication Services,2023,-0.7222222222222222,15
+polarity,AI,Communication Services,2024,-0.7058823529411765,17
+polarity,AI,Communication Services,2025,-0.9444444444444444,18
+polarity,AI,Consumer Discretionary,2019,-0.8333333333333334,3
+polarity,AI,Consumer Discretionary,2020,-1.1,5
+polarity,AI,Consumer Discretionary,2021,-0.6,5
+polarity,AI,Consumer Discretionary,2022,-0.8571428571428571,7
+polarity,AI,Consumer Discretionary,2023,-0.7681159420289856,23
+polarity,AI,Consumer Discretionary,2024,-0.925,40
+polarity,AI,Consumer Discretionary,2025,-0.8740740740740741,45
+polarity,AI,Consumer Staples,2019,-0.5,2
+polarity,AI,Consumer Staples,2020,-1.0,1
+polarity,AI,Consumer Staples,2021,0.0,2
+polarity,AI,Consumer Staples,2022,-0.6666666666666666,3
+polarity,AI,Consumer Staples,2023,-0.9333333333333333,15
+polarity,AI,Consumer Staples,2024,-1.0,24
+polarity,AI,Consumer Staples,2025,-1.0,30
+polarity,AI,Energy,2019,0.0,3
+polarity,AI,Energy,2020,0.0,3
+polarity,AI,Energy,2021,0.0,1
+polarity,AI,Energy,2022,0.0,1
+polarity,AI,Energy,2023,-0.8571428571428571,7
+polarity,AI,Energy,2024,-0.8095238095238095,14
+polarity,AI,Energy,2025,-0.8333333333333334,16
+polarity,AI,Financials,2019,-0.8076923076923077,13
+polarity,AI,Financials,2020,-0.6428571428571429,14
+polarity,AI,Financials,2021,-0.7543859649122807,19
+polarity,AI,Financials,2022,-0.8333333333333333,22
+polarity,AI,Financials,2023,-0.9378531073446328,59
+polarity,AI,Financials,2024,-0.931111111111111,75
+polarity,AI,Financials,2025,-0.9122807017543859,76
+polarity,AI,Health Care,2019,-1.0,3
+polarity,AI,Health Care,2020,-0.3333333333333333,3
+polarity,AI,Health Care,2021,0.0,4
+polarity,AI,Health Care,2022,-0.6666666666666666,6
+polarity,AI,Health Care,2023,-0.8284313725490197,34
+polarity,AI,Health Care,2024,-0.8993710691823898,53
+polarity,AI,Health Care,2025,-0.9255952380952381,56
+polarity,AI,Industrials,2019,0.0,6
+polarity,AI,Industrials,2020,-0.3333333333333333,6
+polarity,AI,Industrials,2021,-0.4833333333333333,10
+polarity,AI,Industrials,2022,-0.6363636363636364,11
+polarity,AI,Industrials,2023,-0.9316239316239316,39
+polarity,AI,Industrials,2024,-0.8387096774193549,62
+polarity,AI,Industrials,2025,-0.7662337662337663,77
+polarity,AI,Information Technology,2019,0.05797101449275362,23
+polarity,AI,Information Technology,2020,-0.16049382716049385,27
+polarity,AI,Information Technology,2021,-0.15517241379310345,29
+polarity,AI,Information Technology,2022,-0.28846153846153844,26
+polarity,AI,Information Technology,2023,-0.7756410256410257,52
+polarity,AI,Information Technology,2024,-0.5404761904761906,70
+polarity,AI,Information Technology,2025,-0.5311111111111111,75
+polarity,AI,Materials,2019,1.0,1
+polarity,AI,Materials,2020,,0
+polarity,AI,Materials,2021,,0
+polarity,AI,Materials,2022,,0
+polarity,AI,Materials,2023,-1.0,8
+polarity,AI,Materials,2024,-0.8555555555555556,15
+polarity,AI,Materials,2025,-0.9411764705882353,17
+polarity,AI,Real Estate,2019,,0
+polarity,AI,Real Estate,2020,,0
+polarity,AI,Real Estate,2021,,0
+polarity,AI,Real Estate,2022,,0
+polarity,AI,Real Estate,2023,-0.9555555555555556,15
+polarity,AI,Real Estate,2024,-0.8194444444444445,24
+polarity,AI,Real Estate,2025,-0.8908045977011494,29
+polarity,AI,Utilities,2019,-1.0,1
+polarity,AI,Utilities,2020,-1.0,1
+polarity,AI,Utilities,2021,-1.0,1
+polarity,AI,Utilities,2022,,0
+polarity,AI,Utilities,2023,-0.9375,16
+polarity,AI,Utilities,2024,-0.7028985507246377,23
+polarity,AI,Utilities,2025,-0.5617283950617283,27
+magnitude,AI,Communication Services,2019,1.0,1
+magnitude,AI,Communication Services,2020,0.5,2
+magnitude,AI,Communication Services,2021,0.0,2
+magnitude,AI,Communication Services,2022,0.75,2
+magnitude,AI,Communication Services,2023,0.8555555555555555,15
+magnitude,AI,Communication Services,2024,0.892156862745098,17
+magnitude,AI,Communication Services,2025,0.9629629629629629,18
+magnitude,AI,Consumer Discretionary,2019,0.5,3
+magnitude,AI,Consumer Discretionary,2020,0.9,5
+magnitude,AI,Consumer Discretionary,2021,0.8666666666666666,5
+magnitude,AI,Consumer Discretionary,2022,0.6904761904761905,7
+magnitude,AI,Consumer Discretionary,2023,0.45652173913043476,23
+magnitude,AI,Consumer Discretionary,2024,0.5541666666666667,40
+magnitude,AI,Consumer Discretionary,2025,0.6925925925925926,45
+magnitude,AI,Consumer Staples,2019,0.5,2
+magnitude,AI,Consumer Staples,2020,1.0,1
+magnitude,AI,Consumer Staples,2021,0.5,2
+magnitude,AI,Consumer Staples,2022,0.6666666666666666,3
+magnitude,AI,Consumer Staples,2023,0.4111111111111111,15
+magnitude,AI,Consumer Staples,2024,0.46527777777777773,24
+magnitude,AI,Consumer Staples,2025,0.7333333333333333,30
+magnitude,AI,Energy,2019,0.6666666666666666,3
+magnitude,AI,Energy,2020,0.6666666666666666,3
+magnitude,AI,Energy,2021,0.0,1
+magnitude,AI,Energy,2022,0.0,1
+magnitude,AI,Energy,2023,0.42857142857142855,7
+magnitude,AI,Energy,2024,0.4523809523809524,14
+magnitude,AI,Energy,2025,0.7708333333333334,16
+magnitude,AI,Financials,2019,0.7307692307692307,13
+magnitude,AI,Financials,2020,0.6071428571428571,14
+magnitude,AI,Financials,2021,0.6140350877192983,19
+magnitude,AI,Financials,2022,0.6666666666666666,22
+magnitude,AI,Financials,2023,0.652542372881356,59
+magnitude,AI,Financials,2024,0.7688888888888888,75
+magnitude,AI,Financials,2025,0.8486842105263158,76
+magnitude,AI,Health Care,2019,0.8333333333333334,3
+magnitude,AI,Health Care,2020,1.0,3
+magnitude,AI,Health Care,2021,1.0,4
+magnitude,AI,Health Care,2022,0.6666666666666666,6
+magnitude,AI,Health Care,2023,0.7990196078431373,34
+magnitude,AI,Health Care,2024,0.7955974842767295,53
+magnitude,AI,Health Care,2025,0.8005952380952381,56
+magnitude,AI,Industrials,2019,0.8333333333333334,6
+magnitude,AI,Industrials,2020,0.6666666666666666,6
+magnitude,AI,Industrials,2021,0.6,10
+magnitude,AI,Industrials,2022,0.36363636363636365,11
+magnitude,AI,Industrials,2023,0.5897435897435898,39
+magnitude,AI,Industrials,2024,0.75,62
+magnitude,AI,Industrials,2025,0.8463203463203464,77
+magnitude,AI,Information Technology,2019,0.7391304347826086,23
+magnitude,AI,Information Technology,2020,0.7222222222222222,27
+magnitude,AI,Information Technology,2021,0.7873563218390804,29
+magnitude,AI,Information Technology,2022,0.8397435897435896,26
+magnitude,AI,Information Technology,2023,0.9134615384615384,52
+magnitude,AI,Information Technology,2024,1.0738095238095238,70
+magnitude,AI,Information Technology,2025,1.1688888888888889,75
+magnitude,AI,Materials,2019,2.0,1
+magnitude,AI,Materials,2020,,0
+magnitude,AI,Materials,2021,,0
+magnitude,AI,Materials,2022,,0
+magnitude,AI,Materials,2023,0.625,8
+magnitude,AI,Materials,2024,0.7222222222222221,15
+magnitude,AI,Materials,2025,0.7254901960784313,17
+magnitude,AI,Real Estate,2019,,0
+magnitude,AI,Real Estate,2020,,0
+magnitude,AI,Real Estate,2021,,0
+magnitude,AI,Real Estate,2022,,0
+magnitude,AI,Real Estate,2023,0.5777777777777777,15
+magnitude,AI,Real Estate,2024,0.6041666666666666,24
+magnitude,AI,Real Estate,2025,0.7471264367816093,29
+magnitude,AI,Utilities,2019,1.0,1
+magnitude,AI,Utilities,2020,1.0,1
+magnitude,AI,Utilities,2021,1.0,1
+magnitude,AI,Utilities,2022,,0
+magnitude,AI,Utilities,2023,0.46875,16
+magnitude,AI,Utilities,2024,0.8985507246376813,23
+magnitude,AI,Utilities,2025,1.1604938271604939,27
+realization,AI,Communication Services,2019,0.0,1
+realization,AI,Communication Services,2020,1.0,2
+realization,AI,Communication Services,2021,0.5,2
+realization,AI,Communication Services,2022,0.5,2
+realization,AI,Communication Services,2023,0.41111111111111115,15
+realization,AI,Communication Services,2024,0.7352941176470589,17
+realization,AI,Communication Services,2025,0.6481481481481481,18
+realization,AI,Consumer Discretionary,2019,0.16666666666666666,3
+realization,AI,Consumer Discretionary,2020,0.8,5
+realization,AI,Consumer Discretionary,2021,0.4666666666666666,5
+realization,AI,Consumer Discretionary,2022,0.9761904761904762,7
+realization,AI,Consumer Discretionary,2023,0.43478260869565216,23
+realization,AI,Consumer Discretionary,2024,0.5083333333333333,40
+realization,AI,Consumer Discretionary,2025,0.6407407407407407,45
+realization,AI,Consumer Staples,2019,1.0,2
+realization,AI,Consumer Staples,2020,1.0,1
+realization,AI,Consumer Staples,2021,0.5,2
+realization,AI,Consumer Staples,2022,0.3333333333333333,3
+realization,AI,Consumer Staples,2023,0.2,15
+realization,AI,Consumer Staples,2024,0.2569444444444445,24
+realization,AI,Consumer Staples,2025,0.5111111111111111,30
+realization,AI,Energy,2019,1.3333333333333333,3
+realization,AI,Energy,2020,1.3333333333333333,3
+realization,AI,Energy,2021,1.0,1
+realization,AI,Energy,2022,1.0,1
+realization,AI,Energy,2023,0.2857142857142857,7
+realization,AI,Energy,2024,0.2380952380952381,14
+realization,AI,Energy,2025,0.29166666666666663,16
+realization,AI,Financials,2019,0.6923076923076923,13
+realization,AI,Financials,2020,0.9404761904761905,14
+realization,AI,Financials,2021,0.8508771929824562,19
+realization,AI,Financials,2022,0.5984848484848485,22
+realization,AI,Financials,2023,0.5508474576271186,59
+realization,AI,Financials,2024,0.611111111111111,75
+realization,AI,Financials,2025,0.6513157894736842,76
+realization,AI,Health Care,2019,0.5,3
+realization,AI,Health Care,2020,1.0,3
+realization,AI,Health Care,2021,1.0,4
+realization,AI,Health Care,2022,0.75,6
+realization,AI,Health Care,2023,0.5245098039215685,34
+realization,AI,Health Care,2024,0.6163522012578616,53
+realization,AI,Health Care,2025,0.630952380952381,56
+realization,AI,Industrials,2019,0.5833333333333334,6
+realization,AI,Industrials,2020,0.8333333333333334,6
+realization,AI,Industrials,2021,0.5166666666666667,10
+realization,AI,Industrials,2022,0.2727272727272727,11
+realization,AI,Industrials,2023,0.3547008547008547,39
+realization,AI,Industrials,2024,0.5349462365591398,62
+realization,AI,Industrials,2025,0.5021645021645021,77
+realization,AI,Information Technology,2019,0.9057971014492753,23
+realization,AI,Information Technology,2020,0.8641975308641975,27
+realization,AI,Information Technology,2021,0.9195402298850575,29
+realization,AI,Information Technology,2022,0.8461538461538461,26
+realization,AI,Information Technology,2023,0.7660256410256411,52
+realization,AI,Information Technology,2024,0.7928571428571428,70
+realization,AI,Information Technology,2025,0.8355555555555555,75
+realization,AI,Materials,2019,1.0,1
+realization,AI,Materials,2020,,0
+realization,AI,Materials,2021,,0
+realization,AI,Materials,2022,,0
+realization,AI,Materials,2023,0.3125,8
+realization,AI,Materials,2024,0.3111111111111111,15
+realization,AI,Materials,2025,0.607843137254902,17
+realization,AI,Real Estate,2019,,0
+realization,AI,Real Estate,2020,,0
+realization,AI,Real Estate,2021,,0
+realization,AI,Real Estate,2022,,0
+realization,AI,Real Estate,2023,0.31111111111111106,15
+realization,AI,Real Estate,2024,0.4236111111111111,24
+realization,AI,Real Estate,2025,0.5689655172413793,29
+realization,AI,Utilities,2019,1.0,1
+realization,AI,Utilities,2020,1.0,1
+realization,AI,Utilities,2021,1.0,1
+realization,AI,Utilities,2022,,0
+realization,AI,Utilities,2023,0.34375,16
+realization,AI,Utilities,2024,0.3840579710144927,23
+realization,AI,Utilities,2025,0.5432098765432098,27
+uncertainty,AI,Communication Services,2019,2.0,1
+uncertainty,AI,Communication Services,2020,2.0,2
+uncertainty,AI,Communication Services,2021,2.0,2
+uncertainty,AI,Communication Services,2022,1.6666666666666665,2
+uncertainty,AI,Communication Services,2023,2.0,15
+uncertainty,AI,Communication Services,2024,1.9901960784313726,17
+uncertainty,AI,Communication Services,2025,2.0740740740740744,18
+uncertainty,AI,Consumer Discretionary,2019,2.0,3
+uncertainty,AI,Consumer Discretionary,2020,1.6,5
+uncertainty,AI,Consumer Discretionary,2021,2.0,5
+uncertainty,AI,Consumer Discretionary,2022,1.4285714285714286,7
+uncertainty,AI,Consumer Discretionary,2023,1.8333333333333333,23
+uncertainty,AI,Consumer Discretionary,2024,1.9916666666666667,40
+uncertainty,AI,Consumer Discretionary,2025,1.9333333333333333,45
+uncertainty,AI,Consumer Staples,2019,2.0,2
+uncertainty,AI,Consumer Staples,2020,2.0,1
+uncertainty,AI,Consumer Staples,2021,2.0,2
+uncertainty,AI,Consumer Staples,2022,2.0,3
+uncertainty,AI,Consumer Staples,2023,1.9333333333333333,15
+uncertainty,AI,Consumer Staples,2024,2.013888888888889,24
+uncertainty,AI,Consumer Staples,2025,1.9444444444444444,30
+uncertainty,AI,Energy,2019,1.0,3
+uncertainty,AI,Energy,2020,0.6666666666666666,3
+uncertainty,AI,Energy,2021,1.0,1
+uncertainty,AI,Energy,2022,2.0,1
+uncertainty,AI,Energy,2023,2.142857142857143,7
+uncertainty,AI,Energy,2024,1.869047619047619,14
+uncertainty,AI,Energy,2025,2.0416666666666665,16
+uncertainty,AI,Financials,2019,1.8076923076923077,13
+uncertainty,AI,Financials,2020,1.5238095238095237,14
+uncertainty,AI,Financials,2021,1.6491228070175439,19
+uncertainty,AI,Financials,2022,1.9393939393939392,22
+uncertainty,AI,Financials,2023,2.053672316384181,59
+uncertainty,AI,Financials,2024,2.0733333333333333,75
+uncertainty,AI,Financials,2025,2.0526315789473686,76
+uncertainty,AI,Health Care,2019,2.0,3
+uncertainty,AI,Health Care,2020,1.3333333333333333,3
+uncertainty,AI,Health Care,2021,1.0,4
+uncertainty,AI,Health Care,2022,2.0,6
+uncertainty,AI,Health Care,2023,1.911764705882353,34
+uncertainty,AI,Health Care,2024,2.0062893081761004,53
+uncertainty,AI,Health Care,2025,2.011904761904762,56
+uncertainty,AI,Industrials,2019,1.6666666666666667,6
+uncertainty,AI,Industrials,2020,1.8333333333333333,6
+uncertainty,AI,Industrials,2021,1.55,10
+uncertainty,AI,Industrials,2022,1.6363636363636365,11
+uncertainty,AI,Industrials,2023,2.0256410256410255,39
+uncertainty,AI,Industrials,2024,1.9193548387096775,62
+uncertainty,AI,Industrials,2025,1.9350649350649352,77
+uncertainty,AI,Information Technology,2019,1.0434782608695652,23
+uncertainty,AI,Information Technology,2020,1.1728395061728396,27
+uncertainty,AI,Information Technology,2021,1.2298850574712643,29
+uncertainty,AI,Information Technology,2022,1.5,26
+uncertainty,AI,Information Technology,2023,1.9423076923076923,52
+uncertainty,AI,Information Technology,2024,1.8809523809523807,70
+uncertainty,AI,Information Technology,2025,1.7666666666666666,75
+uncertainty,AI,Materials,2019,1.0,1
+uncertainty,AI,Materials,2020,,0
+uncertainty,AI,Materials,2021,,0
+uncertainty,AI,Materials,2022,,0
+uncertainty,AI,Materials,2023,2.0416666666666665,8
+uncertainty,AI,Materials,2024,1.922222222222222,15
+uncertainty,AI,Materials,2025,2.0,17
+uncertainty,AI,Real Estate,2019,,0
+uncertainty,AI,Real Estate,2020,,0
+uncertainty,AI,Real Estate,2021,,0
+uncertainty,AI,Real Estate,2022,,0
+uncertainty,AI,Real Estate,2023,1.9777777777777779,15
+uncertainty,AI,Real Estate,2024,2.0625,24
+uncertainty,AI,Real Estate,2025,2.045977011494253,29
+uncertainty,AI,Utilities,2019,2.0,1
+uncertainty,AI,Utilities,2020,2.0,1
+uncertainty,AI,Utilities,2021,2.0,1
+uncertainty,AI,Utilities,2022,,0
+uncertainty,AI,Utilities,2023,1.9375,16
+uncertainty,AI,Utilities,2024,2.079710144927536,23
+uncertainty,AI,Utilities,2025,2.1049382716049383,27
+specificity,AI,Communication Services,2019,1.0,1
+specificity,AI,Communication Services,2020,1.0,2
+specificity,AI,Communication Services,2021,1.0,2
+specificity,AI,Communication Services,2022,1.3333333333333335,2
+specificity,AI,Communication Services,2023,1.1555555555555554,15
+specificity,AI,Communication Services,2024,1.284313725490196,17
+specificity,AI,Communication Services,2025,1.4166666666666667,18
+specificity,AI,Consumer Discretionary,2019,1.1666666666666667,3
+specificity,AI,Consumer Discretionary,2020,1.3,5
+specificity,AI,Consumer Discretionary,2021,1.2666666666666666,5
+specificity,AI,Consumer Discretionary,2022,1.3571428571428572,7
+specificity,AI,Consumer Discretionary,2023,1.210144927536232,23
+specificity,AI,Consumer Discretionary,2024,1.1583333333333334,40
+specificity,AI,Consumer Discretionary,2025,1.237037037037037,45
+specificity,AI,Consumer Staples,2019,1.0,2
+specificity,AI,Consumer Staples,2020,1.0,1
+specificity,AI,Consumer Staples,2021,1.0,2
+specificity,AI,Consumer Staples,2022,1.0,3
+specificity,AI,Consumer Staples,2023,1.2,15
+specificity,AI,Consumer Staples,2024,1.1736111111111112,24
+specificity,AI,Consumer Staples,2025,1.1555555555555554,30
+specificity,AI,Energy,2019,1.3333333333333333,3
+specificity,AI,Energy,2020,1.0,3
+specificity,AI,Energy,2021,1.0,1
+specificity,AI,Energy,2022,1.0,1
+specificity,AI,Energy,2023,1.0,7
+specificity,AI,Energy,2024,1.119047619047619,14
+specificity,AI,Energy,2025,1.1666666666666667,16
+specificity,AI,Financials,2019,1.3076923076923077,13
+specificity,AI,Financials,2020,1.2142857142857142,14
+specificity,AI,Financials,2021,1.1228070175438596,19
+specificity,AI,Financials,2022,1.0681818181818181,22
+specificity,AI,Financials,2023,1.2401129943502827,59
+specificity,AI,Financials,2024,1.2733333333333334,75
+specificity,AI,Financials,2025,1.388157894736842,76
+specificity,AI,Health Care,2019,1.0,3
+specificity,AI,Health Care,2020,1.3333333333333333,3
+specificity,AI,Health Care,2021,1.5,4
+specificity,AI,Health Care,2022,1.25,6
+specificity,AI,Health Care,2023,1.2450980392156863,34
+specificity,AI,Health Care,2024,1.3050314465408805,53
+specificity,AI,Health Care,2025,1.3571428571428572,56
+specificity,AI,Industrials,2019,1.4166666666666667,6
+specificity,AI,Industrials,2020,1.3333333333333333,6
+specificity,AI,Industrials,2021,1.15,10
+specificity,AI,Industrials,2022,1.0909090909090908,11
+specificity,AI,Industrials,2023,1.1282051282051282,39
+specificity,AI,Industrials,2024,1.1801075268817205,62
+specificity,AI,Industrials,2025,1.2121212121212122,77
+specificity,AI,Information Technology,2019,1.2391304347826086,23
+specificity,AI,Information Technology,2020,1.1111111111111112,27
+specificity,AI,Information Technology,2021,1.2298850574712643,29
+specificity,AI,Information Technology,2022,1.2564102564102564,26
+specificity,AI,Information Technology,2023,1.4134615384615385,52
+specificity,AI,Information Technology,2024,1.4428571428571428,70
+specificity,AI,Information Technology,2025,1.488888888888889,75
+specificity,AI,Materials,2019,2.0,1
+specificity,AI,Materials,2020,,0
+specificity,AI,Materials,2021,,0
+specificity,AI,Materials,2022,,0
+specificity,AI,Materials,2023,1.0416666666666667,8
+specificity,AI,Materials,2024,1.1888888888888889,15
+specificity,AI,Materials,2025,1.303921568627451,17
+specificity,AI,Real Estate,2019,,0
+specificity,AI,Real Estate,2020,,0
+specificity,AI,Real Estate,2021,,0
+specificity,AI,Real Estate,2022,,0
+specificity,AI,Real Estate,2023,1.0333333333333334,15
+specificity,AI,Real Estate,2024,1.222222222222222,24
+specificity,AI,Real Estate,2025,1.252873563218391,29
+specificity,AI,Utilities,2019,1.0,1
+specificity,AI,Utilities,2020,1.0,1
+specificity,AI,Utilities,2021,1.0,1
+specificity,AI,Utilities,2022,,0
+specificity,AI,Utilities,2023,1.0,16
+specificity,AI,Utilities,2024,1.2463768115942029,23
+specificity,AI,Utilities,2025,1.3950617283950617,27
+discussed,AI,Communication Services,2019,0.06666666666666667,15
+discussed,AI,Communication Services,2020,0.13333333333333333,15
+discussed,AI,Communication Services,2021,0.125,16
+discussed,AI,Communication Services,2022,0.125,16
+discussed,AI,Communication Services,2023,0.8823529411764706,17
+discussed,AI,Communication Services,2024,0.9444444444444444,18
+discussed,AI,Communication Services,2025,0.9473684210526315,19
+discussed,AI,Consumer Discretionary,2019,0.06666666666666667,45
+discussed,AI,Consumer Discretionary,2020,0.10869565217391304,46
+discussed,AI,Consumer Discretionary,2021,0.10638297872340426,47
+discussed,AI,Consumer Discretionary,2022,0.14893617021276595,47
+discussed,AI,Consumer Discretionary,2023,0.48936170212765956,47
+discussed,AI,Consumer Discretionary,2024,0.851063829787234,47
+discussed,AI,Consumer Discretionary,2025,0.9574468085106383,47
+discussed,AI,Consumer Staples,2019,0.06451612903225806,31
+discussed,AI,Consumer Staples,2020,0.03225806451612903,31
+discussed,AI,Consumer Staples,2021,0.06451612903225806,31
+discussed,AI,Consumer Staples,2022,0.0967741935483871,31
+discussed,AI,Consumer Staples,2023,0.45454545454545453,33
+discussed,AI,Consumer Staples,2024,0.7272727272727273,33
+discussed,AI,Consumer Staples,2025,0.9090909090909091,33
+discussed,AI,Energy,2019,0.15789473684210525,19
+discussed,AI,Energy,2020,0.15,20
+discussed,AI,Energy,2021,0.047619047619047616,21
+discussed,AI,Energy,2022,0.047619047619047616,21
+discussed,AI,Energy,2023,0.3333333333333333,21
+discussed,AI,Energy,2024,0.6666666666666666,21
+discussed,AI,Energy,2025,0.7619047619047619,21
+discussed,AI,Financials,2019,0.18055555555555555,72
+discussed,AI,Financials,2020,0.19444444444444445,72
+discussed,AI,Financials,2021,0.25675675675675674,74
+discussed,AI,Financials,2022,0.29333333333333333,75
+discussed,AI,Financials,2023,0.7866666666666666,75
+discussed,AI,Financials,2024,0.9868421052631579,76
+discussed,AI,Financials,2025,1.0,76
+discussed,AI,Health Care,2019,0.05263157894736842,57
+discussed,AI,Health Care,2020,0.05454545454545454,55
+discussed,AI,Health Care,2021,0.06896551724137931,58
+discussed,AI,Health Care,2022,0.1016949152542373,59
+discussed,AI,Health Care,2023,0.576271186440678,59
+discussed,AI,Health Care,2024,0.8833333333333333,60
+discussed,AI,Health Care,2025,0.9333333333333333,60
+discussed,AI,Industrials,2019,0.08108108108108109,74
+discussed,AI,Industrials,2020,0.08,75
+discussed,AI,Industrials,2021,0.1282051282051282,78
+discussed,AI,Industrials,2022,0.14102564102564102,78
+discussed,AI,Industrials,2023,0.4936708860759494,79
+discussed,AI,Industrials,2024,0.7848101265822784,79
+discussed,AI,Industrials,2025,0.9871794871794872,78
+discussed,AI,Information Technology,2019,0.3333333333333333,69
+discussed,AI,Information Technology,2020,0.38571428571428573,70
+discussed,AI,Information Technology,2021,0.4027777777777778,72
+discussed,AI,Information Technology,2022,0.3561643835616438,73
+discussed,AI,Information Technology,2023,0.7123287671232876,73
+discussed,AI,Information Technology,2024,0.9722222222222222,72
+discussed,AI,Information Technology,2025,1.0,75
+discussed,AI,Materials,2019,0.045454545454545456,22
+discussed,AI,Materials,2020,0.0,21
+discussed,AI,Materials,2021,0.0,22
+discussed,AI,Materials,2022,0.0,22
+discussed,AI,Materials,2023,0.34782608695652173,23
+discussed,AI,Materials,2024,0.625,24
+discussed,AI,Materials,2025,0.7083333333333334,24
+discussed,AI,Real Estate,2019,0.0,30
+discussed,AI,Real Estate,2020,0.0,30
+discussed,AI,Real Estate,2021,0.0,30
+discussed,AI,Real Estate,2022,0.0,30
+discussed,AI,Real Estate,2023,0.5,30
+discussed,AI,Real Estate,2024,0.8,30
+discussed,AI,Real Estate,2025,0.9666666666666667,30
+discussed,AI,Utilities,2019,0.03333333333333333,30
+discussed,AI,Utilities,2020,0.03333333333333333,30
+discussed,AI,Utilities,2021,0.03225806451612903,31
+discussed,AI,Utilities,2022,0.0,31
+discussed,AI,Utilities,2023,0.5161290322580645,31
+discussed,AI,Utilities,2024,0.7419354838709677,31
+discussed,AI,Utilities,2025,0.8709677419354839,31

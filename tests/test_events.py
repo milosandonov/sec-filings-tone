@@ -2,7 +2,9 @@
 
 import pandas as pd
 
-from sec_filings_tone.events import changes, did
+import re
+
+from sec_filings_tone.events import TOPIC_WORDS, changes, did
 
 c = pd.DataFrame({
     "ticker": ["A", "A", "A", "B", "B"], "fy": [2021, 2022, 2023, 2021, 2022], "topic": ["T"] * 5,
@@ -20,4 +22,10 @@ est, lo, hi = did(pd.Series([1.0, 1.0, 1.0]), pd.Series([0.0, 0.0]))
 assert est == 1 and lo == hi == 1
 est, *_ = did(pd.Series([2.0, 4.0]), pd.Series([], dtype=float))  # no comparison group: the plain mean
 assert est == 3
+# the word check: names the topic, not look-alikes
+for topic, yes, no in [("AI", ["AI-driven demand", "artificial intelligence", "A.I. tools", "machine learning"], ["AIG", "fiduciary", "maintain"]),
+                       ("China", ["China", "Chinese customers", "the PRC", "Hong Kong"], ["Indochina", "chinaware"]),
+                       ("Tariffs", ["tariffs", "Section 301", "anti-dumping duties"], ["fiduciary duties", "trade secrets"])]:
+    assert all(re.search(TOPIC_WORDS[topic], x) for x in yes), topic
+    assert not any(re.search(TOPIC_WORDS[topic], x) for x in no), topic
 print("ok")

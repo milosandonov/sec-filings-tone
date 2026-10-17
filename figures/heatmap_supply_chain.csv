@@ -1,0 +1,463 @@
+measure,topic,sector,fy,mean,n
+polarity,Supply chain,Communication Services,2019,-0.7555555555555556,15
+polarity,Supply chain,Communication Services,2020,-0.8444444444444444,15
+polarity,Supply chain,Communication Services,2021,-0.84375,16
+polarity,Supply chain,Communication Services,2022,-0.8125,16
+polarity,Supply chain,Communication Services,2023,-0.7745098039215685,17
+polarity,Supply chain,Communication Services,2024,-0.7037037037037037,18
+polarity,Supply chain,Communication Services,2025,-0.7017543859649122,19
+polarity,Supply chain,Consumer Discretionary,2019,-0.7083333333333334,44
+polarity,Supply chain,Consumer Discretionary,2020,-0.8666666666666667,45
+polarity,Supply chain,Consumer Discretionary,2021,-0.9716312056737588,47
+polarity,Supply chain,Consumer Discretionary,2022,-0.9680851063829787,47
+polarity,Supply chain,Consumer Discretionary,2023,-0.9007092198581559,47
+polarity,Supply chain,Consumer Discretionary,2024,-0.875886524822695,47
+polarity,Supply chain,Consumer Discretionary,2025,-0.8794326241134752,47
+polarity,Supply chain,Consumer Staples,2019,-0.7419354838709677,31
+polarity,Supply chain,Consumer Staples,2020,-0.8548387096774194,31
+polarity,Supply chain,Consumer Staples,2021,-1.0430107526881722,31
+polarity,Supply chain,Consumer Staples,2022,-0.9569892473118279,31
+polarity,Supply chain,Consumer Staples,2023,-0.8787878787878788,33
+polarity,Supply chain,Consumer Staples,2024,-0.8535353535353536,33
+polarity,Supply chain,Consumer Staples,2025,-0.8585858585858586,33
+polarity,Supply chain,Energy,2019,-0.7962962962962963,18
+polarity,Supply chain,Energy,2020,-0.9,20
+polarity,Supply chain,Energy,2021,-0.8333333333333334,21
+polarity,Supply chain,Energy,2022,-0.7936507936507935,21
+polarity,Supply chain,Energy,2023,-0.8412698412698413,21
+polarity,Supply chain,Energy,2024,-0.8095238095238095,21
+polarity,Supply chain,Energy,2025,-0.7857142857142857,21
+polarity,Supply chain,Financials,2019,-0.44345238095238093,56
+polarity,Supply chain,Financials,2020,-0.6935483870967742,62
+polarity,Supply chain,Financials,2021,-0.8380952380952381,70
+polarity,Supply chain,Financials,2022,-0.821256038647343,69
+polarity,Supply chain,Financials,2023,-0.7142857142857143,63
+polarity,Supply chain,Financials,2024,-0.6744791666666666,64
+polarity,Supply chain,Financials,2025,-0.6820512820512821,65
+polarity,Supply chain,Health Care,2019,-0.8742690058479533,57
+polarity,Supply chain,Health Care,2020,-0.978395061728395,54
+polarity,Supply chain,Health Care,2021,-1.0775862068965518,58
+polarity,Supply chain,Health Care,2022,-1.089080459770115,58
+polarity,Supply chain,Health Care,2023,-1.0254237288135593,59
+polarity,Supply chain,Health Care,2024,-0.980225988700565,59
+polarity,Supply chain,Health Care,2025,-1.0,60
+polarity,Supply chain,Industrials,2019,-0.7785388127853882,73
+polarity,Supply chain,Industrials,2020,-0.8933333333333333,75
+polarity,Supply chain,Industrials,2021,-1.0598290598290598,78
+polarity,Supply chain,Industrials,2022,-1.0662393162393162,78
+polarity,Supply chain,Industrials,2023,-0.9092827004219408,79
+polarity,Supply chain,Industrials,2024,-0.8987341772151899,79
+polarity,Supply chain,Industrials,2025,-0.8910256410256411,78
+polarity,Supply chain,Information Technology,2019,-0.8405797101449275,69
+polarity,Supply chain,Information Technology,2020,-0.9009661835748792,69
+polarity,Supply chain,Information Technology,2021,-1.0393518518518519,72
+polarity,Supply chain,Information Technology,2022,-1.0388127853881277,73
+polarity,Supply chain,Information Technology,2023,-0.9863013698630136,73
+polarity,Supply chain,Information Technology,2024,-0.92018779342723,71
+polarity,Supply chain,Information Technology,2025,-0.9369369369369369,74
+polarity,Supply chain,Materials,2019,-0.9015151515151515,22
+polarity,Supply chain,Materials,2020,-0.9523809523809523,21
+polarity,Supply chain,Materials,2021,-0.9772727272727273,22
+polarity,Supply chain,Materials,2022,-1.1136363636363635,22
+polarity,Supply chain,Materials,2023,-0.8985507246376813,23
+polarity,Supply chain,Materials,2024,-0.9444444444444445,24
+polarity,Supply chain,Materials,2025,-0.9652777777777778,24
+polarity,Supply chain,Real Estate,2019,-0.7222222222222222,18
+polarity,Supply chain,Real Estate,2020,-0.8958333333333334,24
+polarity,Supply chain,Real Estate,2021,-1.0178571428571428,28
+polarity,Supply chain,Real Estate,2022,-0.971264367816092,29
+polarity,Supply chain,Real Estate,2023,-0.9333333333333332,25
+polarity,Supply chain,Real Estate,2024,-0.9012345679012346,27
+polarity,Supply chain,Real Estate,2025,-0.88,25
+polarity,Supply chain,Utilities,2019,-0.6944444444444444,30
+polarity,Supply chain,Utilities,2020,-0.7333333333333333,30
+polarity,Supply chain,Utilities,2021,-0.8440860215053763,31
+polarity,Supply chain,Utilities,2022,-0.8602150537634408,31
+polarity,Supply chain,Utilities,2023,-0.9354838709677419,31
+polarity,Supply chain,Utilities,2024,-0.8010752688172043,31
+polarity,Supply chain,Utilities,2025,-0.8387096774193549,31
+magnitude,Supply chain,Communication Services,2019,0.8555555555555555,15
+magnitude,Supply chain,Communication Services,2020,0.9333333333333333,15
+magnitude,Supply chain,Communication Services,2021,0.9375,16
+magnitude,Supply chain,Communication Services,2022,1.0625,16
+magnitude,Supply chain,Communication Services,2023,0.8039215686274509,17
+magnitude,Supply chain,Communication Services,2024,0.75,18
+magnitude,Supply chain,Communication Services,2025,0.8070175438596492,19
+magnitude,Supply chain,Consumer Discretionary,2019,1.0075757575757576,44
+magnitude,Supply chain,Consumer Discretionary,2020,1.1481481481481481,45
+magnitude,Supply chain,Consumer Discretionary,2021,1.3191489361702127,47
+magnitude,Supply chain,Consumer Discretionary,2022,1.2943262411347518,47
+magnitude,Supply chain,Consumer Discretionary,2023,1.1950354609929077,47
+magnitude,Supply chain,Consumer Discretionary,2024,1.099290780141844,47
+magnitude,Supply chain,Consumer Discretionary,2025,1.1524822695035462,47
+magnitude,Supply chain,Consumer Staples,2019,0.8440860215053764,31
+magnitude,Supply chain,Consumer Staples,2020,1.3333333333333335,31
+magnitude,Supply chain,Consumer Staples,2021,1.3333333333333335,31
+magnitude,Supply chain,Consumer Staples,2022,1.3010752688172045,31
+magnitude,Supply chain,Consumer Staples,2023,1.202020202020202,33
+magnitude,Supply chain,Consumer Staples,2024,1.0303030303030303,33
+magnitude,Supply chain,Consumer Staples,2025,1.1717171717171717,33
+magnitude,Supply chain,Energy,2019,0.9444444444444444,18
+magnitude,Supply chain,Energy,2020,1.15,20
+magnitude,Supply chain,Energy,2021,1.0238095238095237,21
+magnitude,Supply chain,Energy,2022,1.0476190476190477,21
+magnitude,Supply chain,Energy,2023,1.0714285714285714,21
+magnitude,Supply chain,Energy,2024,1.1904761904761905,21
+magnitude,Supply chain,Energy,2025,0.9841269841269842,21
+magnitude,Supply chain,Financials,2019,0.5744047619047619,56
+magnitude,Supply chain,Financials,2020,0.7983870967741935,62
+magnitude,Supply chain,Financials,2021,0.819047619047619,70
+magnitude,Supply chain,Financials,2022,0.7342995169082125,69
+magnitude,Supply chain,Financials,2023,0.5767195767195767,63
+magnitude,Supply chain,Financials,2024,0.609375,64
+magnitude,Supply chain,Financials,2025,0.5948717948717949,65
+magnitude,Supply chain,Health Care,2019,0.9707602339181287,57
+magnitude,Supply chain,Health Care,2020,1.2808641975308643,54
+magnitude,Supply chain,Health Care,2021,1.3908045977011496,58
+magnitude,Supply chain,Health Care,2022,1.4252873563218391,58
+magnitude,Supply chain,Health Care,2023,1.2457627118644068,59
+magnitude,Supply chain,Health Care,2024,1.2062146892655368,59
+magnitude,Supply chain,Health Care,2025,1.2583333333333333,60
+magnitude,Supply chain,Industrials,2019,0.95662100456621,73
+magnitude,Supply chain,Industrials,2020,1.2377777777777776,75
+magnitude,Supply chain,Industrials,2021,1.3824786324786325,78
+magnitude,Supply chain,Industrials,2022,1.344017094017094,78
+magnitude,Supply chain,Industrials,2023,1.2278481012658229,79
+magnitude,Supply chain,Industrials,2024,1.2616033755274263,79
+magnitude,Supply chain,Industrials,2025,1.1346153846153846,78
+magnitude,Supply chain,Information Technology,2019,1.140096618357488,69
+magnitude,Supply chain,Information Technology,2020,1.2149758454106279,69
+magnitude,Supply chain,Information Technology,2021,1.324074074074074,72
+magnitude,Supply chain,Information Technology,2022,1.3333333333333333,73
+magnitude,Supply chain,Information Technology,2023,1.2922374429223744,73
+magnitude,Supply chain,Information Technology,2024,1.300469483568075,71
+magnitude,Supply chain,Information Technology,2025,1.2567567567567568,74
+magnitude,Supply chain,Materials,2019,1.0378787878787878,22
+magnitude,Supply chain,Materials,2020,1.1349206349206349,21
+magnitude,Supply chain,Materials,2021,1.303030303030303,22
+magnitude,Supply chain,Materials,2022,1.2272727272727273,22
+magnitude,Supply chain,Materials,2023,1.144927536231884,23
+magnitude,Supply chain,Materials,2024,1.0694444444444444,24
+magnitude,Supply chain,Materials,2025,1.2361111111111112,24
+magnitude,Supply chain,Real Estate,2019,0.7962962962962963,18
+magnitude,Supply chain,Real Estate,2020,0.9583333333333334,24
+magnitude,Supply chain,Real Estate,2021,1.0892857142857142,28
+magnitude,Supply chain,Real Estate,2022,0.7931034482758621,29
+magnitude,Supply chain,Real Estate,2023,0.6866666666666668,25
+magnitude,Supply chain,Real Estate,2024,0.9259259259259259,27
+magnitude,Supply chain,Real Estate,2025,0.92,25
+magnitude,Supply chain,Utilities,2019,0.9222222222222223,30
+magnitude,Supply chain,Utilities,2020,1.0333333333333334,30
+magnitude,Supply chain,Utilities,2021,1.182795698924731,31
+magnitude,Supply chain,Utilities,2022,1.3010752688172045,31
+magnitude,Supply chain,Utilities,2023,1.2419354838709677,31
+magnitude,Supply chain,Utilities,2024,1.182795698924731,31
+magnitude,Supply chain,Utilities,2025,1.1720430107526882,31
+realization,Supply chain,Communication Services,2019,0.7888888888888889,15
+realization,Supply chain,Communication Services,2020,0.9333333333333333,15
+realization,Supply chain,Communication Services,2021,0.9791666666666666,16
+realization,Supply chain,Communication Services,2022,1.0729166666666667,16
+realization,Supply chain,Communication Services,2023,1.0392156862745099,17
+realization,Supply chain,Communication Services,2024,0.9629629629629629,18
+realization,Supply chain,Communication Services,2025,0.8859649122807017,19
+realization,Supply chain,Consumer Discretionary,2019,0.8522727272727273,44
+realization,Supply chain,Consumer Discretionary,2020,0.9111111111111111,45
+realization,Supply chain,Consumer Discretionary,2021,1.2765957446808511,47
+realization,Supply chain,Consumer Discretionary,2022,1.202127659574468,47
+realization,Supply chain,Consumer Discretionary,2023,1.1134751773049645,47
+realization,Supply chain,Consumer Discretionary,2024,1.0638297872340425,47
+realization,Supply chain,Consumer Discretionary,2025,1.2695035460992907,47
+realization,Supply chain,Consumer Staples,2019,0.6666666666666667,31
+realization,Supply chain,Consumer Staples,2020,1.2258064516129032,31
+realization,Supply chain,Consumer Staples,2021,1.3548387096774193,31
+realization,Supply chain,Consumer Staples,2022,1.3978494623655913,31
+realization,Supply chain,Consumer Staples,2023,1.393939393939394,33
+realization,Supply chain,Consumer Staples,2024,1.0555555555555556,33
+realization,Supply chain,Consumer Staples,2025,1.0808080808080807,33
+realization,Supply chain,Energy,2019,0.824074074074074,18
+realization,Supply chain,Energy,2020,1.1333333333333333,20
+realization,Supply chain,Energy,2021,1.0793650793650795,21
+realization,Supply chain,Energy,2022,1.0,21
+realization,Supply chain,Energy,2023,1.0317460317460316,21
+realization,Supply chain,Energy,2024,1.0317460317460316,21
+realization,Supply chain,Energy,2025,1.0714285714285714,21
+realization,Supply chain,Financials,2019,1.0267857142857142,56
+realization,Supply chain,Financials,2020,1.1612903225806452,62
+realization,Supply chain,Financials,2021,1.1142857142857143,70
+realization,Supply chain,Financials,2022,0.9371980676328503,69
+realization,Supply chain,Financials,2023,0.9391534391534391,63
+realization,Supply chain,Financials,2024,0.7708333333333334,64
+realization,Supply chain,Financials,2025,0.9179487179487179,65
+realization,Supply chain,Health Care,2019,0.652046783625731,57
+realization,Supply chain,Health Care,2020,0.9197530864197531,54
+realization,Supply chain,Health Care,2021,1.0574712643678161,58
+realization,Supply chain,Health Care,2022,1.1206896551724137,58
+realization,Supply chain,Health Care,2023,1.019774011299435,59
+realization,Supply chain,Health Care,2024,0.923728813559322,59
+realization,Supply chain,Health Care,2025,1.0166666666666666,60
+realization,Supply chain,Industrials,2019,0.8105022831050228,73
+realization,Supply chain,Industrials,2020,1.0911111111111111,75
+realization,Supply chain,Industrials,2021,1.3247863247863247,78
+realization,Supply chain,Industrials,2022,1.4401709401709402,78
+realization,Supply chain,Industrials,2023,1.2151898734177216,79
+realization,Supply chain,Industrials,2024,1.1223628691983123,79
+realization,Supply chain,Industrials,2025,1.0405982905982907,78
+realization,Supply chain,Information Technology,2019,0.8574879227053139,69
+realization,Supply chain,Information Technology,2020,1.0821256038647342,69
+realization,Supply chain,Information Technology,2021,1.1828703703703705,72
+realization,Supply chain,Information Technology,2022,1.321917808219178,73
+realization,Supply chain,Information Technology,2023,1.221461187214612,73
+realization,Supply chain,Information Technology,2024,1.1924882629107982,71
+realization,Supply chain,Information Technology,2025,1.3445945945945945,74
+realization,Supply chain,Materials,2019,0.7651515151515151,22
+realization,Supply chain,Materials,2020,0.992063492063492,21
+realization,Supply chain,Materials,2021,1.0984848484848486,22
+realization,Supply chain,Materials,2022,1.2045454545454546,22
+realization,Supply chain,Materials,2023,0.9927536231884058,23
+realization,Supply chain,Materials,2024,0.8333333333333334,24
+realization,Supply chain,Materials,2025,0.9583333333333334,24
+realization,Supply chain,Real Estate,2019,0.8518518518518519,18
+realization,Supply chain,Real Estate,2020,0.8888888888888888,24
+realization,Supply chain,Real Estate,2021,0.8869047619047619,28
+realization,Supply chain,Real Estate,2022,0.7126436781609196,29
+realization,Supply chain,Real Estate,2023,0.66,25
+realization,Supply chain,Real Estate,2024,0.49382716049382713,27
+realization,Supply chain,Real Estate,2025,0.8466666666666666,25
+realization,Supply chain,Utilities,2019,0.8333333333333334,30
+realization,Supply chain,Utilities,2020,0.8277777777777777,30
+realization,Supply chain,Utilities,2021,0.9032258064516129,31
+realization,Supply chain,Utilities,2022,1.0752688172043012,31
+realization,Supply chain,Utilities,2023,1.086021505376344,31
+realization,Supply chain,Utilities,2024,1.021505376344086,31
+realization,Supply chain,Utilities,2025,1.0913978494623657,31
+uncertainty,Supply chain,Communication Services,2019,1.5111111111111113,15
+uncertainty,Supply chain,Communication Services,2020,1.5555555555555556,15
+uncertainty,Supply chain,Communication Services,2021,1.7291666666666667,16
+uncertainty,Supply chain,Communication Services,2022,1.5416666666666667,16
+uncertainty,Supply chain,Communication Services,2023,1.4705882352941178,17
+uncertainty,Supply chain,Communication Services,2024,1.3425925925925926,18
+uncertainty,Supply chain,Communication Services,2025,1.5263157894736843,19
+uncertainty,Supply chain,Consumer Discretionary,2019,1.6022727272727273,44
+uncertainty,Supply chain,Consumer Discretionary,2020,1.8222222222222222,45
+uncertainty,Supply chain,Consumer Discretionary,2021,1.7624113475177303,47
+uncertainty,Supply chain,Consumer Discretionary,2022,1.677304964539007,47
+uncertainty,Supply chain,Consumer Discretionary,2023,1.7056737588652484,47
+uncertainty,Supply chain,Consumer Discretionary,2024,1.730496453900709,47
+uncertainty,Supply chain,Consumer Discretionary,2025,1.6879432624113475,47
+uncertainty,Supply chain,Consumer Staples,2019,1.5913978494623657,31
+uncertainty,Supply chain,Consumer Staples,2020,1.8118279569892473,31
+uncertainty,Supply chain,Consumer Staples,2021,1.8387096774193548,31
+uncertainty,Supply chain,Consumer Staples,2022,1.817204301075269,31
+uncertainty,Supply chain,Consumer Staples,2023,1.6868686868686869,33
+uncertainty,Supply chain,Consumer Staples,2024,1.8585858585858586,33
+uncertainty,Supply chain,Consumer Staples,2025,1.7777777777777777,33
+uncertainty,Supply chain,Energy,2019,1.5370370370370372,18
+uncertainty,Supply chain,Energy,2020,1.675,20
+uncertainty,Supply chain,Energy,2021,1.6746031746031744,21
+uncertainty,Supply chain,Energy,2022,1.603174603174603,21
+uncertainty,Supply chain,Energy,2023,1.4761904761904763,21
+uncertainty,Supply chain,Energy,2024,1.5952380952380953,21
+uncertainty,Supply chain,Energy,2025,1.5476190476190477,21
+uncertainty,Supply chain,Financials,2019,1.0327380952380953,56
+uncertainty,Supply chain,Financials,2020,1.446236559139785,62
+uncertainty,Supply chain,Financials,2021,1.7357142857142858,70
+uncertainty,Supply chain,Financials,2022,1.6014492753623188,69
+uncertainty,Supply chain,Financials,2023,1.5343915343915344,63
+uncertainty,Supply chain,Financials,2024,1.5052083333333333,64
+uncertainty,Supply chain,Financials,2025,1.4461538461538461,65
+uncertainty,Supply chain,Health Care,2019,1.654970760233918,57
+uncertainty,Supply chain,Health Care,2020,1.9320987654320987,54
+uncertainty,Supply chain,Health Care,2021,1.9741379310344827,58
+uncertainty,Supply chain,Health Care,2022,2.0028735632183907,58
+uncertainty,Supply chain,Health Care,2023,1.8728813559322033,59
+uncertainty,Supply chain,Health Care,2024,1.8926553672316384,59
+uncertainty,Supply chain,Health Care,2025,1.8527777777777779,60
+uncertainty,Supply chain,Industrials,2019,1.678082191780822,73
+uncertainty,Supply chain,Industrials,2020,1.8422222222222222,75
+uncertainty,Supply chain,Industrials,2021,1.9230769230769231,78
+uncertainty,Supply chain,Industrials,2022,1.7628205128205128,78
+uncertainty,Supply chain,Industrials,2023,1.620253164556962,79
+uncertainty,Supply chain,Industrials,2024,1.7362869198312234,79
+uncertainty,Supply chain,Industrials,2025,1.7072649572649572,78
+uncertainty,Supply chain,Information Technology,2019,1.722222222222222,69
+uncertainty,Supply chain,Information Technology,2020,1.855072463768116,69
+uncertainty,Supply chain,Information Technology,2021,1.789351851851852,72
+uncertainty,Supply chain,Information Technology,2022,1.8013698630136987,73
+uncertainty,Supply chain,Information Technology,2023,1.7534246575342465,73
+uncertainty,Supply chain,Information Technology,2024,1.7136150234741785,71
+uncertainty,Supply chain,Information Technology,2025,1.6576576576576578,74
+uncertainty,Supply chain,Materials,2019,1.8106060606060608,22
+uncertainty,Supply chain,Materials,2020,1.8333333333333333,21
+uncertainty,Supply chain,Materials,2021,1.9090909090909092,22
+uncertainty,Supply chain,Materials,2022,1.9242424242424243,22
+uncertainty,Supply chain,Materials,2023,1.7971014492753625,23
+uncertainty,Supply chain,Materials,2024,1.9166666666666667,24
+uncertainty,Supply chain,Materials,2025,1.8958333333333333,24
+uncertainty,Supply chain,Real Estate,2019,1.4259259259259258,18
+uncertainty,Supply chain,Real Estate,2020,1.8958333333333333,24
+uncertainty,Supply chain,Real Estate,2021,2.017857142857143,28
+uncertainty,Supply chain,Real Estate,2022,1.8218390804597702,29
+uncertainty,Supply chain,Real Estate,2023,1.8,25
+uncertainty,Supply chain,Real Estate,2024,1.8271604938271606,27
+uncertainty,Supply chain,Real Estate,2025,1.7533333333333334,25
+uncertainty,Supply chain,Utilities,2019,1.5444444444444445,30
+uncertainty,Supply chain,Utilities,2020,1.8,30
+uncertainty,Supply chain,Utilities,2021,1.7365591397849462,31
+uncertainty,Supply chain,Utilities,2022,1.7849462365591398,31
+uncertainty,Supply chain,Utilities,2023,1.89247311827957,31
+uncertainty,Supply chain,Utilities,2024,1.7688172043010753,31
+uncertainty,Supply chain,Utilities,2025,1.682795698924731,31
+specificity,Supply chain,Communication Services,2019,1.6111111111111112,15
+specificity,Supply chain,Communication Services,2020,1.6,15
+specificity,Supply chain,Communication Services,2021,1.5208333333333333,16
+specificity,Supply chain,Communication Services,2022,1.4895833333333333,16
+specificity,Supply chain,Communication Services,2023,1.450980392156863,17
+specificity,Supply chain,Communication Services,2024,1.4166666666666667,18
+specificity,Supply chain,Communication Services,2025,1.4035087719298247,19
+specificity,Supply chain,Consumer Discretionary,2019,1.6742424242424243,44
+specificity,Supply chain,Consumer Discretionary,2020,1.7185185185185183,45
+specificity,Supply chain,Consumer Discretionary,2021,1.6595744680851063,47
+specificity,Supply chain,Consumer Discretionary,2022,1.6737588652482271,47
+specificity,Supply chain,Consumer Discretionary,2023,1.6560283687943262,47
+specificity,Supply chain,Consumer Discretionary,2024,1.677304964539007,47
+specificity,Supply chain,Consumer Discretionary,2025,1.6843971631205674,47
+specificity,Supply chain,Consumer Staples,2019,1.7526881720430108,31
+specificity,Supply chain,Consumer Staples,2020,1.7741935483870968,31
+specificity,Supply chain,Consumer Staples,2021,1.7741935483870968,31
+specificity,Supply chain,Consumer Staples,2022,1.7741935483870968,31
+specificity,Supply chain,Consumer Staples,2023,1.8181818181818181,33
+specificity,Supply chain,Consumer Staples,2024,1.7474747474747476,33
+specificity,Supply chain,Consumer Staples,2025,1.686868686868687,33
+specificity,Supply chain,Energy,2019,1.6944444444444444,18
+specificity,Supply chain,Energy,2020,1.6166666666666667,20
+specificity,Supply chain,Energy,2021,1.4444444444444444,21
+specificity,Supply chain,Energy,2022,1.492063492063492,21
+specificity,Supply chain,Energy,2023,1.6904761904761905,21
+specificity,Supply chain,Energy,2024,1.603174603174603,21
+specificity,Supply chain,Energy,2025,1.5952380952380953,21
+specificity,Supply chain,Financials,2019,1.4047619047619049,56
+specificity,Supply chain,Financials,2020,1.317204301075269,62
+specificity,Supply chain,Financials,2021,1.0357142857142858,70
+specificity,Supply chain,Financials,2022,1.108695652173913,69
+specificity,Supply chain,Financials,2023,1.2116402116402116,63
+specificity,Supply chain,Financials,2024,1.1015625,64
+specificity,Supply chain,Financials,2025,1.205128205128205,65
+specificity,Supply chain,Health Care,2019,1.6403508771929824,57
+specificity,Supply chain,Health Care,2020,1.6574074074074074,54
+specificity,Supply chain,Health Care,2021,1.7270114942528736,58
+specificity,Supply chain,Health Care,2022,1.704022988505747,58
+specificity,Supply chain,Health Care,2023,1.675141242937853,59
+specificity,Supply chain,Health Care,2024,1.6610169491525424,59
+specificity,Supply chain,Health Care,2025,1.6916666666666667,60
+specificity,Supply chain,Industrials,2019,1.6141552511415524,73
+specificity,Supply chain,Industrials,2020,1.5844444444444443,75
+specificity,Supply chain,Industrials,2021,1.6346153846153846,78
+specificity,Supply chain,Industrials,2022,1.6880341880341878,78
+specificity,Supply chain,Industrials,2023,1.6751054852320677,79
+specificity,Supply chain,Industrials,2024,1.668776371308017,79
+specificity,Supply chain,Industrials,2025,1.6217948717948718,78
+specificity,Supply chain,Information Technology,2019,1.7463768115942029,69
+specificity,Supply chain,Information Technology,2020,1.7173913043478262,69
+specificity,Supply chain,Information Technology,2021,1.7106481481481481,72
+specificity,Supply chain,Information Technology,2022,1.730593607305936,73
+specificity,Supply chain,Information Technology,2023,1.6894977168949772,73
+specificity,Supply chain,Information Technology,2024,1.6948356807511737,71
+specificity,Supply chain,Information Technology,2025,1.6756756756756757,74
+specificity,Supply chain,Materials,2019,1.7272727272727273,22
+specificity,Supply chain,Materials,2020,1.6666666666666667,21
+specificity,Supply chain,Materials,2021,1.712121212121212,22
+specificity,Supply chain,Materials,2022,1.6666666666666665,22
+specificity,Supply chain,Materials,2023,1.7246376811594202,23
+specificity,Supply chain,Materials,2024,1.6041666666666667,24
+specificity,Supply chain,Materials,2025,1.701388888888889,24
+specificity,Supply chain,Real Estate,2019,1.3703703703703705,18
+specificity,Supply chain,Real Estate,2020,1.3194444444444444,24
+specificity,Supply chain,Real Estate,2021,1.2678571428571428,28
+specificity,Supply chain,Real Estate,2022,1.1379310344827587,29
+specificity,Supply chain,Real Estate,2023,1.0333333333333332,25
+specificity,Supply chain,Real Estate,2024,1.1419753086419753,27
+specificity,Supply chain,Real Estate,2025,1.2733333333333332,25
+specificity,Supply chain,Utilities,2019,1.8,30
+specificity,Supply chain,Utilities,2020,1.6444444444444446,30
+specificity,Supply chain,Utilities,2021,1.650537634408602,31
+specificity,Supply chain,Utilities,2022,1.7204301075268817,31
+specificity,Supply chain,Utilities,2023,1.7795698924731183,31
+specificity,Supply chain,Utilities,2024,1.7526881720430108,31
+specificity,Supply chain,Utilities,2025,1.6344086021505375,31
+discussed,Supply chain,Communication Services,2019,1.0,15
+discussed,Supply chain,Communication Services,2020,1.0,15
+discussed,Supply chain,Communication Services,2021,1.0,16
+discussed,Supply chain,Communication Services,2022,1.0,16
+discussed,Supply chain,Communication Services,2023,1.0,17
+discussed,Supply chain,Communication Services,2024,1.0,18
+discussed,Supply chain,Communication Services,2025,1.0,19
+discussed,Supply chain,Consumer Discretionary,2019,0.9777777777777777,45
+discussed,Supply chain,Consumer Discretionary,2020,0.9782608695652174,46
+discussed,Supply chain,Consumer Discretionary,2021,1.0,47
+discussed,Supply chain,Consumer Discretionary,2022,1.0,47
+discussed,Supply chain,Consumer Discretionary,2023,1.0,47
+discussed,Supply chain,Consumer Discretionary,2024,1.0,47
+discussed,Supply chain,Consumer Discretionary,2025,1.0,47
+discussed,Supply chain,Consumer Staples,2019,1.0,31
+discussed,Supply chain,Consumer Staples,2020,1.0,31
+discussed,Supply chain,Consumer Staples,2021,1.0,31
+discussed,Supply chain,Consumer Staples,2022,1.0,31
+discussed,Supply chain,Consumer Staples,2023,1.0,33
+discussed,Supply chain,Consumer Staples,2024,1.0,33
+discussed,Supply chain,Consumer Staples,2025,1.0,33
+discussed,Supply chain,Energy,2019,0.9473684210526315,19
+discussed,Supply chain,Energy,2020,1.0,20
+discussed,Supply chain,Energy,2021,1.0,21
+discussed,Supply chain,Energy,2022,1.0,21
+discussed,Supply chain,Energy,2023,1.0,21
+discussed,Supply chain,Energy,2024,1.0,21
+discussed,Supply chain,Energy,2025,1.0,21
+discussed,Supply chain,Financials,2019,0.7777777777777778,72
+discussed,Supply chain,Financials,2020,0.8611111111111112,72
+discussed,Supply chain,Financials,2021,0.9459459459459459,74
+discussed,Supply chain,Financials,2022,0.92,75
+discussed,Supply chain,Financials,2023,0.84,75
+discussed,Supply chain,Financials,2024,0.8421052631578947,76
+discussed,Supply chain,Financials,2025,0.8552631578947368,76
+discussed,Supply chain,Health Care,2019,1.0,57
+discussed,Supply chain,Health Care,2020,0.9818181818181818,55
+discussed,Supply chain,Health Care,2021,1.0,58
+discussed,Supply chain,Health Care,2022,0.9830508474576272,59
+discussed,Supply chain,Health Care,2023,1.0,59
+discussed,Supply chain,Health Care,2024,0.9833333333333333,60
+discussed,Supply chain,Health Care,2025,1.0,60
+discussed,Supply chain,Industrials,2019,0.9864864864864865,74
+discussed,Supply chain,Industrials,2020,1.0,75
+discussed,Supply chain,Industrials,2021,1.0,78
+discussed,Supply chain,Industrials,2022,1.0,78
+discussed,Supply chain,Industrials,2023,1.0,79
+discussed,Supply chain,Industrials,2024,1.0,79
+discussed,Supply chain,Industrials,2025,1.0,78
+discussed,Supply chain,Information Technology,2019,1.0,69
+discussed,Supply chain,Information Technology,2020,0.9857142857142858,70
+discussed,Supply chain,Information Technology,2021,1.0,72
+discussed,Supply chain,Information Technology,2022,1.0,73
+discussed,Supply chain,Information Technology,2023,1.0,73
+discussed,Supply chain,Information Technology,2024,0.9861111111111112,72
+discussed,Supply chain,Information Technology,2025,0.9866666666666667,75
+discussed,Supply chain,Materials,2019,1.0,22
+discussed,Supply chain,Materials,2020,1.0,21
+discussed,Supply chain,Materials,2021,1.0,22
+discussed,Supply chain,Materials,2022,1.0,22
+discussed,Supply chain,Materials,2023,1.0,23
+discussed,Supply chain,Materials,2024,1.0,24
+discussed,Supply chain,Materials,2025,1.0,24
+discussed,Supply chain,Real Estate,2019,0.6,30
+discussed,Supply chain,Real Estate,2020,0.8,30
+discussed,Supply chain,Real Estate,2021,0.9333333333333333,30
+discussed,Supply chain,Real Estate,2022,0.9666666666666667,30
+discussed,Supply chain,Real Estate,2023,0.8333333333333334,30
+discussed,Supply chain,Real Estate,2024,0.9,30
+discussed,Supply chain,Real Estate,2025,0.8333333333333334,30
+discussed,Supply chain,Utilities,2019,1.0,30
+discussed,Supply chain,Utilities,2020,1.0,30
+discussed,Supply chain,Utilities,2021,1.0,31
+discussed,Supply chain,Utilities,2022,1.0,31
+discussed,Supply chain,Utilities,2023,1.0,31
+discussed,Supply chain,Utilities,2024,1.0,31
+discussed,Supply chain,Utilities,2025,1.0,31
