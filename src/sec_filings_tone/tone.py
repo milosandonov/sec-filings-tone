@@ -3,6 +3,9 @@
 A cell's passages are hybrid search's top 3 in that 10-K, with no reranking (PLAN.md, Phase 9):
 every topic for every company, and deposits and liquidity for Financials only.
 
+With --quarterly (PLAN.md option B5), a cell is one 10-Q instead: Financials only, deposits and
+liquidity and interest rates only, written to the q_ files so the annual ones are never touched.
+
 Each passage is scored with the same call as the gold benchmark (sentiment.score: model, prompt,
 schema, effort), sent through the Message Batches API at half price.
 
@@ -12,6 +15,7 @@ Usage:
     uv run python -m sec_filings_tone.tone score --tickers NVDA --budget 0.2   # smoke test on one company
     uv run python -m sec_filings_tone.tone score --budget 30                    # the rest; resumes if stopped
     uv run python -m sec_filings_tone.tone baselines   # FinBERT and LM on the same passages, local; resumes
+    uv run python -m sec_filings_tone.tone retrieve --quarterly   # any command, on the 10-Q cells
 """
 
 import argparse
@@ -38,17 +42,39 @@ VECTORS = OUT / "vectors.npy"  # every chunk's stored embedding, unit length, in
 SCORES = OUT / "scores.parquet"  # one row per scored passage, keyed by its row number in PASSAGES (pid)
 STATE = OUT / "batches.json"  # submitted batches not yet collected
 BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per distinct chunk
+# form -> passages, scores, batch state, baselines; the 10-Q cells (B5) get their own q_ files
+FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
+         "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}
+KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
+Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 K = 3
 BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
 USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
 
 
-def cells() -> pd.DataFrame:
-    """One row per (10-K, topic)."""
-    k = retrieve.chunks()
-    k = k[k.form == "10-K"].drop_duplicates(["ticker", "fy"])[["ticker", "sector", "fy"]]
-    c = k.merge(pd.DataFrame({"topic": list(TOPICS)}), how="cross")
+def cells(form: str = "10-K", k: pd.DataFrame | None = None) -> pd.DataFrame:
+    """One row per (filing, topic) from chunk metadata `k` (default: every chunk). 10-K: every topic,
+    deposits and liquidity for Financials only. 10-Q: Financials only, Q_TOPICS only."""
+    k = retrieve.chunks() if k is None else k
+    k = k[(k.form == form) & ((k.sector == "Financials") if form == "10-Q" else True)]
+    k = k.drop_duplicates(KEY[form])[list(dict.fromkeys(["ticker", "sector", "fy", *KEY[form]]))]
+    c = k.merge(pd.DataFrame({"topic": Q_TOPICS if form == "10-Q" else list(TOPICS)}), how="cross")
     return c[(c.topic != "Deposits and liquidity") | (c.sector == "Financials")].reset_index(drop=True)
+
+
+def top(c: pd.DataFrame, df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, form: str) -> list[dict]:
+    """Each cell's hybrid top K within its own filing, ranked as retrieve.search ranks them: the top
+    CANDIDATES by vector score `vs` and by BM25 score `bs` (both aligned with df's rows), fused with RRF."""
+    ids, groups = df.chunk_id.to_numpy(), df.groupby(["form", *KEY[form]]).indices  # positions in df
+    rows = []
+    for r in c.to_dict("records"):
+        idx = groups[(form, *[r[x] for x in KEY[form]])]
+        n = min(retrieve.CANDIDATES, len(idx))
+        v = idx[np.argsort(-vs[idx], kind="stable")[:n]]
+        b = idx[np.argsort(-bs[idx], kind="stable")[:n]]
+        fused = retrieve.rrf(list(ids[v]), list(ids[b[bs[b] > 0]]))  # BM25 drops chunks with no query word
+        rows += [{**r, "rank": i, "chunk_id": cid, "rrf": s} for i, (cid, s) in enumerate(list(fused.items())[:K], 1)]
+    return rows
 
 
 def vectors() -> np.ndarray:
@@ -70,69 +96,66 @@ def vectors() -> np.ndarray:
     return np.load(VECTORS, mmap_mode="r")
 
 
-def retrieve_cells() -> None:
+def retrieve_cells(form: str = "10-K") -> None:
     """Hybrid's top 3 for every cell, ranked as retrieve.search ranks them, but with each topic scored
     over all chunks once: search() takes about 1.5 seconds a call, about 17 hours for every cell.
     Vector scores here are exact cosine; search() asks Chroma's approximate (HNSW) index, so a few
     cells can differ. `check` measures how many."""
-    if SCORES.exists() or STATE.exists():  # scores point at passage row numbers, which a new retrieval would shuffle
-        raise SystemExit(f"{SCORES} or {STATE} exists; move them before retrieving again")
+    passages, scores, state, _ = FILES[form]
+    if scores.exists() or state.exists():  # scores point at passage row numbers, which a new retrieval would shuffle
+        raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
     start = time.time()
     df = retrieve.chunks()
-    ids, vec = df.chunk_id.to_numpy(), vectors()
-    groups = df.groupby(["form", "ticker", "fy"]).indices  # positions, aligned with the vectors and BM25
-    c = cells()
+    vec, c = vectors(), cells(form, df)
     rows = []
-    for topic, query in TOPICS.items():
-        q = np.asarray(retrieve.embed_query(query), np.float32)
+    for topic in c.topic.unique():
+        q = np.asarray(retrieve.embed_query(TOPICS[topic]), np.float32)
         vs = vec @ (q / np.linalg.norm(q))
-        bs = retrieve.bm25_index().get_scores(bm25s.tokenize([query], stopwords="en", return_ids=False,
+        bs = retrieve.bm25_index().get_scores(bm25s.tokenize([TOPICS[topic]], stopwords="en", return_ids=False,
                                                              show_progress=False)[0])
-        for r in c[c.topic == topic].itertuples():
-            idx = groups[("10-K", r.ticker, r.fy)]
-            n = min(retrieve.CANDIDATES, len(idx))
-            v = idx[np.argsort(-vs[idx], kind="stable")[:n]]
-            b = idx[np.argsort(-bs[idx], kind="stable")[:n]]
-            fused = retrieve.rrf(list(ids[v]), list(ids[b[bs[b] > 0]]))  # BM25 drops chunks with no query word
-            rows += [{"ticker": r.ticker, "sector": r.sector, "fy": r.fy, "topic": topic, "rank": i, "chunk_id": cid,
-                      "rrf": s} for i, (cid, s) in enumerate(list(fused.items())[:K], 1)]
+        rows += top(c[c.topic == topic], df, vs, bs, form)
         print(f"{topic}: {(c.topic == topic).sum():,} cells, {time.time() - start:.0f}s", flush=True)
     out = pd.DataFrame(rows)
-    out.to_parquet(PASSAGES, index=False)
-    print(f"{PASSAGES}: {len(out):,} passages for {out.groupby(['ticker', 'fy', 'topic']).ngroups:,} of "
+    out.to_parquet(passages, index=False)
+    print(f"{passages}: {len(out):,} passages for {out.groupby([*KEY[form], 'topic']).ngroups:,} of "
           f"{len(c):,} cells")
 
 
-def check(n: int, seed: int = 0) -> None:
+def check(n: int, form: str = "10-K", seed: int = 0) -> None:
     """n random cells' top 3 against retrieve.search's hybrid top 3."""
-    p = pd.read_parquet(PASSAGES)
-    same = 0
-    for r in p[["ticker", "fy", "topic"]].drop_duplicates().sample(n, random_state=seed).itertuples():
-        mine = p[(p.ticker == r.ticker) & (p.fy == r.fy) & (p.topic == r.topic)].sort_values("rank").chunk_id.tolist()
-        theirs = retrieve.search(TOPICS[r.topic], k=K, rerank=False, ticker=r.ticker, form="10-K",
-                                 fy=int(r.fy))["hybrid"].chunk_id.tolist()
+    p = pd.read_parquet(FILES[form][0])
+    key, same = [*KEY[form], "topic"], 0
+    for _, r in p.drop_duplicates(key).sample(n, random_state=seed).iterrows():
+        mine = p[(p[key] == r[key]).all(axis=1)].sort_values("rank").chunk_id.tolist()
+        day = retrieve.chunks().filing_date.loc[mine[0]]  # a 10-Q is the ticker's only one filed that day
+        one = {"fy": int(r.fy)} if form == "10-K" else {"date_from": day, "date_to": day}
+        theirs = retrieve.search(TOPICS[r.topic], k=K, rerank=False, ticker=r.ticker, form=form,
+                                 **one)["hybrid"].chunk_id.tolist()
         same += mine == theirs
         if mine != theirs:
-            print(f"{r.ticker} {r.fy} {r.topic}: {mine} vs search() {theirs}")
+            print(f"{' '.join(map(str, r[key]))}: {mine} vs search() {theirs}")
     print(f"{same}/{n} cells identical to retrieve.search")
 
 
-def score_cells(budget: float, tickers: list[str] | None = None) -> None:
+def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10-K") -> None:
     """Submit every passage not yet scored, in batches, then wait and collect. Failed requests aren't
     stored, so running again resubmits just those."""
+    passages, scores, saved, _ = FILES[form]
     client = anthropic.Anthropic()
-    state = json.loads(STATE.read_text()) if STATE.exists() else []
+    state = json.loads(saved.read_text()) if saved.exists() else []
     if not state:
-        p = pd.read_parquet(PASSAGES).reset_index(names="pid")
+        p = pd.read_parquet(passages).reset_index(names="pid")
         if tickers:
             p = p[p.ticker.isin(tickers)]
-        if SCORES.exists():
-            p = p[~p.pid.isin(pd.read_parquet(SCORES, columns=["pid"]).pid)]
+        if scores.exists():
+            p = p[~p.pid.isin(pd.read_parquet(scores, columns=["pid"]).pid)]
         est = len(p) * USD_PER_REQUEST
         print(f"{len(p):,} passages to score, about ${est:.2f}")
         if est > budget:
             raise SystemExit(f"over --budget ${budget:.2f}; nothing submitted")
-        rows, system, fmt = retrieve.chunks(), system_prompt(), transform_schema(schema(list(DIMENSIONS)))
+        # only these chunks' texts, not all 674k
+        rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]).set_index("chunk_id", drop=False)
+        system, fmt = system_prompt(), transform_schema(schema(list(DIMENSIONS)))
         batch, size = [], 0
         for r in [*p.itertuples(), None]:  # None flushes the last batch
             req = None if r is None else Request(custom_id=f"p{r.pid}", params=MessageCreateParamsNonStreaming(
@@ -148,7 +171,7 @@ def score_cells(budget: float, tickers: list[str] | None = None) -> None:
                     except anthropic.RateLimitError:  # the queue is full of our own batches: wait for some to finish
                         print("batch queue full; retrying in 5 minutes", flush=True)
                         time.sleep(300)
-                STATE.write_text(json.dumps(state))
+                saved.write_text(json.dumps(state))
                 print(f"submitted {state[-1]}: {len(batch):,} requests, {size / 1e6:.0f} MB", flush=True)
                 batch, size = [], 0
             if req:
@@ -179,24 +202,25 @@ def score_cells(budget: float, tickers: list[str] | None = None) -> None:
                                + (u.cache_read_input_tokens or 0) * 0.1, u.output_tokens) / 2  # batch: half price
                 out.append({"pid": int(res.custom_id[1:]), **parsed, "model": MODEL, "usd": usd, "batch": bid})
             new = pd.DataFrame(out)
-            pd.concat([pd.read_parquet(SCORES), new] if SCORES.exists() else [new]).to_parquet(SCORES, index=False)
+            pd.concat([pd.read_parquet(scores), new] if scores.exists() else [new]).to_parquet(scores, index=False)
             state.remove(bid)
-            STATE.write_text(json.dumps(state)) if state else STATE.unlink()
+            saved.write_text(json.dumps(state)) if state else saved.unlink()
             print(f"{bid}: {len(out):,} scored, {failed} failed, ${new.usd.sum():.3f} "
                   f"(${new.usd.mean():.5f} a request)", flush=True)
         if state:
             time.sleep(60)
-    s = pd.read_parquet(SCORES)
-    print(f"{SCORES}: {len(s):,} passages scored, ${s.usd.sum():.2f} in all")
+    s = pd.read_parquet(scores)
+    print(f"{scores}: {len(s):,} passages scored, ${s.usd.sum():.2f} in all")
 
 
-def baselines(part: int = 5000) -> None:
+def baselines(form: str = "10-K", part: int = 5000) -> None:
     """FinBERT, Loughran-McDonald and the rule-based counts for every passage, locally and free. They
     score the whole passage, not a topic, so each chunk is scored once however many cells it's in.
     Saved every `part` chunks, so a stopped run resumes."""
-    done = pd.read_parquet(BASELINES) if BASELINES.exists() else pd.DataFrame({"chunk_id": pd.Series(dtype=str)})
+    passages, _, _, out = FILES[form]
+    done = pd.read_parquet(out) if out.exists() else pd.DataFrame({"chunk_id": pd.Series(dtype=str)})
     seen = set(done.chunk_id)
-    todo = [c for c in pd.read_parquet(PASSAGES).chunk_id.unique() if c not in seen]
+    todo = [c for c in pd.read_parquet(passages).chunk_id.unique() if c not in seen]
     # only these texts: all 674k chunks with FinBERT on top pushed a 16 GB machine into swap
     text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", todo)]).set_index("chunk_id").text
     start = time.time()
@@ -206,7 +230,7 @@ def baselines(part: int = 5000) -> None:
         b = pd.concat([finbert(t), pd.DataFrame([lm(x) | proxies(x) for x in t])], axis=1)
         b.insert(0, "chunk_id", ids)
         done = pd.concat([done, b], ignore_index=True)
-        done.to_parquet(BASELINES, index=False)
+        done.to_parquet(out, index=False)
         print(f"{len(done):,} of {len(done) + len(todo) - k - len(ids):,} chunks, {time.time() - start:.0f}s", flush=True)
 
 
@@ -216,15 +240,17 @@ def main() -> None:
     p.add_argument("--n", type=int, default=50)
     p.add_argument("--tickers", nargs="+")
     p.add_argument("--budget", type=float, default=0.5, help="USD; nothing is submitted if the estimate is over it")
+    p.add_argument("--quarterly", action="store_true", help="B5: Financials' 10-Q cells, in the q_ files")
     a = p.parse_args()
+    form = "10-Q" if a.quarterly else "10-K"
     if a.command == "retrieve":
-        retrieve_cells()
+        retrieve_cells(form)
     elif a.command == "check":
-        check(a.n)
+        check(a.n, form)
     elif a.command == "baselines":
-        baselines()
+        baselines(form)
     else:
-        score_cells(a.budget, a.tickers)
+        score_cells(a.budget, a.tickers, form)
 
 
 if __name__ == "__main__":
