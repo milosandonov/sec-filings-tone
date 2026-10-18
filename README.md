@@ -1,7 +1,7 @@
 # SEC Filings Tone
 
 **In short:** this project measures how S&P 500 companies write about 13 topics, such as AI, China
-and tariffs, in their annual reports (10-Ks) from FY2019 to FY2025, and its 126,051 scored passages
+and tariffs, in their annual reports (10-Ks) from FY2019 to FY2026, and its 126,051 scored passages
 will be released as a dataset. Two parts of the measurement hold up against one person's labels:
 when the model says a passage isn't about the topic, it was right every time (11 of 11), and its
 realization score (has the risk already happened?) agrees with the person's. The other four scores
@@ -255,7 +255,7 @@ dataset card describing each file and column. Its `provenance.json` records the
 scoring model, hashes of the prompt and output schema, and row counts. With it, every result in
 RESULTS.md from the event tests on can be rerun locally, with no SEC download, embeddings or API
 calls. Rebuilding from scratch takes about 14 hours of SEC fetching, roughly $35 of API calls and
-several hours of FinBERT. The final frozen version (1.0.0) will also go to Zenodo, with a DOI.
+several hours of FinBERT. The final frozen data version (1.0.0) will also go to Zenodo, with a DOI.
 
 ## Setup
 
@@ -357,7 +357,7 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 | 8 | Boilerplate vs new text (`diff.py`) | Done |
 | 9 | Topic tone across years and sectors, co-movement (`tone.py`, `charts.py`, `comove.py`) | Done |
 | 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: 1 of 4 bars met |
-| 11 | Publishing: README, data release, paper | In progress |
+| 11 | Publishing: README, data release, paper | v1.0.0 released; paper next |
 
 ## License
 
