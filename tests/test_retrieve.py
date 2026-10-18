@@ -1,10 +1,14 @@
 """Run: uv run python tests/test_retrieve.py  (offline: no API calls, no data files)"""
 
+import tempfile
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
 from sec_filings_tone import retrieve as r
 
+r.BM25_DIR = Path(tempfile.mkdtemp())  # the toy index is saved here, not in data/
 toy = pd.DataFrame({
     "chunk_id": ["a", "b", "c", "d"],
     "ticker": ["NVDA", "NVDA", "AMD", "JPM"],

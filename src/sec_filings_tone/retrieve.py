@@ -27,6 +27,7 @@ CANDIDATES = 20  # each search's top n; the fused top n goes to the reranker
 RRF_K = 60
 FILTERS = ("ticker", "sector", "form", "item", "fy")
 STAGES = ("vector", "bm25", "hybrid", "rerank")
+BM25_DIR = CHUNKS.parent / "bm25"  # saved BM25 indexes, one folder per chunk count
 
 RERANK_PROMPT = """You rerank passages from SEC filings (10-K and 10-Q) by relevance to a question.
 The passages arrive roughly in order from a search; you may be able to improve on that order.
@@ -48,9 +49,14 @@ def chunks() -> pd.DataFrame:
 
 @cache
 def bm25_index() -> bm25s.BM25:
-    # rebuilt in every process; bm25s's save()/load() would avoid that
+    """Built once and saved under BM25_DIR: building takes about a minute on the full set, loading seconds."""
+    # ponytail: keyed on the chunk count only; delete BM25_DIR if chunks.parquet changes but keeps its count
+    path = BM25_DIR / str(len(chunks()))
+    if path.exists():
+        return bm25s.BM25.load(path, show_progress=False)
     index = bm25s.BM25()
     index.index(bm25s.tokenize(chunks().text.tolist(), stopwords="en", show_progress=False), show_progress=False)
+    index.save(path, show_progress=False)
     return index
 
 
