@@ -521,8 +521,7 @@ The Q&A layer (`answer.py`, `app.py`) plans each turn with Claude Haiku 5.5, ret
 reranked hybrid search above (or, for "which companies / sectors" questions, ranks the tone cells),
 and answers from the passages with the API's citations. The eval set, metrics and pass bars were
 fixed in PLAN.md (Phase 10) before the run; the reference answers have not yet been reviewed by the
-owner. The judge was not checked against a person's grades (the owner's decision, 2026-10-18);
-instead a second judge from another model family graded the same answers (below).
+owner, and no person graded the answers, so the judge's scores are not validated against a person.
 
 **The set (`eval/qa_tests.jsonl`, 69 rows):** the 50 questions of `tests.jsonl` without their
 filters, 7 two-turn conversations and 2 multi-part questions written for this eval (reference
@@ -569,17 +568,7 @@ What the numbers mean:
   had but the judge didn't (period-end dates from each document's context field, the scoring model
   named in the cell note); and the 7 wrong declines. A smaller number are real errors, such as s06
   citing a span for "the AI Diffusion rule was rescinded in May 2025" that doesn't say it. How
-  much of the 78% is the judge's strictness, a second judge only partly answers (below).
-- **A second judge agrees on the scores that decide the bars** (`eval/qa_eval.py judge-gpt` and
-  `compare`; OpenAI's gpt-6-sol, the tier priced like Sonnet, same prompts and schema, Batch API,
-  $0.288). Mean accuracy 4.09 vs 4.06, completeness 4.08 vs 3.95, groundedness 3.89 vs 3.88;
-  quadratic-weighted kappa 0.89 [0.80, 0.94], 0.94 [0.89, 0.97] and 0.58 [0.45, 0.68]. It flags an
-  unsupported claim in 70% of answers (Sonnet 78%; they agree on 70% of answers). So both missed
-  bars hold under either judge, and the high flag rate is not one judge's quirk. Of the 8 answers
-  where they differ by 2 or more on a score (or 3 summed; `eval/qa_judge_divergences.md`), 5 are
-  the wrong declines, which both call wrong and score differently only for groundedness (Sonnet 3,
-  gpt-6-sol 1); in 2 "which" answers Sonnet is stricter, in 1 single question gpt-6-sol is. Two
-  judges agreeing is not the same as a person agreeing: they can share a reading of "unsupported".
+  much of the 78% is the judge's strictness is not measured.
 - **Citations are reliable and retrieval mostly finds the evidence.** Every cited span is in its
   passage (the API returns spans, so this checks the plumbing more than the model). The passages
   given to the answer model contain 81% of the keywords; the filtered retrieval eval's reranked
@@ -598,8 +587,6 @@ third-person answers, each dimension's scale in the cell note, and ties ranked b
 uv run python eval/qa_eval.py answers --budget 0.70       # Q&A eval answers; about $0.27
 uv run python eval/qa_eval.py judge --budget 1.25         # Claude Sonnet 5.5 judge, Batch API; about $0.41
 uv run python eval/qa_eval.py report                      # every metric; free
-uv run python eval/qa_eval.py judge-gpt --budget 0.80     # second judge, OpenAI gpt-6-sol, Batch API; about $0.29
-uv run python eval/qa_eval.py compare                     # agreement, and eval/qa_judge_divergences.md; free
 uv run python tests/test_ingest.py                        # chunker fixes
 uv run python tests/test_retrieve.py                      # filters, BM25, RRF, rerank order
 uv run python eval/experiment.py --dry-run                # chunks, tokens, cost; free

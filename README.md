@@ -236,11 +236,8 @@ take a median 21 seconds, most of it Chroma's filtered search. It meets one of f
 The planner declined 7 answerable questions that name a company outside the index or ask for one
 figure. The fiscal-year bar is partly a test artefact: the expected filters come from the retrieval
 eval, and many questions don't name the year. Many claims the judge calls unsupported are statements
-about what the passages don't say, or facts the answer model had and the judge didn't. A second
-judge from another family (OpenAI's gpt-6-sol) gives nearly the same means (groundedness 3.88,
-unsupported claims in 70%; weighted kappa 0.89 for accuracy, 0.58 for groundedness), so the missed
-bars don't depend on the judge. No person has graded the answers, and the reference answers haven't
-been reviewed.
+about what the passages don't say, or facts the answer model had and the judge didn't. No person
+has graded the answers, and the reference answers haven't been reviewed.
 
 ## Data availability
 
@@ -355,7 +352,7 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 | 7 | Event tests, robustness, 10-Q follow-up (`events.py`) | Done; 10-Q follow-up parked |
 | 8 | Boilerplate vs new text (`diff.py`) | Done |
 | 9 | Topic tone across years and sectors, co-movement (`tone.py`, `charts.py`, `comove.py`) | Done |
-| 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: 1 of 4 bars met, under two judges |
+| 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: 1 of 4 bars met |
 | 11 | Publishing: README, data release, paper | In progress |
 
 ## License

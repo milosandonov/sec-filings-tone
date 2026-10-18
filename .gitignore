@@ -21,3 +21,8 @@ data/fyfix/
 data/release/
 .DS_Store
 data/bm25/
+# Q&A eval: the second judge (gpt-6-sol) and its comparison, kept locally
+eval/qa_judge_gpt-*.jsonl
+eval/qa_judge_divergences.md
+eval/qa_hand_grades.csv
+eval/qa_batch*.json
