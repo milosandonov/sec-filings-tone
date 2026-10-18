@@ -22,7 +22,7 @@ from sec_filings_tone.fetch import CACHE, DATA, FORMS, MIN_CHARS
 CHUNKS = DATA / "chunks.parquet"
 SUBSET = DATA / "chunks_subset.parquet"  # --tickers: never CHUNKS, which every later phase reads for all companies
 SKIPPED = DATA / "ingest_skipped.csv"
-VECTOR_DB = "vector_db"
+VECTOR_DB = str(DATA.parent / "vector_db")
 EMBED_MODEL = "text-embedding-3-large"
 EMBED_DIMS = 1024
 EMBED_PRICE_PER_M = 0.13  # USD per 1M tokens (OpenAI pricing page, checked 2026-10-12)

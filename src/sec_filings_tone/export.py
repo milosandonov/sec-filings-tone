@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from anthropic.lib._parse._transform import transform_schema  # what tone.py sends, so the hash is of that
+from anthropic import transform_schema  # what tone.py sends, so the hash is of that
 
 from sec_filings_tone import events, retrieve
 from sec_filings_tone.diff import CARRYOVER
@@ -43,8 +43,8 @@ from sec_filings_tone.sentiment import (DIMENSIONS, FINBERT, LM_PATH, MODEL, OUT
                                         system_prompt, user_prompt)
 from sec_filings_tone.tone import FILES, K, KEY, OUT, QUERIES, masked_prompt, vectors
 
-RELEASE = Path("data/release")
 ROOT = Path(__file__).parents[2]
+RELEASE = ROOT / "data" / "release"
 META = ["item", "filing_date", "report_date", "accession"]  # chunk metadata the event tests need, kept without the text
 
 

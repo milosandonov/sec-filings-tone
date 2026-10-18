@@ -18,7 +18,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from edgar import Company, set_identity
 
-DATA = Path("data")
+DATA = Path(__file__).parents[2] / "data"
 CACHE = DATA / "cache"
 COMPANIES = DATA / "companies.csv"
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"

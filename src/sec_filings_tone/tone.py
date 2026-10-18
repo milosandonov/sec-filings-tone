@@ -29,13 +29,12 @@ import hashlib
 import json
 import re
 import time
-from pathlib import Path
 
 import anthropic
 import bm25s
 import numpy as np
 import pandas as pd
-from anthropic.lib._parse._transform import transform_schema  # what messages.parse sends, so both paths share one schema
+from anthropic import transform_schema  # what messages.parse sends, so both paths share one schema
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
 
@@ -44,7 +43,7 @@ from sec_filings_tone.budget import call_usd
 from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS
 from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
 
-OUT = Path("data/tone")
+OUT = CHUNKS.parent / "tone"
 PASSAGES = OUT / "passages.parquet"
 VECTORS = OUT / "vectors.npy"  # every chunk's stored embedding, unit length, in chunks() order (2.8 GB)
 VECTOR_ORDER = OUT / "vectors_order.sha256"  # hash of the chunk ids in VECTORS' row order
@@ -60,7 +59,7 @@ FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
 KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
-QUERIES = Path("data/fyfix/queries.npy")  # the query vectors passages.parquet was ranked with, in TOPICS order
+QUERIES = OUT / "queries.npy"  # the query vectors passages.parquet was ranked with, in TOPICS order
 K = 3
 LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB

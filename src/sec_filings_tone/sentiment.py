@@ -37,7 +37,7 @@ from sec_filings_tone.budget import Cap, CapReached, call_usd, rerank_call_usd
 from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
 
 GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
-OUT = Path("data/sentiment")
+OUT = CHUNKS.parent / "sentiment"
 MODEL = "claude-haiku-5-5"  # cheapest; the pilot shows whether a bigger model is needed
 TIMEOUT = 60  # seconds per call
 SELECTION = "reranked"  # how pilot passages are picked; in the file names, so results from different pickers don't mix
@@ -162,7 +162,7 @@ def proxies(text: str) -> dict:
 # Loughran-McDonald Master Dictionary 1993-2025, linked from sraf.nd.edu/loughranmcdonald-master-dictionary.
 # Free for academic use; kept out of git.
 LM_URL = "https://drive.google.com/uc?export=download&id=1iq2RUf8qGFEAk1g8wQntP3habOnR3fXF"
-LM_PATH = Path("data/lm/Loughran-McDonald_MasterDictionary_1993-2025.csv")
+LM_PATH = CHUNKS.parent / "lm" / "Loughran-McDonald_MasterDictionary_1993-2025.csv"
 LM_CATEGORIES = ["negative", "positive", "uncertainty", "litigious", "strong_modal", "weak_modal", "constraining"]
 FINBERT = "ProsusAI/finbert"
 

@@ -74,6 +74,7 @@ MODELS = {
     "Qwen/Qwen3-Embedding-0.6B": {"dims": 1024, "score_dims": [256, 1024], "price": 0.0, "local": True},
     "BAAI/bge-m3": {"dims": 1024, "score_dims": [1024], "price": 0.0, "local": True},  # not trained for truncation
 }
+EXP = Path(__file__).parents[1] / "data" / "experiment"
 MAIN_DIMS = 1024  # what Chroma stores; variants are compared here
 DEPTH = 50  # ranks saved per stage, so recall@k is computable up to 50
 RERANK_REPEATS = 2  # the reranker isn't deterministic; two runs show how much it moves
@@ -330,9 +331,9 @@ def main() -> None:
     CAP = Cap(a.budget, a.max_minutes)
 
     # smoke: the smallest pilot company, so every code path runs for about $0.20
-    tickers, out = (["TXN"], Path("data/experiment/smoke")) if a.smoke else (PILOT, Path("data/experiment"))
+    tickers, out = (["TXN"], EXP / "smoke") if a.smoke else (PILOT, EXP)
     if a.multi:
-        tickers, out = PILOT + EXTRA, Path("data/experiment/multi")
+        tickers, out = PILOT + EXTRA, EXP / "multi"
         if a.variants == list(VARIANTS):
             a.variants = MULTI_VARIANTS
     out.mkdir(parents=True, exist_ok=True)

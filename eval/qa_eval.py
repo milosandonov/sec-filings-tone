@@ -20,7 +20,7 @@ from typing import Literal
 
 import anthropic
 import pandas as pd
-from anthropic.lib._parse._transform import transform_schema
+from anthropic import transform_schema
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
 from dotenv import load_dotenv
