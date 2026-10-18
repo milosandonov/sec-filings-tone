@@ -259,7 +259,8 @@ several hours of FinBERT. The final frozen version (1.0.0) will also go to Zenod
 
 ## Setup
 
-Requires Python 3.13 or newer and [uv](https://docs.astral.sh/uv/). Run `uv sync`, then create a
+Requires Python 3.13 or newer and [uv](https://docs.astral.sh/uv/). Run `uv sync` (add `--extra finbert`
+for the FinBERT baselines, `--extra app` for the chat app, or `--all-extras`), then create a
 `.env` file in the project root. The SEC rejects requests without a User-Agent.
 
 ```
