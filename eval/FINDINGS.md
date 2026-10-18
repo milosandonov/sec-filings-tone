@@ -515,9 +515,91 @@ Paired differences from `text-embedding-3-large` (95% intervals):
 - **Using bge-m3 in production** would also mean embedding queries locally (the 2.3 GB model loaded
   in memory), and changing `ingest.embed_chunks` and `retrieve.vector_search`.
 
+## 9. Q&A layer (Phase 10, 2026-10-18)
+
+The Q&A layer (`answer.py`, `app.py`) plans each turn with Claude Haiku 5.5, retrieves with the
+reranked hybrid search above (or, for "which companies / sectors" questions, ranks the tone cells),
+and answers from the passages with the API's citations. The eval set, metrics and pass bars were
+fixed in PLAN.md (Phase 10) before the run; the reference answers have not yet been reviewed by the
+owner. The judge was not checked against a person's grades (the owner's decision, 2026-10-18);
+instead a second judge from another model family graded the same answers (below).
+
+**The set (`eval/qa_tests.jsonl`, 69 rows):** the 50 questions of `tests.jsonl` without their
+filters, 7 two-turn conversations and 2 multi-part questions written for this eval (reference
+answers and keywords from the filing text), 5 "which companies / sectors" questions with
+reference answers computed from the cells, and 5 out-of-scope questions.
+
+**Results** (`uv run python eval/qa_eval.py report`; answers at effort low, $0.270 for 69 rows,
+$0.0039 a row, median 21 seconds; judge Claude Sonnet 5.5 at effort medium through the Batch API,
+$0.410 for 64 answers):
+
+| Metric | Value | Bar fixed in advance |
+|---|---|---|
+| Planner: tickers right (59 passage questions) | 83% | ≥ 90%: **missed** |
+| Planner: fiscal years right | 54% | ≥ 90%: **missed** (see below) |
+| Planner: forms right | 54% | |
+| "Which" questions sent to the cells (5) | 5 of 5 (topic 5, dimension 5, unit 4) | |
+| Out-of-scope questions declined (5) | 5 of 5 | ≥ 80%: met |
+| In-scope questions declined | 7 of 64 | |
+| Keyword MRR / coverage in the passages given to the answer model (59) | 0.703 / 81% | |
+| Cited spans found word for word in their passage | 417 of 417 | |
+| Judge: accuracy / completeness, mean of 1–5 (64) | 4.09 / 4.08 | |
+| Judge: groundedness, mean of 1–5 | 3.89 | ≥ 4: **missed** |
+| Answers with at least one claim the judge calls unsupported | 78% (50 of 64) | ≤ 5%: **missed** |
+
+By type (judge accuracy / completeness / groundedness): conversations 5.00 / 4.86 / 4.57 (7),
+multi-part 5.00 / 5.00 / 4.50 (2), single questions 3.98 / 4.00 / 3.84 (50), "which" questions
+3.60 / 3.40 / 3.20 (5).
+
+What the numbers mean:
+
+- **The planner declines too often.** 7 of the 50 single questions were declined. Each names an
+  entity outside the index or asks for one figure (Mellanox's revenue share, Intel's Altera deal and
+  Mobileye IPO, Amazon's Rivian loss, NextEra's storm costs, Exxon's Pioneer closing, Prologis's
+  Duke Realty price), and the planner assumed the filings wouldn't have it; they do. These 7 make
+  most of the judge's lowest scores. The fix (a planner rule that such questions are searched, not
+  declined) is not made: these results describe the code as it was run.
+- **The planner bar is partly a test artefact.** The expected filters are the retrieval eval's,
+  which the test author supplied rather than wrote into the question: s11 ("What government inquiry
+  about China shipments did Applied Materials disclose?") expects FY2022, and the 8
+  year-in-question rows expect no year at all, so extracting "fiscal 2019" from s31 counts as a
+  miss. A fair version needs expected filters written from the question text alone.
+- **The unsupported-claim rate mixes three things.** On reading the judge's list: statements about
+  what the passages don't say ("the passages don't break out HBM revenue"); facts the answer model
+  had but the judge didn't (period-end dates from each document's context field, the scoring model
+  named in the cell note); and the 7 wrong declines. A smaller number are real errors, such as s06
+  citing a span for "the AI Diffusion rule was rescinded in May 2025" that doesn't say it. How
+  much of the 78% is the judge's strictness, a second judge only partly answers (below).
+- **A second judge agrees on the scores that decide the bars** (`eval/qa_eval.py judge-gpt` and
+  `compare`; OpenAI's gpt-6-sol, the tier priced like Sonnet, same prompts and schema, Batch API,
+  $0.288). Mean accuracy 4.09 vs 4.06, completeness 4.08 vs 3.95, groundedness 3.89 vs 3.88;
+  quadratic-weighted kappa 0.89 [0.80, 0.94], 0.94 [0.89, 0.97] and 0.58 [0.45, 0.68]. It flags an
+  unsupported claim in 70% of answers (Sonnet 78%; they agree on 70% of answers). So both missed
+  bars hold under either judge, and the high flag rate is not one judge's quirk. Of the 8 answers
+  where they differ by 2 or more on a score (or 3 summed; `eval/qa_judge_divergences.md`), 5 are
+  the wrong declines, which both call wrong and score differently only for groundedness (Sonnet 3,
+  gpt-6-sol 1); in 2 "which" answers Sonnet is stricter, in 1 single question gpt-6-sol is. Two
+  judges agreeing is not the same as a person agreeing: they can share a reading of "unsupported".
+- **Citations are reliable and retrieval mostly finds the evidence.** Every cited span is in its
+  passage (the API returns spans, so this checks the plumbing more than the model). The passages
+  given to the answer model contain 81% of the keywords; the filtered retrieval eval's reranked
+  top 10 has an MRR of 0.910, but its filters were supplied, and here the planner sets them.
+- **Speed.** Most of the 21 seconds is Chroma's filtered vector search (4–19 seconds a query on the
+  full collection, timed 2026-10-18); planning takes about 2 seconds and each rerank 1–4.
+
+**Smoke tests (before the eval, on the analyst questions, $0.164):** 12 answers at effort low
+($0.078) and at medium ($0.079) cost and took the same; low stays the default. Tuning made then, not
+on the eval set: planner rules for sub-industries ("regional banks") and for change between years,
+third-person answers, each dimension's scale in the cell note, and ties ranked by specificity.
+
 ## How to reproduce
 
 ```bash
+uv run python eval/qa_eval.py answers --budget 0.70       # Q&A eval answers; about $0.27
+uv run python eval/qa_eval.py judge --budget 1.25         # Claude Sonnet 5.5 judge, Batch API; about $0.41
+uv run python eval/qa_eval.py report                      # every metric; free
+uv run python eval/qa_eval.py judge-gpt --budget 0.80     # second judge, OpenAI gpt-6-sol, Batch API; about $0.29
+uv run python eval/qa_eval.py compare                     # agreement, and eval/qa_judge_divergences.md; free
 uv run python tests/test_ingest.py                        # chunker fixes
 uv run python tests/test_retrieve.py                      # filters, BM25, RRF, rerank order
 uv run python eval/experiment.py --dry-run                # chunks, tokens, cost; free

@@ -170,15 +170,19 @@ There are 50 test questions in `eval/tests.jsonl`, each with metadata filters, k
 the passages that answer it, and a reference answer. A chunk counts as relevant if it contains a
 keyword as a whole word. Scores are on the top 10. MRR and nDCG are computed for each keyword and
 averaged per question, then over questions, so MRR is the mean reciprocal rank of the first chunk
-naming each keyword, not of one answer chunk per question. This is the production check on all 498
-companies (2026-10-15, $0.07):
+naming each keyword, not of one answer chunk per question. On all 498 companies, rerun without
+reranking on 2026-10-18; the reranked row is the production check of 2026-10-15 ($0.07):
 
 | Stage | MRR | nDCG@10 |
 |---|---|---|
 | Vector search only | 0.764 | 0.675 |
-| BM25 only | 0.671 | 0.638 |
-| Hybrid (RRF) | 0.776 | 0.691 |
-| Hybrid + Claude rerank | 0.910 | 0.805 |
+| BM25 only | 0.667 | 0.635 |
+| Hybrid (RRF) | 0.776 | 0.692 |
+| Hybrid + Claude rerank (2026-10-15) | 0.910 | 0.805 |
+
+- The 2026-10-15 run had BM25 at 0.671 / 0.638 and hybrid nDCG at 0.691. The cause of the
+  difference wasn't found: the same code, test file and library versions give 0.667 on the chunks
+  from before the fiscal-year fix too.
 
 - The questions were written at the start of the project, before any retrieval results were seen.
 - The chunking and embedding setup was chosen on the first 30 questions (10 semiconductor
@@ -188,6 +192,55 @@ companies (2026-10-15, $0.07):
 - The research pipeline uses hybrid search's top 3 with fixed topic queries and no reranking. So this
   eval tests the retrieval layer, not the tone cells. The cells' quality is measured by the
   off-topic rate (24.8% of passages) and the word check.
+
+## Q&A demo
+
+A local chat window (`uv run python -m sec_filings_tone.app`) answers questions about any company,
+sector or year from the filings. Each turn, Claude Haiku 5.5 plans the search (follow-ups rewritten,
+multi-part questions split, companies and years turned into filters), the reranked hybrid search
+finds the passages, and the answer cites them through the API's citations. "Which companies / which
+sectors" questions are answered from the tone cells instead, since a search returns only a few
+passages. Under each answer: the cited spans, the tone profile of the cells it draws on with the
+change from the year before, and the cost. It declines predictions and questions outside the data.
+
+![The Q&A chat answering a question about NVIDIA's H20 export license](figures/qa_demo.png)
+
+An excerpt of that answer, copied from the run (2026-10-18, $0.0054); the bracketed numbers point
+to the cited spans listed under it:
+
+> **Q:** How did NVIDIA describe the financial impact of the US license requirement for H20 exports
+> to China, and when did it learn of it?
+>
+> **Short answer:** NVIDIA learned on April 9, 2025 that the U.S. government required a license for
+> H20 exports to China. It said the requirement led to a $4.5 billion charge in the first quarter of
+> fiscal 2026 and would also hurt future revenue. […]
+>
+> NVIDIA incurred a $4.5 billion charge in the first quarter of fiscal year 2026 associated with H20
+> excess inventory and purchase obligations as the demand for H20 products diminished.[3] […]
+> H20 sales were $4.6 billion for the first quarter of fiscal year 2026 prior to the new export
+> licensing requirements.[5]
+
+**Eval** (69 questions in `eval/qa_tests.jsonl`, bars fixed in advance; details in
+[eval/FINDINGS.md](eval/FINDINGS.md) section 9). Answers cost $0.0039 a question on average and
+take a median 21 seconds, most of it Chroma's filtered search. It meets one of four bars:
+
+| Metric | Result | Bar |
+|---|---|---|
+| Out-of-scope questions declined | 5 of 5 | ≥ 80%: met |
+| Planner tickers / fiscal years right | 83% / 54% | ≥ 90%: missed |
+| Judge groundedness (Claude Sonnet 5.5, 1–5) | 3.89 | ≥ 4: missed |
+| Answers with a claim the judge calls unsupported | 78% | ≤ 5%: missed |
+| Cited spans found in their passage | 417 of 417 | |
+| Judge accuracy / completeness (1–5) | 4.09 / 4.08 | |
+
+The planner declined 7 answerable questions that name a company outside the index or ask for one
+figure. The fiscal-year bar is partly a test artefact: the expected filters come from the retrieval
+eval, and many questions don't name the year. Many claims the judge calls unsupported are statements
+about what the passages don't say, or facts the answer model had and the judge didn't. A second
+judge from another family (OpenAI's gpt-6-sol) gives nearly the same means (groundedness 3.88,
+unsupported claims in 70%; weighted kappa 0.89 for accuracy, 0.58 for groundedness), so the missed
+bars don't depend on the judge. No person has graded the answers, and the reference answers haven't
+been reviewed.
 
 ## Data availability
 
@@ -247,6 +300,11 @@ uv run python -m sec_filings_tone.diff report
 uv run python -m sec_filings_tone.comove
 uv run python -m sec_filings_tone.charts             # writes figures/
 
+# Phase 10: Q&A with cited passages (paid, cents a question; $0.50 cap per session by default)
+uv run python -m sec_filings_tone.answer "What charge did NVIDIA record for H20 exports to China?"
+uv run python -m sec_filings_tone.app                # local chat window at http://127.0.0.1:7860
+uv run python eval/qa_eval.py answers --budget 0.70   # the Q&A eval (paid), then: judge --budget 1.25, report
+
 # Offline tests, no API calls
 for f in tests/test_*.py; do uv run python $f; done
 ```
@@ -297,7 +355,7 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 | 7 | Event tests, robustness, 10-Q follow-up (`events.py`) | Done; 10-Q follow-up parked |
 | 8 | Boilerplate vs new text (`diff.py`) | Done |
 | 9 | Topic tone across years and sectors, co-movement (`tone.py`, `charts.py`, `comove.py`) | Done |
-| 10 | Q&A layer over the retrieval | Planned |
+| 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: 1 of 4 bars met, under two judges |
 | 11 | Publishing: README, data release, paper | In progress |
 
 ## License

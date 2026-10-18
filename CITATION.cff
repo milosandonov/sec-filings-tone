@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this code or dataset, please cite it as below."
+type: software
+title: "SEC Filings Tone: topic tone profiles of S&P 500 10-K filings, FY2019–FY2025"
+abstract: >-
+  Code, labels and results for measuring how S&P 500 companies write about 13 topics (AI, China,
+  tariffs, interest rates, supply chain and others) in their 10-K filings from FY2019 to FY2025.
+  Hybrid retrieval (OpenAI text-embedding-3-large and BM25) selects passages from Item 1A and
+  Item 7 of 3,458 10-Ks; Claude Haiku 5.5 scores 126,051 passages on five dimensions (polarity,
+  magnitude, realization, uncertainty, specificity), with FinBERT and the Loughran-McDonald
+  dictionary as baselines. The tests were fixed in advance and are reported whether they passed or
+  not: on one person's blind labels only realization meets the agreement bar (weighted kappa 0.67),
+  and the planned event test against unaffected sectors detects 0 of 11 expected changes. Includes
+  a 40-item human-labeled gold set, a retrieval eval, a boilerplate (year-over-year carryover)
+  analysis and a cited Q&A layer over the filings.
+authors:
+  - family-names: Andonov
+    given-names: Milos
+    email: milosandonov7@gmail.com
+repository-code: "https://github.com/milosandonov/sec-filings-tone"
+url: "https://huggingface.co/datasets/milosand1/sec-filings-tone"
+license: MIT
+keywords:
+  - SEC filings
+  - 10-K
+  - financial NLP
+  - sentiment analysis
+  - LLM annotation
+  - retrieval-augmented generation
+  - event study
+  - S&P 500
