@@ -34,8 +34,8 @@ Usage:
     uv run python -m sec_filings_tone.events --filed
 """
 
+import argparse
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -239,15 +239,26 @@ def robust() -> None:
             report(ev.assign(items=item), results=OUT / f"events_{item}{suffix}.csv", keep=keep)
 
 
-if __name__ == "__main__":
-    if "--quarterly" in sys.argv:  # events_quarterly.csv fixed "before" as the last 10-Q filed before the date
+def main() -> None:
+    p = argparse.ArgumentParser(description="Phase 7 event tests; with no option, the primary tests (events.csv)")
+    run = p.add_mutually_exclusive_group()  # one version per run; an unknown option is an error, not the default run
+    run.add_argument("--quarterly", action="store_true", help="B5: the 10-Q cells and events_quarterly.csv")
+    run.add_argument("--named", action="store_true", help="word-checked: TOPIC_WORDS topics count only passages naming them")
+    run.add_argument("--robust", action="store_true", help="A4: event studies, break check, each 10-K section alone")
+    run.add_argument("--filed", action="store_true", help='robustness: "before" is the last 10-K filed before the date')
+    a = p.parse_args()
+    if a.quarterly:  # events_quarterly.csv fixed "before" as the last 10-Q filed before the date
         report(*QUARTERLY, filed=True)
-    elif "--named" in sys.argv:
+    elif a.named:
         report(results=OUT / "events_named.csv", keep=named())
-    elif "--robust" in sys.argv:
+    elif a.robust:
         robust()
-    elif "--filed" in sys.argv:
+    elif a.filed:
         for suffix, keep in [("", None), ("_named", named())]:
             report(results=OUT / f"events_filed{suffix}.csv", keep=keep, filed=True)
     else:
         report()
+
+
+if __name__ == "__main__":
+    main()

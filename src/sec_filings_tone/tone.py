@@ -193,14 +193,17 @@ def sections() -> None:
 
 
 def check(n: int, form: str = "10-K", seed: int = 0) -> None:
-    """n random cells' top 3 against retrieve.search's hybrid top 3."""
+    """n random cells' top 3 against retrieve.search's hybrid top 3 (section cells: searched within S_ITEM)."""
     p = pd.read_parquet(FILES[form][0])
-    key, same = [*KEY[form], "topic"], 0
+    sec = "10-Q" if form == "10-Q" else "10-K"  # the SEC form; section cells are 10-K cells
+    key, same = [*KEY[sec], "topic"], 0
     for _, r in p.drop_duplicates(key).sample(n, random_state=seed).iterrows():
         mine = p[(p[key] == r[key]).all(axis=1)].sort_values("rank").chunk_id.tolist()
         day = retrieve.chunks().filing_date.loc[mine[0]]  # a 10-Q is the ticker's only one filed that day
-        one = {"fy": int(r.fy)} if form == "10-K" else {"date_from": day, "date_to": day}
-        theirs = retrieve.search(TOPICS[r.topic], k=K, rerank=False, ticker=r.ticker, form=form,
+        one = {"fy": int(r.fy)} if sec == "10-K" else {"date_from": day, "date_to": day}
+        if form == "section":
+            one["item"] = S_ITEM
+        theirs = retrieve.search(TOPICS[r.topic], k=K, rerank=False, ticker=r.ticker, form=sec,
                                  **one)["hybrid"].chunk_id.tolist()
         same += mine == theirs
         if mine != theirs:
@@ -281,14 +284,19 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
                                + (u.cache_read_input_tokens or 0) * 0.1, u.output_tokens) / 2  # batch: half price
                 out.append({"pid": int(res.custom_id[1:]), **parsed, "model": MODEL, "usd": usd, "batch": bid})
             new = pd.DataFrame(out)
-            pd.concat([pd.read_parquet(scores), new] if scores.exists() else [new]).to_parquet(scores, index=False)
+            old = pd.read_parquet(scores) if scores.exists() else None
+            if len(new) and old is not None:  # collected again after a crash between saving scores and state: keep the first copy
+                new = new[~new.pid.isin(old.pid)]
+            if len(new):
+                pd.concat([old, new] if old is not None else [new]).to_parquet(scores, index=False)
             state.remove(bid)
             saved.write_text(json.dumps(state)) if state else saved.unlink()
-            print(f"{bid}: {len(out):,} scored, {failed} failed, ${new.usd.sum():.3f} "
-                  f"(${new.usd.mean():.5f} a request)", flush=True)
+            usd = new.usd.sum() if len(new) else 0.0
+            print(f"{bid}: {len(out):,} scored ({len(out) - len(new):,} already saved), {failed} failed, ${usd:.3f} "
+                  f"(${usd / max(1, len(new)):.5f} a request)", flush=True)
         if state:
             time.sleep(60)
-    s = pd.read_parquet(scores)
+    s = pd.read_parquet(scores) if scores.exists() else pd.DataFrame({"usd": []})  # none saved: every request failed
     print(f"{scores}: {len(s):,} passages scored, ${s.usd.sum():.2f} in all")
 
 

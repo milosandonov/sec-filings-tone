@@ -65,9 +65,9 @@ event rule.
   events before-after, but in none of the 4 that have a comparison group. The baselines score the
   whole passage, not the topic. And the scorer is told each filing's company and fiscal year, and
   the baselines aren't. So the event tests are free of labels but not of the model's knowledge.
-  Masked, on 1,903 event-test passages, scores agree with the originals about as well as a second
-  run does, and realization's changes hold. But COVID's rise in uncertainty falls from +0.21 to
-  +0.02: told "FY2019", the model scored pre-COVID text as calmer.
+  Masked, on 1,903 event-test passages (a sample drawn under the old filed rule), scores agree with
+  the originals about as well as a second run does, and realization's changes hold. But COVID's rise
+  in uncertainty falls from +0.21 to +0.02: told "FY2019", the model scored pre-COVID text as calmer.
 - **Other event caveats.** "Before" is now the last 10-K whose fiscal year ended before the event
   (the owner's decision, 2026-10-17, after the results). The old filed rule, kept as
   `events.py --filed`, compared FY2023 with FY2025 for 75% of companies in the 2025 tariff test. With
@@ -168,7 +168,9 @@ Financials only.
 
 There are 50 test questions in `eval/tests.jsonl`, each with metadata filters, keywords copied from
 the passages that answer it, and a reference answer. A chunk counts as relevant if it contains a
-keyword as a whole word. Scores are on the top 10. This is the production check on all 498
+keyword as a whole word. Scores are on the top 10. MRR and nDCG are computed for each keyword and
+averaged per question, then over questions, so MRR is the mean reciprocal rank of the first chunk
+naming each keyword, not of one answer chunk per question. This is the production check on all 498
 companies (2026-10-15, $0.07):
 
 | Stage | MRR | nDCG@10 |

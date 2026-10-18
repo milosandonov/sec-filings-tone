@@ -17,6 +17,7 @@ Usage:
     uv run python eval/experiment.py --score-only             # metrics from saved rankings, no API calls
     uv run python eval/experiment.py --multi                  # pilot + one company per other sector, more questions
     uv run python eval/experiment.py --multi --variants oss_bge_m3 --no-rerank   # vector, BM25, hybrid only
+The oss_ variants run open models locally and need the experiment extra: uv sync --extra experiment
     uv run python eval/experiment.py --budget 6 --max-minutes 60   # caps (defaults: $8 of new spend, 90 minutes)
 """
 

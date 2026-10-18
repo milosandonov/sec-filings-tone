@@ -43,9 +43,9 @@ AI-boom test retested within MD&A.
   rising in IT and Communication Services MD&A but nearly as much elsewhere (differences +0.11 and
   +0.09, n.s., 38 companies against 40), and the scorer is told each filing's company
   and fiscal year while the baselines aren't, so the tests are free of labels but not of the model's
-  knowledge (masked, on 1,903 event-test passages, scores agree with the originals about as well as
-  a second run does and realization's changes hold, but COVID's rise in uncertainty falls from +0.21
-  to +0.02).
+  knowledge (masked, on 1,903 event-test passages drawn under the old filed rule, scores agree with
+  the originals about as well as a second run does and realization's changes hold, but COVID's rise
+  in uncertainty falls from +0.21 to +0.02).
 - **Quarterly 10-Qs:** a follow-up on Financials' 10-Qs ($1.45) detected neither SVB nor the rate
   hikes in its planned before-after tests (0 of 5), because bank MD&A already sits at the top of the
   realization and specificity scales and the top 3 passages often miss the event text, though its

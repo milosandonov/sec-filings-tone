@@ -10,7 +10,7 @@ Usage:
     uv run python -m sec_filings_tone.diff report      # carryover by sector and year, and the tests
 """
 
-import sys
+import argparse
 from collections import Counter, defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from difflib import SequenceMatcher
@@ -148,5 +148,11 @@ def report() -> None:
         event_report(EVENTS, "10-K", out, keep=k)
 
 
+def main() -> None:
+    p = argparse.ArgumentParser(description="Phase 8: carryover from the year before, and new vs carried-over text")
+    p.add_argument("command", choices=["carryover", "report"])
+    {"carryover": carryover, "report": report}[p.parse_args().command]()
+
+
 if __name__ == "__main__":
-    {"carryover": carryover, "report": report}[sys.argv[1]]()
+    main()

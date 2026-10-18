@@ -291,7 +291,7 @@ A test that doesn't depend on our labels: tone should move where a known event h
 - **Multi-part questions:** split questions such as "compare NVDA and AMD's China risk in FY2022 vs FY2024" or "how did banks talk about deposits before and after SVB?" into one sub-query per ticker or sector and year, retrieve for each, then answer from the combined passages.
 - **Sentiment:** attach the tone profile to each answer, cite the passages it came from (ticker, year, item), and show how each dimension changed from the previous year.
 - **Check:** add about 10 multi-part and follow-up questions to `eval/tests.jsonl`, and have an LLM judge grade the answers against reference answers for accuracy and completeness.
-- **Design, fixed 2026-10-18 before any answer was generated** (brief: `PHASE10_PLAN.md`; the owner's decisions: a local Gradio chat as the main demo, `claude-haiku-5-5` for every call, a fixed workflow rather than an agent, aggregate questions answered from the cells). Replaces the check above: new questions go into a new file, since `eval.py` reads every row of `tests.jsonl` and the published retrieval numbers would change.
+- **Design, fixed 2026-10-18 before any answer was generated** (the owner's decisions: a local Gradio chat as the main demo, `claude-haiku-5-5` for every call, a fixed workflow rather than an agent, aggregate questions answered from the cells). Replaces the check above: new questions go into a new file, since `eval.py` reads every row of `tests.jsonl` and the published retrieval numbers would change.
   - **Planner** (`answer.py`, one structured-output call per turn, cached system prompt with the company list and the 13 topics): `kind` is `passages`, `aggregate` or `decline`. It rewrites follow-ups into standalone queries, splits multi-part questions (at most 6 sub-queries) and turns companies and years into filters (section 7 of `eval/FINDINGS.md`: a company filter alone finds the right year poorly). Every filter is checked against the real values; an unknown company or year gets a question back instead of a guess.
   - **Passages:** `retrieve.search(..., rerank=True)` per sub-query, top 6 each, merged by `chunk_id`, at most 24 in all. The published retrieval and scoring defaults are unchanged.
   - **Aggregate** ("which companies / sectors ..."): `events.cells()` filtered by sector, topic and fiscal year (word-checked for AI, China and tariffs), ranked on the dimension asked about, with the top cells' own passages as quoted examples. The answer says the list comes from model-scored cells, and which version.
@@ -392,7 +392,6 @@ sec-filings-tone/
 
 ### Notes
 
-- **`.python-version` was deleted** in commit 949ddcb ("Pulling 10-Q data too"). uv used it to pin Python 3.13. Restore it unless the deletion was on purpose.
 - **Known extraction issues**, which the Phase 4 chunking experiment should fix in `fetch.py` before the full-scale embed:
   - Deere's 10-K MD&A is missing in every year: the heading doesn't appear as text anywhere in the filing.
   - Waste Management (7 10-Qs) and GE's 2020–21 10-Qs use custom layouts and are short.
