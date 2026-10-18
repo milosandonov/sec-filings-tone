@@ -47,7 +47,7 @@ event rule.
   It passes for 3 of 13: COVID realization, export-control polarity and tariff realization. The
   tariffs reached every sector, so that one fails the comparison. No expected change passes both.
 - **Before-after counts also pick up drift.** Where the event hit, the model moved as expected in
-  **9 of 15** tests (10 under the filed rule; word-checked 7 and 6). FinBERT and the
+  **9 of 15** tests (10 under the filed rule; word-checked 6 and 6). FinBERT and the
   Loughran-McDonald dictionary managed **0 of 9**. But from FY2019 to FY2025, realization rose for 9
   of 12 topics and polarity fell for all 12, event or not. Realization beat polarity in 4 of 6
   events before-after, but in none of the 4 that have a comparison group. The baselines score the
@@ -60,7 +60,9 @@ event rule.
   (the owner's decision, 2026-10-17, after the results). The old filed rule, kept as
   `events.py --filed`, compared FY2023 with FY2025 for 75% of companies in the 2025 tariff test. With
   one year, the tariffs' realization difference from other sectors is +0.00 [−0.12, +0.13]. The
-  AI-boom test is selected on retrieval rank and isn't interpretable as designed. A follow-up on
+  AI-boom test now searches each MD&A on its own ($0.85; before, it was selected on retrieval rank).
+  AI polarity and specificity rose in IT and Communication Services MD&A, but nearly as much
+  elsewhere: differences +0.11 and +0.09, n.s., on 38 companies against 40. A follow-up on
   Financials' 10-Qs ($1.45) detected neither SVB nor the rate hikes in its planned tests (0 of 5).
 - **What the data describes.** AI went from 8% to 93% of risk-factor sections (word-checked, FY2019 →
   FY2025). In FY2025, 80% of risk factors and 62% of MD&A were copied from the year before. New text
@@ -72,8 +74,8 @@ event rule.
 ![AI tone in S&P 500 10-Ks by fiscal year, risk factors and MD&A, word-checked](figures/lines_ai_named.png)
 
 *AI in 10-Ks, word-checked: the share of companies with an AI passage in risk factors went from 8% to
-93% (FY2019 → FY2025). Where risk factors name AI, polarity went from −0.88 to −0.93. In MD&A, AI
-stayed positive (+0.90 in FY2019, +0.88 in FY2025, on 20–76 companies).*
+93% (FY2019 → FY2025). Where risk factors name AI, polarity went from −0.88 to −0.93. In MD&A, searched on
+its own, AI stayed positive (+0.73 in FY2019, +0.60 in FY2025, on 28–170 companies).*
 
 ![Rate hikes event study: change from each company's last 10-K before 2022-03-16](figures/event_study_rate_hikes.png)
 
@@ -101,7 +103,8 @@ flowchart LR
 3. **Retrieve** (`retrieve.py`, `tone.py`): a *cell* is one company, one 10-K and one topic, such
    as NVDA × FY2023 × China. Each cell's passages are the top 3 from vector search plus BM25, fused
    with reciprocal rank fusion. Each topic has one fixed query. That gives 42,017 cells and 126,051
-   passages.
+   passages. For AI in MD&A-only analyses, a cell is the top 3 within that 10-K's MD&A instead
+   (10,308 passages), so MD&A text needn't out-rank the risk factors.
 4. **Score** (`sentiment.py`, `tone.py`): one Claude Haiku 5.5 call per passage, sent through the
    Message Batches API at half price. The prompt quotes the rules in
    [labels/guidelines.md](labels/guidelines.md) word for word. The model quotes its evidence before
@@ -141,11 +144,12 @@ Financials only.
 - **Word check.** The model's on-topic call is lenient for AI, China and tariffs. So every result on
   those topics is also run counting only passages that name the topic, and both versions are kept.
 - **Recomputed with separate code:** the 10-Q event tests, the co-movement test (2,938 random
-  pairs, identical), the cell retrieval (identical top 3 for all 355 cells of 4 companies) and the
-  carryover matcher (within 0.2 points of an all-pairs comparison on four filings).
+  pairs, identical), the cell retrieval (identical top 3 for all 355 cells of 4 companies), the
+  MD&A-only AI cells (200 random cells identical) and their AI-boom test (every estimate identical),
+  and the carryover matcher (within 0.2 points of an all-pairs comparison on four filings).
 - **Spend.** The kept scores for all 126,051 passages cost $18.94 ($19.09 paid in all, including
   $0.21 to rescore after the fiscal-year fix). The run-to-run check on 5,000 passages cost $0.79,
-  the masked-prompt check $0.27 and the 10-Q follow-up $1.45. Embedding cost $15.18, plus about
+  the masked-prompt check $0.27, the 10-Q follow-up $1.45 and the MD&A-only AI cells $0.85. Embedding cost $15.18, plus about
   $0.05 for the 914 chunks the fiscal-year fix added.
 
 ## Retrieval eval
@@ -173,10 +177,10 @@ companies (2026-10-15, $0.07):
 
 ## Data availability
 
-**Coming: a GitHub release, data version 0.2.0.** It is not published yet.
+**Coming: a GitHub release, data version 0.3.0.** It is not published yet.
 
 The scored passages, cells, FinBERT and Loughran-McDonald baselines, carryover shares, human labels
-and every result table will be released as versioned Parquet files (about 53 MB). The release's
+and every result table will be released as versioned Parquet files (about 57 MB). The release's
 `README.md` is a dataset card describing each file and column. Its `provenance.json` records the
 scoring model, hashes of the prompt and output schema, and row counts. With it, every result in
 RESULTS.md from the event tests on can be rerun locally, with no SEC download, embeddings or API
@@ -214,6 +218,7 @@ uv run python eval/eval.py
 uv run python -m sec_filings_tone.tone retrieve
 uv run python -m sec_filings_tone.tone score --budget 30
 uv run python -m sec_filings_tone.tone baselines
+uv run python -m sec_filings_tone.tone retrieve --section   # AI within each MD&A; then score --section --budget 2, baselines --section
 
 # Phase 6: the scorer and baselines against the human labels
 uv run python -m sec_filings_tone.sentiment gold-report [--adjudicated]
@@ -271,9 +276,6 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 | 9 | Topic tone across years and sectors, co-movement (`tone.py`, `charts.py`, `comove.py`) | Done |
 | 10 | Q&A layer over the retrieval | Planned |
 | 11 | Publishing: README, data release, paper | In progress |
-
-**Not done:** AI retrieval within MD&A, which a valid AI-boom test needs. It is a priced option
-(about $1.30–1.55).
 
 ## License
 

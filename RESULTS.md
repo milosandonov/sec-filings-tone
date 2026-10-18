@@ -8,7 +8,8 @@ change can be detected, which is not the same as no change.
 ## Key findings
 
 Reframed 2026-10-17 after an external review; every claim of the earlier one-paragraph summary is
-kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix and the one-year event rule.
+kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix, the one-year event rule and the
+AI-boom test retested within MD&A.
 
 - **The data:** Claude Haiku 5.5 scored 126,051 passages from 3,458 S&P 500 10-Ks (FY2019–FY2026) on
   five tone dimensions toward 13 topics for $18.94, and its off-topic flag was right on all 11 gold
@@ -27,15 +28,17 @@ kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix and the one-ye
   for 3 of 13 (COVID realization, export-control polarity and tariff realization, the last failing
   the comparison because the tariffs reached every sector), and no expected change passes both.
 - **Events, before-after:** where the event hit, the model moved as expected in **9 of 15** tests
-  (10 under the filed rule; word-checked 7 and 6) and FinBERT and the Loughran-McDonald dictionary
+  (10 under the filed rule; word-checked 6 and 6) and FinBERT and the Loughran-McDonald dictionary
   in **0 of 9**, but this count also picks up drift, since from FY2019 to FY2025 realization rose for
   9 of 12 topics and polarity fell for all 12, event or not, and realization beat polarity in 4 of 6
   events before-after but in none of the 4 that have a comparison group.
 - **Caveats on the event tests:** "before" is now the last 10-K whose fiscal year ended before the
   event (the owner's decision, 2026-10-17), since the filed rule compared FY2023 with FY2025 for 75%
   of companies in the 2025 tariff test (with one year, the tariffs' realization difference from other
-  sectors is +0.00 [−0.12, +0.13]), the AI-boom test is selected on retrieval rank and isn't
-  interpretable as designed, and the scorer is told each filing's company
+  sectors is +0.00 [−0.12, +0.13]), the AI-boom test, rerun on a top 3 searched within MD&A
+  (2026-10-18, $0.85; it was selected on retrieval rank before), finds AI polarity and specificity
+  rising in IT and Communication Services MD&A but nearly as much elsewhere (differences +0.11 and
+  +0.09, n.s., 38 companies against 40), and the scorer is told each filing's company
   and fiscal year while the baselines aren't, so the tests are free of labels but not of the model's
   knowledge (masked, on 1,903 event-test passages, scores agree with the originals about as well as
   a second run does and realization's changes hold, but COVID's rise in uncertainty falls from +0.21
@@ -55,6 +58,8 @@ kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix and the one-ye
 
 - **Unit:** a *cell* is one company, one 10-K (fiscal year) and one topic, such as NVDA × FY2023 ×
   China: 42,017 cells. Each cell's passages are hybrid search's top 3 in that 10-K (126,051 passages).
+  For AI in MD&A-only analyses, a cell is the top 3 within that 10-K's MD&A instead: 3,436 cells and
+  10,308 passages, scored for $0.85 with 1,572 scores reused (2026-10-18, section 3).
   A 10-K's fiscal year is the calendar year its period ends in, except that a 52/53-week year ending
   January 1–7 counts as the year before (fixed 2026-10-17 for 13 companies, PLAN.md Phase 9).
 - **Scorer:** `claude-haiku-5-5`, one call per passage, quoting evidence before each score, with the
@@ -188,7 +193,8 @@ is kept as the robustness version (`events.py --filed`, `data/tone/events_filed*
 
 **Every test with an expected direction** (one-year rule; reframed 2026-10-17 after an external
 review, since the first version led with the "where the event hit" column alone; updated 2026-10-18
-after the fiscal-year fix). Companies: those discussing the topic in both 10-Ks, where the event hit
+after the fiscal-year fix, and for the AI boom's top 3 searched within MD&A, with the earlier version
+kept in italics as the record; the counts below use the new one). Companies: those discussing the topic in both 10-Ks, where the event hit
 / elsewhere; for the break check, those whose "after" 10-K is the next fiscal year and that have the
 year before.
 
@@ -205,8 +211,10 @@ year before.
 | | specificity | up | +0.01 n.s. ✗ | −0.08 [−0.14, −0.02] | +0.10 n.s. ✗ (borderline) | +0.03 n.s. ✗ (101) |
 | SVB, banks (75 / no comparison) | magnitude | up | +0.12 [+0.03, +0.21] ✓ | – | – | +0.09 n.s. ✗ (74) |
 | | realization | up | +0.02 n.s. ✗ | – | – | −0.01 n.s. ✗ (74) |
-| AI boom, IT and Communication Services MD&A (13 / 11), *not interpretable as designed* | polarity | up | +0.47 [+0.22, +0.73] ✓ | 0.00 n.s. | +0.47 n.s. ✗ | can't check |
-| | specificity | up | +0.73 [+0.19, +1.23] ✓ | +0.41 n.s. | +0.32 n.s. ✗ | can't check |
+| AI boom, IT and Communication Services MD&A, top 3 searched within MD&A (38 / 40) | polarity | up | +0.36 [+0.14, +0.57] ✓ | +0.25 n.s. | +0.11 n.s. ✗ | can't check |
+| | specificity | up | +0.56 [+0.25, +0.87] ✓ | +0.47 [+0.24, +0.72] | +0.09 n.s. ✗ | can't check |
+| *AI boom, the record: MD&A part of the whole-10-K top 3 (13 / 11), not interpretable as designed* | *polarity* | *up* | *+0.47 [+0.22, +0.73]* | *0.00 n.s.* | *+0.47 n.s.* | *can't check* |
+| | *specificity* | *up* | *+0.73 [+0.19, +1.23]* | *+0.41 n.s.* | *+0.32 n.s.* | *can't check* |
 | Tariffs 2025, Industrials, Consumer Discretionary, IT (182 / 222) | realization | up | +0.34 [+0.24, +0.44] ✓ | +0.33 [+0.25, +0.42] | +0.00 n.s. ✗ | **+0.27** [+0.13, +0.41] ✓ (163) |
 | | uncertainty | up | +0.03 n.s. ✗ | −0.02 n.s. | +0.06 n.s. ✗ | +0.07 n.s. ✗ (163) |
 
@@ -232,14 +240,17 @@ How to read it:
   headline led with). It also picks up drift (below). Of the 9, 3 have no comparison group (COVID, SVB magnitude) and 6 fail it.
 - **Word-checked version** (added 2026-10-17 after the results, both kept; `events.py --named`,
   `data/tone/events_named.csv`): when passages about AI, China and tariffs count only if they name
-  the topic, the before-after count falls to **7 of 15**. Lost: export-control polarity (−0.14
-  [−0.33, +0.05]) and AI specificity (+0.38 n.s.). Against other sectors it is **1 of 11**: AI
-  polarity's difference becomes +0.76 [+0.27, +1.39], on 8 companies against 7, because the others'
-  AI polarity fell (−0.43 [−1.00, −0.07]). The break check keeps COVID and tariff realization (+0.28
+  the topic, the before-after count falls to **6 of 15**. Lost: export-control polarity (−0.14
+  [−0.33, +0.05]), AI polarity (+0.09 [−0.17, +0.35]) and AI specificity (+0.17 [−0.07, +0.43]),
+  on 23 IT and Communication Services companies. Against other sectors it is **0 of 11**. (With the
+  whole-10-K cells it was 7 and 1: AI polarity's difference was +0.76 [+0.27, +1.39] on 8 companies
+  against 7, because those 7 others' AI polarity fell; within MD&A it is −0.14 [−0.84, +0.40], 23
+  against 11.) The break check keeps COVID and tariff realization (+0.28
   [+0.12, +0.43], 152 companies) and loses export-control polarity (−0.17 n.s.): **2 of 13**. The
   other events have no word list, so their results are unchanged.
 - **The filed rule** (the robustness version, recomputed after the fiscal-year fix): before-after
-  **10 of 15** (6 word-checked) and against other sectors **2 of 11** (3 word-checked). Where it
+  **10 of 15** (6 word-checked) and against other sectors **2 of 11** (2 word-checked; 3 with the
+  whole-10-K AI cells). Where it
   differs from the table above:
 
   | Event (companies) | Dimension | Where the event hit | Elsewhere | Difference |
@@ -249,8 +260,10 @@ How to read it:
   | Chip export controls (19 / 233) | polarity | −0.14 [−0.30, −0.01] ✓ | −0.02 n.s. | −0.12 n.s. ✗ |
   | Rate hikes (103 / 361) | magnitude | +0.14 [+0.06, +0.22] ✓ | +0.04 n.s. | **+0.10** [+0.00, +0.20] ✓ |
   | | specificity | +0.01 n.s. ✗ | −0.09 [−0.15, −0.03] | **+0.11** [+0.01, +0.20] ✓ |
-  | AI boom (13 / 11) | polarity | +0.40 [+0.15, +0.65] ✓ | 0.00 n.s. | +0.40 n.s. ✗ |
-  | | specificity | +0.58 [+0.08, +1.12] ✓ | +0.41 n.s. | +0.17 n.s. ✗ |
+  | AI boom, within MD&A (37 / 40) | polarity | +0.31 [+0.07, +0.55] ✓ | +0.25 n.s. | +0.06 n.s. ✗ |
+  | | specificity | +0.58 [+0.27, +0.89] ✓ | +0.47 [+0.24, +0.72] | +0.11 n.s. ✗ |
+  | *AI boom, whole-10-K record (13 / 11)* | *polarity* | *+0.40 [+0.15, +0.65]* | *0.00 n.s.* | *+0.40 n.s.* |
+  | | *specificity* | *+0.58 [+0.08, +1.12]* | *+0.41 n.s.* | *+0.17 n.s.* |
   | Tariffs 2025 (170 / 179) | realization | +0.32 [+0.22, +0.43] ✓ | +0.42 [+0.31, +0.52] | −0.09 n.s. ✗ |
   | | uncertainty | +0.07 [+0.01, +0.14] ✓ | +0.05 n.s. | +0.02 n.s. ✗ |
 
@@ -277,16 +290,36 @@ How to read it:
   from the 2019–2020 rules (Huawei, the entity list), so realization and specificity had no room to
   rise; only polarity and uncertainty moved. And only 19 semiconductor companies discuss China in
   both years.
-- **The AI-boom test isn't interpretable as designed (decision 2026-10-17, after the external
-  review).** A cell is hybrid search's top 3 over the whole 10-K, so it has an MD&A passage only if
-  MD&A out-ranks the risk factors. As AI risk factors spread, the share of AI cells with any
-  retrieved MD&A passage (on topic or not) fell from 43% (FY2019) to 26% (FY2025); among cells
-  discussing AI, the share with an on-topic MD&A passage fell from 26% to 18%. The 13 IT and
-  Communication Services companies (of 89 with both 10-Ks) whose cell has an on-topic MD&A passage
-  in both years are therefore selected on retrieval rank, not on what their MD&A says. The numbers
-  are kept as a record. A valid test needs a top 3 searched within MD&A: for AI in every year's 10-K,
-  about 10,300 passages, about $1.30–1.55 at the full run's rate (the low end if the ~1,600 AI MD&A
-  passages already scored can be reused). That is a priced option, not done. In levels, across the
+- **The AI boom, retested within MD&A (design fixed in PLAN.md on 2026-10-18 before any retrieval
+  or scoring; `tone.py retrieve --section`, $0.85).** The first version wasn't interpretable as
+  designed (decision 2026-10-17, after the external review). A cell was hybrid search's top 3 over
+  the whole 10-K, so it had an MD&A passage only if MD&A out-ranked the risk factors. As AI risk
+  factors spread, the share of AI cells with any retrieved MD&A passage (on topic or not) fell from
+  43% (FY2019) to 26% (FY2025). Among cells discussing AI, the share with an on-topic MD&A passage
+  fell from 26% to 18%. So the 13 IT and Communication Services companies (of 89 with both 10-Ks)
+  whose cell had an on-topic MD&A passage in both years were selected on retrieval rank, not on what
+  their MD&A says. Those numbers are kept as the record (the italic rows above,
+  `data/tone/events_whole*.csv`).
+  - **The new cells:** for AI, each 10-K's MD&A is now searched on its own. Its top 3 passages within
+    Item 7 are ranked exactly as before, with the same query vector. As a check, the same code grouped
+    by 10-K reproduces all 10,374 whole-10-K AI passages, and 200 cells re-ranked with separate code
+    match. That gives 10,308 passages in the 3,436 10-Ks that have an Item 7. Of those, 1,572 had
+    already been scored for the same cell, so their scores were copied; the other 8,736 were scored
+    for $0.85. Every MD&A-only analysis of AI uses these cells: this test, A4's MD&A-alone tests and
+    event study, Phase 8's new-text tests and the AI charts' MD&A line. Risk factors, the whole 10-K
+    and the other topics are unchanged.
+  - **Who is in the test:** 88 of the 89 IT and Communication Services companies (390 of 392 others)
+    have an MD&A in both 10-Ks. Of these, 38 (40 others) discuss AI there in both.
+  - **Result: not detected.** In IT and Communication Services MD&A, AI polarity rose +0.36 [+0.14,
+    +0.57] and specificity +0.56 [+0.25, +0.87], as expected. But they rose in the other sectors' MD&A
+    too: +0.25 [−0.03, +0.54] and +0.47 [+0.24, +0.72]. So the differences, the planned test, are
+    +0.11 [−0.27, +0.46] and +0.09 [−0.30, +0.48]. Magnitude (+0.61 against +0.31) and realization
+    (+0.40 against +0.28) also rose in both groups.
+  - **What did differ:** the share of IT and Communication Services 10-Ks whose MD&A discusses AI rose
+    +0.38, against +0.21 elsewhere (difference +0.16 [+0.04, +0.29]; no direction was set for it).
+  - **Recomputed with separate code:** every estimate and company count in every version matches.
+
+  In levels, across the
   whole 10-K: the share of 10-Ks discussing AI went from 57% to 99% in IT and Communication Services
   and from 34% to 94% elsewhere, and AI polarity, mostly from risk factors, turned more negative in
   every sector but Utilities (+0.19, 7 companies in FY2021). AI arrived as a risk almost everywhere,
@@ -308,22 +341,34 @@ How to read it:
   +0.02 [−0.14, +0.17] masked. The difference sits in the FY2019 "before" passages, which the model
   scored as more certain when told they were from FY2019 (masked, +0.12 a passage; FY2020, +0.02).
   SVB's uncertainty change also shrinks (−0.11 [−0.21, −0.01]), and AI polarity falls from +0.32 to
-  +0.22 n.s. (10 companies). Realization's results come from the text (COVID +0.25 → +0.18, tariffs
+  +0.22 n.s. (10 companies, whole-10-K cells). Realization's results come from the text (COVID +0.25 → +0.18, tariffs
   +0.37 → +0.36). Two limits: two thirds of the passages name a year, the company or COVID in their
   own text, which masking the header can't hide (on the 623 that name none, agreement is similar,
   kappa 0.73–0.93); and single events are small (10–56 companies), so only the pooled differences
   are firm. The sample's companies are a subset, so its changes differ from the tables above (COVID
   uncertainty +0.21 here, +0.15 over all 464 companies under the filed rule).
 - **Robustness check, added 2026-10-17 after the results, both versions kept:** before FY2023, 52–58%
-  of the passages the model called on topic for AI contain no AI word (limitations). Counting only
-  passages that name AI (artificial intelligence, machine learning, "AI", generative and the like),
-  8 IT and Communication Services companies remain under the one-year rule: polarity +0.33 [+0.08,
-  +0.67] is still detected, specificity +0.38 [−0.12, +0.88] isn't; magnitude +0.62 [0.00, +1.25].
-  Polarity's difference from other sectors becomes positive, +0.76 [+0.27, +1.39], on 7 other
-  companies. Under the filed rule (9 companies): polarity +0.30 [0.00, +0.59] and specificity +0.22
-  [−0.22, +0.67], so **neither is detected**; magnitude +0.52 [0.00, +1.00]; difference +0.72 [+0.22,
-  +1.37]. Part of the reported change came from comparing general technology text in FY2021 with AI
-  text in FY2025.
+  of the passages the model called on topic for AI contain no AI word (limitations). The word check
+  counts only passages that name AI (artificial intelligence, machine learning, "AI", generative and
+  the like).
+  - **Within MD&A (since 2026-10-18):** 23 IT and Communication Services companies remain, against
+    11 others. At most 24 and 17 could, since that many have an MD&A naming AI anywhere in both 10-Ks.
+    Polarity +0.09 [−0.17, +0.35] and specificity +0.17 [−0.07, +0.43]: **neither is detected**, even
+    before-after. Their differences from other sectors are −0.14 [−0.84, +0.40] and +0.28 [−0.15,
+    +0.70]. Magnitude rose +0.43 [+0.17, +0.70]. Under the filed rule (23 / 11), polarity is +0.07
+    n.s. and specificity +0.20 n.s.
+  - **FinBERT, the only planned test a baseline passes in the main tests:** its polarity difference
+    is +0.19 [+0.005, +0.37], with the lower bound at +0.010 to +0.015 over 5 seeds of 10,000
+    resamples (Welch p = 0.077). It comes from the 11 other companies' FinBERT polarity falling
+    (−0.16), not from a rise where the boom hit (+0.03 n.s.).
+  - **With the whole-10-K cells (the record):** 8 IT and Communication Services companies remained
+    under the one-year rule. Polarity +0.33 [+0.08, +0.67] was detected and specificity +0.38 [−0.12,
+    +0.88] wasn't; magnitude +0.62 [0.00, +1.25]. The difference from 7 other companies was +0.76
+    [+0.27, +1.39]. Under the filed rule (9 companies), neither was detected: polarity +0.30 [0.00,
+    +0.59], specificity +0.22 [−0.22, +0.67].
+
+  Much of the model-only rise in both versions comes from comparing general technology text in FY2021
+  with AI text in FY2025.
 
 ### Robustness (A4): every year around each event, breaks, and each section alone
 
@@ -374,8 +419,9 @@ changes, on 67 companies, mostly with fiscal years not ending in December; the o
   if the tariffs reached every sector.
 
 **Each section alone** (`data/tone/events_1A.csv`, `events_7.csv`): the expected changes detected are
-7 of 15 in risk factors (6 word-checked) and 6 of 11 in MD&A (5 word-checked; chipmakers' China
-passages almost never come from MD&A), against 9 of 15 (7) for the whole 10-K. Each event shows up
+7 of 15 in risk factors (6 word-checked) and 6 of 11 in MD&A (4 word-checked, 5 with the whole-10-K
+AI cells; chipmakers' China passages almost never come from MD&A), against 9 of 15 (6) for the whole
+10-K. Each event shows up
 where one would look for it: rate-hike realization in risk factors (+0.27 [+0.12, +0.42], against
 +0.09 n.s. in MD&A), SVB's magnitude in MD&A (+0.18 [+0.04, +0.32], against −0.05 n.s. in risk
 factors), COVID's realization in risk factors (+0.22) and its uncertainty in MD&A (+0.20), tariffs
@@ -384,7 +430,8 @@ MD&A, 27). AI polarity in risk factors fell (−0.23 [−0.38, −0.10]), the op
 prediction: AI arrived there as a risk. These counts are before-after changes where the event hit,
 so they pick up drift too. And each section's cell is the part of the whole-10-K top 3 that comes
 from that section, not a search within it, so which companies have an MD&A passage depends on how
-their MD&A ranks against their risk factors (as for the AI boom above).
+their MD&A ranks against their risk factors. The exception, since 2026-10-18, is AI in MD&A, which is
+searched within MD&A (the AI boom above).
 
 ## 4. The LLM profile against FinBERT and Loughran-McDonald
 
@@ -394,15 +441,20 @@ showed only the first column; one-year rule, with the filed rule in brackets):
 
 | | Before-after where the event hit (also picks up drift) | Difference from other sectors (the planned test) |
 |---|---|---|
-| LLM tone profile | **9 of 15** (7 word-checked) [filed: 10 (6)] | **0 of 11** (1 word-checked) [filed: 2 (3)] |
-| FinBERT polarity, LM polarity, LM uncertainty, details per 100 words | **0 of 9** (0 word-checked) [filed: 0 (0)] | **0 of 8** (0 word-checked) [filed: 0 (0)] |
+| LLM tone profile | **9 of 15** (6 word-checked) [filed: 10 (6)] | **0 of 11** (0 word-checked) [filed: 2 (2)] |
+| FinBERT polarity, LM polarity, LM uncertainty, details per 100 words | **0 of 9** (0 word-checked) [filed: 0 (0)] | **0 of 8** (1 word-checked) [filed: 0 (0)] |
+
+Updated 2026-10-18 for the AI boom's top 3 searched within MD&A (section 3). With the whole-10-K AI
+cells, the word-checked counts were 7 [6] and 1 [3] for the LLM and 0 and 0 for the baselines.
 
 In the 7 cases testing the same event and dimension, the LLM's before-after change detects 4 (5
 under the filed rule) and the baselines none (e.g. COVID: LM uncertainty share −0.0002 [−0.0008,
-+0.0003]; AI boom: FinBERT +0.08 [−0.06, +0.22]). Word-checked, the LLM detects 2 of the 7 (COVID
-uncertainty and AI polarity). Against other sectors (6 of the 7 have a comparison), the LLM detects
-none (under the filed rule, rate-hike specificity, which comes from the comparison group's fall), and
-the baselines none. FinBERT does pick up COVID's negative turn (−0.03 [−0.04, −0.02]), but reads
++0.0003]; AI boom: FinBERT +0.02 [−0.06, +0.11]). Word-checked, the LLM detects 1 of the 7 (COVID
+uncertainty; 2 with the whole-10-K AI cells, AI polarity too). Against other sectors (6 of the 7 have
+a comparison), the LLM detects none (under the filed rule, rate-hike specificity, which comes from the
+comparison group's fall), and the baselines none, except word-checked FinBERT polarity in the AI boom,
++0.19 [+0.005, +0.37] (Welch p = 0.077). That one too comes from the comparison group's fall
+(section 3). FinBERT does pick up COVID's negative turn (−0.03 [−0.04, −0.02]), but reads
 tariff text as slightly *more* positive after 2025 (+0.05 [+0.02, +0.07]) where the LLM reads it as
 more negative (−0.08 [−0.12, −0.04]).
 
@@ -426,7 +478,7 @@ uncertainty 3, realization and specificity 2):
 | Chip export controls | **−4%** | +4% n.s. | 0% n.s. | −4% n.s. | +3% n.s. |
 | Rate hikes | +1% n.s. | +5% | **+7%** | 0% n.s. | +1% n.s. |
 | SVB | +2% n.s. | **+4%** | +1% n.s. | +2% n.s. | +1% n.s. |
-| AI boom (13 companies; not interpretable as designed, section 3) | +12% | +27% | +26% | +10% n.s. | **+37%** |
+| AI boom (38 companies; MD&A searched on its own, section 3) | +9% | +20% | +20% | +10% | **+28%** |
 | Tariffs 2025 | −2% | +8% | **+17%** | +1% n.s. | +7% |
 
 Before-after, realization moved more than polarity in 4 of 6 events (COVID, rate hikes, AI,
@@ -552,8 +604,12 @@ companies whose fiscal year doesn't end in December had filed.
   are hatched.
 
 **How to read the section split:** a company's top 3 passages per topic come mostly from risk
-factors, so the MD&A line covers fewer companies (for AI, 85 in FY2025 against 469). Its share
-measures how often an MD&A passage made the top 3, not how often MD&A mentions the topic.
+factors, so the MD&A line covers fewer companies (for AI, with the whole-10-K cells, 85 in FY2025
+against 469). Its share measures how often an MD&A passage made the top 3, not how often MD&A
+mentions the topic. AI is the exception since 2026-10-18: its MD&A line is each 10-K's top 3
+searched within its MD&A (section 3), 229 companies in FY2025, and its share is how often that top 3
+has an on-topic passage. The whole-10-K version is kept as the record (`lines_ai_whole.png`,
+`lines_ai_named_whole.png`).
 
 None of this was tested in advance; it is description, with the surprising patterns checked by
 reading passages.
@@ -567,8 +623,13 @@ tone was already negative and hedged before ChatGPT and stayed so (polarity −0
 moderately, realization a little (0.46 → 0.57). So what changed is mainly how many companies treat AI
 as a risk. The model-only version shows much larger rises in realization, uncertainty and
 specificity, but they come mostly from the non-AI passages it counts in the early years. In MD&A,
-AI stayed positive (+0.90, +0.68, +0.88 in FY2019, FY2022, FY2025, on 20–76 companies) with larger
-effects (magnitude 0.96 → 1.28) and more uncertainty (0.43 → 1.01). Charts: `lines_ai.png` and the
+searched on its own, the share of 10-Ks with an AI-naming passage went from 6% (FY2019) and 7%
+(FY2022) to 34% (FY2025), and AI stayed positive, though less so (+0.73, +0.64, +0.60 in FY2019,
+FY2022, FY2025, on 28–170 companies). The effects stayed the same size (magnitude 0.96 → 0.94) and
+grew more uncertain (0.49 → 0.87). The whole-10-K version, which saw only the MD&As that out-ranked
+the risk factors, showed higher polarity (+0.90, +0.68, +0.88, on 20–76 companies) and growing
+effects (magnitude 0.96 → 1.28; uncertainty 0.43 → 1.01). So the "larger effects" it showed came
+from which MD&As made the top 3. Charts: `lines_ai.png` and the
 word-checked `lines_ai_named.png`; the heatmaps show the risk factors spreading to every sector from
 FY2023 on in both.
 
@@ -760,11 +821,11 @@ Added 2026-10-17 after an external review: the first six points below.
   but its "before" 10-K can already react to an event that falls between the year's end and the
   filing. Both are reported: under the one-year rule tariff uncertainty is no longer detected and the
   rate-hike differences fall just short.
-- **The AI-boom test is selected on retrieval rank** and isn't interpretable as designed: an AI cell
-  has an MD&A passage only if MD&A out-ranks the risk factors, which happened less often as AI risk
-  factors spread. The section-only tests (section 3, A4) share this: they split the whole-10-K top 3
-  rather than search each section. Retrieval within MD&A is a priced option (about $1.30–1.55 for AI),
-  not done.
+- **Section-only tests split the whole-10-K top 3.** An AI cell had an MD&A passage only if MD&A
+  out-ranked the risk factors, which happened less often as AI risk factors spread, so the first
+  AI-boom test was selected on retrieval rank. Since 2026-10-18, AI's MD&A is searched on its own
+  ($0.85, section 3). The test is then interpretable, but it detects nothing against other sectors.
+  For the other topics, the section-only tests (section 3, A4) still split the whole-10-K top 3.
 - **The scorer is told the company and fiscal year,** so the event tests are free of labels but not
   of the model's knowledge of what happened when. The baselines see only the text. Masking both
   (1,904 event-test passages, $0.27; section 3) leaves realization's changes intact but removes most
@@ -775,7 +836,8 @@ Added 2026-10-17 after an external review: the first six points below.
   with no second rater.
 - **Annual data is coarse.** One 10-K before against one after. The quarterly follow-up (section 6)
   covers Financials only and two topics.
-- **Small groups.** 19 chipmakers and 13 companies for the AI result.
+- **Small groups.** 19 chipmakers; for the AI boom, 38 IT and Communication Services companies (23
+  word-checked), up from 13 (8) with the whole-10-K cells.
 - **Short scales hit ceilings.** Realization and specificity have three levels; where a topic was
   already live (China for chipmakers), they can't rise.
 - **Changes after seeing results,** each for a design flaw found on inspection and kept alongside the
@@ -815,6 +877,9 @@ uv run python -m sec_filings_tone.sentiment gold-baselines   # FinBERT, LM and c
 uv run python -m sec_filings_tone.events --named     # word-checked event tests (section 3)
 uv run python -m sec_filings_tone.events --robust    # A4: event studies, breaks, sections
 uv run python -m sec_filings_tone.events --filed     # robustness: the filed "before" rule (section 3)
+uv run python -m sec_filings_tone.tone retrieve --section          # AI's top 3 within each MD&A (section 3), free
+uv run python -m sec_filings_tone.tone score --section --budget 2  # $0.85; copies the scores it already has
+uv run python -m sec_filings_tone.tone baselines --section         # ~25 minutes
 uv run python -m sec_filings_tone.diff carryover     # Phase 8 (section 8), ~2 minutes
 uv run python -m sec_filings_tone.diff report        # also the event tests on new text
 uv run python -m sec_filings_tone.comove             # co-movement (section 9), ~1 minute
@@ -827,4 +892,5 @@ uv run python -m sec_filings_tone.events --quarterly
 ```
 
 Results are written to `data/tone/` (scores, baselines, event results; the quarterly ones start
-with `q_`), which is not in git.
+with `q_`, the section-level AI ones with `s_`), which is not in git. Run the `--section` commands
+before `events`, since every MD&A-only test of AI reads them.
