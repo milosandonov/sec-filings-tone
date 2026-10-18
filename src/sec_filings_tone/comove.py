@@ -19,7 +19,7 @@ from sec_filings_tone.tone import OUT
 
 MIN_SHARED = 10
 PERMUTATIONS = 2000
-LAST_FY = 2025  # by FY2026 only the 80 companies whose fiscal year doesn't end in December had filed
+LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 RESULTS = OUT / "comove.csv"
 
 

@@ -82,7 +82,7 @@ def carryover() -> None:
 
 
 def filings() -> pd.DataFrame:
-    """Carryover share per 10-K item, FY2020-FY2025 (FY2026: only 80 companies had filed)."""
+    """Carryover share per 10-K item, FY2020-FY2025 (FY2026: only companies whose fiscal year doesn't end in December had filed)."""
     c = pd.read_parquet(CARRYOVER).query("fy <= 2025")
     f = c.groupby(["ticker", "sector", "fy", "item"], as_index=False)[["chars", "carried"]].sum()
     return f.assign(share=f.carried / f.chars)

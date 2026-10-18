@@ -1,16 +1,20 @@
 """Phase 7: does tone move where a known event hit (events.csv), and stay flat where it didn't?
 
-For each event, each company's last 10-K filed before the event date is compared with its first
-10-K whose fiscal year ends on or after it (so it covers the event and was written after it; the
-first version took the first 10-K filed after the date, which for the 2025 tariffs meant 10-Ks filed
-weeks after the first orders), on the event's topics. A cell's tone is the mean of each dimension over its
+For each event, each company's last 10-K whose fiscal year ended before the event date is compared
+with its first 10-K whose fiscal year ends on or after it, on the event's topics: one fiscal year
+apart for nearly every company. (The first version took the first 10-K filed after the date as
+"after", which for the 2025 tariffs meant 10-Ks filed weeks after the first orders; the second took
+the last 10-K filed before the date as "before", which for the tariffs skipped December companies'
+FY2024 10-Ks and compared FY2023 with FY2025. That rule is kept as --filed; the fiscal-year rule is
+primary since 2026-10-17.) A cell's tone is the mean of each dimension over its
 on-topic passages; `discussed` is whether it has any. The change is averaged over the event's
 topics, then difference-in-differences: the mean change in the affected sectors minus the mean
 change elsewhere, with a 95% bootstrap interval over companies. Where there's no comparison group
 (an event that hit every sector, or a topic scored only for the affected sector), the plain change
 in the affected sectors is reported instead.
 
-With --quarterly, the same tests on the 10-Q cells (PLAN.md option B5) and events_quarterly.csv.
+With --quarterly, the same tests on the 10-Q cells (PLAN.md option B5) and events_quarterly.csv, with
+the filed rule its definition fixed in advance.
 With --named, the word-checked version: a passage of a TOPIC_WORDS topic counts only if it names the
 topic, since the model calls many passages on topic that don't (RESULTS.md, limitations).
 
@@ -18,17 +22,16 @@ With --robust (PLAN.md option A4): an event study (every fiscal year around each
 the change is a break rather than a trend already under way, and every test on risk factors and MD&A
 separately; each also word-checked.
 
-With --fyrule, every test (model only and word-checked) with "before" = the last 10-K whose fiscal
-year ended before the date, in events_fyrule*.csv: those 10-Ks can already react to the event, which
-biases the change toward zero, but the filed rule compares FY2023 with FY2025 for most companies
-for the 2025 tariffs.
+With --filed, every test (model only and word-checked) with "before" = the last 10-K filed before
+the date, in events_filed*.csv. The primary rule's "before" 10-K can be filed after the event and so
+already react to it, which biases the change toward zero; the filed rule mixes in a second year.
 
 Usage:
     uv run python -m sec_filings_tone.events
     uv run python -m sec_filings_tone.events --quarterly
     uv run python -m sec_filings_tone.events --named
     uv run python -m sec_filings_tone.events --robust
-    uv run python -m sec_filings_tone.events --fyrule
+    uv run python -m sec_filings_tone.events --filed
 """
 
 import re
@@ -91,15 +94,19 @@ def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None =
     return grid.assign(discussed=grid[DIMS[0]].notna().astype(float))
 
 
-def changes(c: pd.DataFrame, date: str, topics: list[str], after_date: str = "", fy_before: bool = False) -> pd.DataFrame:
-    """Per company: the last cell filed before `date` subtracted from the first whose fiscal year ends
+def before_cells(c: pd.DataFrame, date: str, filed: bool = False) -> pd.DataFrame:
+    """Each company and topic's "before" cell: its last 10-K whose fiscal year ended before `date`, or
+    with `filed` (the rule until 2026-10-17), its last 10-K filed before `date`."""
+    c = c[(c.filing_date if filed else c.report_date) < date]
+    return c.sort_values("filing_date").drop_duplicates(["ticker", "topic"], keep="last")
+
+
+def changes(c: pd.DataFrame, date: str, topics: list[str], after_date: str = "", filed: bool = False) -> pd.DataFrame:
+    """Per company: the "before" cell (before_cells) subtracted from the first whose fiscal year ends
     on or after `after_date` (default `date`), per topic, then averaged over the topics. A dimension
-    is missing where either cell isn't discussed. With `fy_before`, "before" is the last cell whose
-    fiscal year ended before `date`, even if filed after it (added 2026-10-17: the filed rule skips
-    December FY2024 10-Ks for the 2025 tariffs, so most companies compared FY2023 with FY2025)."""
+    is missing where either cell isn't discussed."""
     c = c[c.topic.isin(topics)].sort_values("filing_date")
-    before = c[(c.report_date if fy_before else c.filing_date) < date]
-    before = before.drop_duplicates(["ticker", "topic"], keep="last").set_index(["ticker", "topic"])
+    before = before_cells(c, date, filed).set_index(["ticker", "topic"])
     after = c[c.report_date >= (after_date or date)].drop_duplicates(["ticker", "topic"], keep="first").set_index(["ticker", "topic"])
     both = before.index.intersection(after.index)
     m = [x for x in c.columns if x not in ("ticker", "fy", "topic", "sector", "filing_date", "report_date")]
@@ -126,12 +133,12 @@ def affected(e, sector: pd.Series) -> pd.Series:
 
 
 def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Path = RESULTS,
-           keep: set | None = None, fy_before: bool = False) -> None:
+           keep: set | None = None, filed: bool = False) -> None:
     ev = events if isinstance(events, pd.DataFrame) else pd.read_csv(events, dtype=str, keep_default_na=False)
     rows = []
     for e in ev.itertuples():
         items = e.items.split(";") if e.items else None
-        ch = changes(cells(items, form, keep), e.date, e.topics.split(";"), e.after, fy_before)
+        ch = changes(cells(items, form, keep), e.date, e.topics.split(";"), e.after, filed)
         hit = affected(e, ch.sector)
         for m in [c for c in ch.columns if c != "sector"]:
             a, u = ch.loc[hit, m], ch.loc[~hit, m]
@@ -162,10 +169,10 @@ def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Pa
 
 
 def study(c: pd.DataFrame, e) -> pd.DataFrame:
-    """Per company and event year k (fiscal year minus that of its last 10-K filed before the event):
-    each measure's change from that 10-K, averaged over the event's topics. FY2019-FY2025."""
+    """Per company and event year k (fiscal year minus that of its "before" 10-K, before_cells): each
+    measure's change from that 10-K, averaged over the event's topics. FY2019-FY2025."""
     c = c[c.topic.isin(e.topics.split(";")) & (c.fy <= 2025)]
-    before = c[c.filing_date < e.date].sort_values("filing_date").drop_duplicates(["ticker", "topic"], keep="last")
+    before = before_cells(c, e.date)
     x = c.merge(before[["ticker", "topic", "fy", *MEASURES]], on=["ticker", "topic"], suffixes=("", "_b"))
     x = x.assign(k=x.fy - x.fy_b, **{m: x[m] - x[f"{m}_b"] for m in MEASURES})
     return x.groupby(["ticker", "sector", "k"], as_index=False)[MEASURES].mean()
@@ -176,7 +183,7 @@ def breaks(c: pd.DataFrame, e) -> pd.DataFrame:
     averaged over the event's topics; only where "after" is the next fiscal year."""
     key = ["ticker", "topic"]
     c = c[c.topic.isin(e.topics.split(";"))].sort_values("filing_date")
-    b = c[c.filing_date < e.date].drop_duplicates(key, keep="last")
+    b = before_cells(c, e.date)
     a = c[c.report_date >= (e.after or e.date)].drop_duplicates(key, keep="first")
     x = b.merge(a, on=key, suffixes=("_b", "_a"))
     x = x[x.fy_a == x.fy_b + 1]
@@ -218,14 +225,14 @@ def robust() -> None:
 
 
 if __name__ == "__main__":
-    if "--quarterly" in sys.argv:
-        report(*QUARTERLY)
+    if "--quarterly" in sys.argv:  # events_quarterly.csv fixed "before" as the last 10-Q filed before the date
+        report(*QUARTERLY, filed=True)
     elif "--named" in sys.argv:
         report(results=OUT / "events_named.csv", keep=named())
     elif "--robust" in sys.argv:
         robust()
-    elif "--fyrule" in sys.argv:
+    elif "--filed" in sys.argv:
         for suffix, keep in [("", None), ("_named", named())]:
-            report(results=OUT / f"events_fyrule{suffix}.csv", keep=keep, fy_before=True)
+            report(results=OUT / f"events_filed{suffix}.csv", keep=keep, filed=True)
     else:
         report()

@@ -5,7 +5,8 @@ a new --version; files the previous export wrote are removed first, README.md (t
 
 What goes in (data/release/README.md describes each file): every scored passage keyed by (ticker,
 fy or report_date, topic, rank, chunk_id), the baselines, the cells, the carryover shares, the
-passage text, the label sheets and guidelines, the event definitions, companies.csv (sectors and
+passage text, the run-to-run and masked-prompt rescorings, the label sheets and guidelines, the
+event definitions, companies.csv (sectors and
 sub-industries, which the export-control test needs) and the result CSVs; plus
 provenance.json (model, prompt and schema hashes, row counts) and SHA256SUMS. Left out: the
 embeddings (vectors.npy, 2.8 GB), backups, logs, batch state and the Loughran-McDonald dictionary
@@ -34,7 +35,7 @@ from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS, EMBED_MODEL
 from sec_filings_tone.retrieve import CANDIDATES, RRF_K
 from sec_filings_tone.sentiment import (DIMENSIONS, FINBERT, LM_PATH, MODEL, OUT as SENTIMENT, TOPICS, schema,
                                         system_prompt, user_prompt)
-from sec_filings_tone.tone import FILES, K, KEY, OUT
+from sec_filings_tone.tone import FILES, K, KEY, OUT, masked_prompt
 
 RELEASE = Path("data/release")
 ROOT = Path(__file__).parents[2]
@@ -61,7 +62,8 @@ def scored(form: str, chunks: pd.DataFrame) -> pd.DataFrame:
 
 
 def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
-    ids = pd.concat([pd.read_parquet(FILES[f][0], columns=["chunk_id"]) for f in ("10-K", "10-Q")]).chunk_id
+    forms = ("10-K", "10-Q", "rerun", "masked")  # rerun and masked can hold a chunk no cell retrieves any more
+    ids = pd.concat([pd.read_parquet(FILES[f][0], columns=["chunk_id"]) for f in forms]).chunk_id
     chunks = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", ids.unique().tolist())])
     keep = events.named()
     k = scored("10-K", chunks)
@@ -71,9 +73,11 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
         "passages": k,
         "q_passages": scored("10-Q", chunks),
         "rerun": rerun,
+        "masked": scored("masked", chunks).drop(columns="pid"),  # the masked-prompt check; orig_pid as in rerun
         "cells": pd.concat([events.cells().assign(version="model"), events.cells(keep=keep).assign(version="word-checked")]),
         "q_cells": events.cells(form="10-Q"),
-        "baselines": pd.concat([pd.read_parquet(FILES[f][3]) for f in ("10-K", "10-Q")], ignore_index=True),
+        "baselines": pd.concat([pd.read_parquet(FILES[f][3]) for f in ("10-K", "10-Q")], ignore_index=True)
+                     .loc[lambda b: b.chunk_id.isin(ids)],  # chunks no passage uses any more, since a fix, left out
         "carryover": pd.read_parquet(CARRYOVER),
         "gold_scores": pd.read_parquet(SENTIMENT / f"gold_scores_{MODEL}.parquet"),
         "chunks": chunks,
@@ -86,10 +90,11 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
               | {f"results/{f.name}": f for f in sorted(OUT.glob("*.csv"))})  # what events, diff and comove wrote
 
     system, fmt = system_prompt(), json.dumps(transform_schema(schema(list(DIMENSIONS))))
-    template = user_prompt({"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"},
-                           "{topic}", list(DIMENSIONS))
+    row = {"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"}  # placeholders: the template
+    template = user_prompt(row, "{topic}", list(DIMENSIONS))
     hashes = {"system_prompt_sha256": sha(system.encode()), "output_schema_sha256": sha(fmt.encode()),
               "user_prompt_template_sha256": sha(template.encode())}
+    masked = sha(masked_prompt(row, "{topic}", list(DIMENSIONS)).encode())  # masked.parquet's prompt; not in prompt_key
     git = subprocess.run(["git", "describe", "--always", "--dirty"], cwd=ROOT, capture_output=True, text=True)
     prov = {
         "data_version": version,
@@ -102,6 +107,7 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
                    "hash_of": {"system_prompt": "sentiment.system_prompt()",
                                "output_schema": "json.dumps(transform_schema(sentiment.schema(list(DIMENSIONS))))",
                                "user_prompt_template": "sentiment.user_prompt with {ticker} 10-K FY{fy} Item 1A, {topic}, {text}"},
+                   "masked_user_prompt_template_sha256": masked,
                    "request": "one call per passage, max_tokens 4000, effort low, Message Batches API (tone.score_cells)"},
         "retrieval": {"top_k": K, "candidates": CANDIDATES, "rrf_k": RRF_K, "topic_queries": TOPICS},
         "embedding": {"model": EMBED_MODEL, "dims": EMBED_DIMS},

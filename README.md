@@ -24,10 +24,11 @@ Retrieval eval: [eval/FINDINGS.md](eval/FINDINGS.md).
 ## Key results
 
 Numbers in brackets are 95% bootstrap intervals. These follow the "Key findings" in RESULTS.md as of
-2026-10-17; that section was reframed after an external review.
+2026-10-18: reframed after an external review, then updated for the fiscal-year fix and the one-year
+event rule.
 
-- **The data.** Claude Haiku 5.5 scored 125,583 passages from 3,445 S&P 500 10-Ks (FY2019–FY2026) on
-  five dimensions toward 13 topics, for $18.88. Its off-topic flag was right on all 11 gold passages
+- **The data.** Claude Haiku 5.5 scored 126,051 passages from 3,458 S&P 500 10-Ks (FY2019–FY2026) on
+  five dimensions toward 13 topics, for $18.94. Its off-topic flag was right on all 11 gold passages
   it flagged. It is lenient the other way, though: it calls on topic many passages that never name
   the topic (over half of the early AI ones). So a word-checked version sits beside every affected result.
 - **Little is validated against a person's labels.** On one person's blind labels, only
@@ -38,27 +39,29 @@ Numbers in brackets are 95% bootstrap intervals. These follow the "Key findings"
   realization cues. Polarity can't be judged at all, since the model gives −1 to 18 of 20 items.
   Scored twice, **magnitude** misses the run-to-run bar fixed in advance (kappa 0.78, bar 0.8); it
   is kept by a decision made after seeing that result, since 0.78 is close to the bar.
-- **The planned event test detects 2 of 11.** Each event's change is compared with the same change
-  in sectors it didn't hit. Two expected changes pass, both for the rate hikes: magnitude +0.11
-  [+0.01, +0.21] and specificity +0.11 [+0.02, +0.21]. The specificity result exists only because
-  other sectors' specificity fell. A second check asks whether a change is a break rather than a
-  trend already under way. It passes only for the 2025 tariffs, which reached every sector and so
-  fail the comparison. No expected change passes both.
+- **The planned event test detects 0 of 11.** Each event's change is compared with the same change
+  in sectors it didn't hit. The closest are two rate-hike differences, borderline in every version
+  (p = 0.04–0.07): magnitude +0.09 [−0.005, +0.19] and specificity +0.10 [−0.0001, +0.20]. The
+  specificity gap comes from other sectors' specificity falling. Under the old filed rule both pass
+  (2 of 11). A second check asks whether a change is a break rather than a trend already under way.
+  It passes for 3 of 13: COVID realization, export-control polarity and tariff realization. The
+  tariffs reached every sector, so that one fails the comparison. No expected change passes both.
 - **Before-after counts also pick up drift.** Where the event hit, the model moved as expected in
-  **10 of 15** tests (9 of 15 with the tariff window corrected; 6 and 7 word-checked). FinBERT and
-  the Loughran-McDonald dictionary managed **0 of 9**. But from FY2019 to FY2025, realization rose
-  for 9 of 12 topics and polarity fell for all 12, event or not. Realization beat polarity in 4 of 6
+  **9 of 15** tests (10 under the filed rule; word-checked 7 and 6). FinBERT and the
+  Loughran-McDonald dictionary managed **0 of 9**. But from FY2019 to FY2025, realization rose for 9
+  of 12 topics and polarity fell for all 12, event or not. Realization beat polarity in 4 of 6
   events before-after, but in none of the 4 that have a comparison group. The baselines score the
   whole passage, not the topic. And the scorer is told each filing's company and fiscal year, and
   the baselines aren't. So the event tests are free of labels but not of the model's knowledge.
-  Rescoring 1,904 event-test passages with both masked changes per-passage scores no more than a
-  second run does, and realization's changes hold. But COVID's rise in uncertainty falls from +0.21
-  to +0.02: told "FY2019", the model scored pre-COVID text as calmer.
-- **Other event caveats.** As filed, the 2025 tariff test compared FY2023 with FY2025 for 75% of
-  companies. Corrected to one year, the realization difference from other sectors is +0.00 [−0.13,
-  +0.12]. Which rule is primary is **pending** the owner's decision. The AI-boom test is selected on
-  retrieval rank and isn't interpretable as designed. A follow-up on Financials' 10-Qs ($1.45)
-  detected neither SVB nor the rate hikes in its planned tests (0 of 5).
+  Masked, on 1,903 event-test passages, scores agree with the originals about as well as a second
+  run does, and realization's changes hold. But COVID's rise in uncertainty falls from +0.21 to
+  +0.02: told "FY2019", the model scored pre-COVID text as calmer.
+- **Other event caveats.** "Before" is now the last 10-K whose fiscal year ended before the event
+  (the owner's decision, 2026-10-17, after the results). The old filed rule, kept as
+  `events.py --filed`, compared FY2023 with FY2025 for 75% of companies in the 2025 tariff test. With
+  one year, the tariffs' realization difference from other sectors is +0.00 [−0.12, +0.13]. The
+  AI-boom test is selected on retrieval rank and isn't interpretable as designed. A follow-up on
+  Financials' 10-Qs ($1.45) detected neither SVB nor the rate hikes in its planned tests (0 of 5).
 - **What the data describes.** AI went from 8% to 93% of risk-factor sections (word-checked, FY2019 →
   FY2025). In FY2025, 80% of risk factors and 62% of MD&A were copied from the year before. New text
   is more realized than copied text but not more specific (slightly less in risk factors, within
@@ -75,7 +78,7 @@ stayed positive (+0.90 in FY2019, +0.88 in FY2025, on 20–76 companies).*
 ![Rate hikes event study: change from each company's last 10-K before 2022-03-16](figures/event_study_rate_hikes.png)
 
 *Rate hikes, by year around the first hike. Financials' and Real Estate's magnitude jumped +0.14,
-against +0.02 for the other companies. Realization rose in both groups alike (+0.13 and +0.09), from
+against +0.04 for the other companies. Realization rose in both groups alike (+0.13 and +0.12), from
 drift or because the hikes reached every company's filings. The comparison with other sectors
 removes a shared rise like that.*
 
@@ -94,10 +97,10 @@ flowchart LR
    edgartools, FY2019 onward, for the current S&P 500 (498 companies after merging share classes).
 2. **Chunk and embed** (`ingest.py`): heading-aligned chunks (500-token target, 800 maximum),
    embedded as plain text with `text-embedding-3-large` at 1,024 dimensions into Chroma. That gives
-   673,902 chunks.
+   674,816 chunks.
 3. **Retrieve** (`retrieve.py`, `tone.py`): a *cell* is one company, one 10-K and one topic, such
    as NVDA × FY2023 × China. Each cell's passages are the top 3 from vector search plus BM25, fused
-   with reciprocal rank fusion. Each topic has one fixed query. That gives 41,861 cells and 125,583
+   with reciprocal rank fusion. Each topic has one fixed query. That gives 42,017 cells and 126,051
    passages.
 4. **Score** (`sentiment.py`, `tone.py`): one Claude Haiku 5.5 call per passage, sent through the
    Message Batches API at half price. The prompt quotes the rules in
@@ -129,7 +132,7 @@ Financials only.
   before the result existed. That covers the events and directions in `events.csv`, the
   robustness checks, the co-movement test and the agreement bars (kappa 0.6 with people, 0.8 run to
   run). Changes made after seeing results are dated and give the reason. Both versions are kept
-  (for example `events_v1.csv`).
+  (for example `events_v1.csv`, and the filed event rule as `--filed`).
 - **Results reported against the rules.** By the label rule only realization would be kept. By the
   run-to-run rule magnitude would be dropped; it was kept by a dated decision after the result.
   Both are reported, not hidden.
@@ -140,9 +143,10 @@ Financials only.
 - **Recomputed with separate code:** the 10-Q event tests, the co-movement test (2,938 random
   pairs, identical), the cell retrieval (identical top 3 for all 355 cells of 4 companies) and the
   carryover matcher (within 0.2 points of an all-pairs comparison on four filings).
-- **Spend.** Scoring all 125,583 passages cost $18.88, after a $0.05 smoke test on one company. The
-  run-to-run check on 5,000 passages cost $0.79, the masked-prompt check on 1,904 $0.27, and the 10-Q
-  follow-up $1.45. Embedding all 673,902 chunks cost $15.18, once.
+- **Spend.** The kept scores for all 126,051 passages cost $18.94 ($19.09 paid in all, including
+  $0.21 to rescore after the fiscal-year fix). The run-to-run check on 5,000 passages cost $0.79,
+  the masked-prompt check $0.27 and the 10-Q follow-up $1.45. Embedding cost $15.18, plus about
+  $0.05 for the 914 chunks the fiscal-year fix added.
 
 ## Retrieval eval
 
@@ -165,19 +169,20 @@ companies (2026-10-15, $0.07):
   (MRR 0.673 → 0.866 on the first 30).
 - The research pipeline uses hybrid search's top 3 with fixed topic queries and no reranking. So this
   eval tests the retrieval layer, not the tone cells. The cells' quality is measured by the
-  off-topic rate (24.7% of passages) and the word check.
+  off-topic rate (24.8% of passages) and the word check.
 
 ## Data availability
 
-**Coming: a GitHub release, data version 0.2.0, after a pending data fix.** It is not published yet.
+**Coming: a GitHub release, data version 0.2.0.** It is not published yet.
 
 The scored passages, cells, FinBERT and Loughran-McDonald baselines, carryover shares, human labels
 and every result table will be released as versioned Parquet files (about 53 MB). The release's
 `README.md` is a dataset card describing each file and column. Its `provenance.json` records the
 scoring model, hashes of the prompt and output schema, and row counts. With it, every result in
-RESULTS.md from the event tests on can be rerun locally, with no SEC download, embeddings or API calls. Rebuilding from scratch takes about 14 hours
-of SEC fetching, roughly $35 of API calls and several hours of FinBERT. The final frozen version
-will also go to Zenodo (with a DOI) and the Hugging Face Hub.
+RESULTS.md from the event tests on can be rerun locally, with no SEC download, embeddings or API
+calls. Rebuilding from scratch takes about 14 hours of SEC fetching, roughly $35 of API calls and
+several hours of FinBERT. The final frozen version will also go to Zenodo (with a DOI) and the
+Hugging Face Hub.
 
 ## Setup
 
@@ -215,7 +220,7 @@ uv run python -m sec_filings_tone.sentiment gold-report [--adjudicated]
 uv run python -m sec_filings_tone.sentiment gold-baselines
 
 # Phase 7-9 analyses: free and local, seconds to minutes
-uv run python -m sec_filings_tone.events             # also --named, --robust, --fyrule
+uv run python -m sec_filings_tone.events             # also --named, --robust, --filed
 uv run python -m sec_filings_tone.diff carryover
 uv run python -m sec_filings_tone.diff report
 uv run python -m sec_filings_tone.comove
@@ -234,7 +239,7 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
   dropped out of the index or went bankrupt.
 - **One labeler.** One person labeled the 40 gold items, with no second rater. The adjudicated
   labels lean toward the model, so they can't validate it.
-- **The off-topic flag is lenient.** Before FY2023, 53–59% of the passages the model called on topic
+- **The off-topic flag is lenient.** Before FY2023, 52–58% of the passages the model called on topic
   for AI contain no AI word. Word-checked versions exist only for AI, China and tariffs.
 - **The scorer sees the company and fiscal year.** Masking both leaves realization's event changes
   intact but removes most of COVID's rise in uncertainty. Two thirds of passages name a year, the
@@ -242,10 +247,12 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 - **Short scales hit ceilings.** Realization and specificity have three levels. Where a topic was
   already live, as China was for chipmakers, they can't rise.
 - **Fiscal years are as the companies label them.** Most end in December, but NVDA's ends in
-  January. Charts use that fiscal-year label. Event windows compare the last 10-K *filed* before
-  the event with the first 10-K whose fiscal year *ends* on or after it. A variant (`--fyrule`) takes
-  the last fiscal year ending before the event instead.
-- **Some numbers will shift slightly** after a pending fix to some companies' fiscal-year labels.
+  January; a 52/53-week year ending January 1–7 counts as the year before. Charts use that
+  fiscal-year label. Event windows compare the last 10-K whose fiscal year ended before the event
+  with the first whose fiscal year ends on or after it. That "before" 10-K can be filed after the
+  event and already react to it, which biases the change toward zero. The filed rule
+  (`events.py --filed`) takes the last 10-K filed before the event instead; in the 2025 tariff test
+  it skipped FY2024 for 75% of companies.
 - **No claim that tone predicts returns.** The results describe how companies write about risk and
   performance.
 
@@ -265,8 +272,8 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
 | 10 | Q&A layer over the retrieval | Planned |
 | 11 | Publishing: README, data release, paper | In progress |
 
-**Still pending:** the choice of tariff window rule and the fiscal-year fix (data version 0.2.0). AI retrieval within MD&A, which a valid
-AI-boom test needs, is a priced option (about $1.30–1.55), not done.
+**Not done:** AI retrieval within MD&A, which a valid AI-boom test needs. It is a priced option
+(about $1.30–1.55).
 
 ## License
 

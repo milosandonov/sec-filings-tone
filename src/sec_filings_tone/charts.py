@@ -36,7 +36,7 @@ from sec_filings_tone.tone import OUT  # noqa: E402
 FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
 SECTIONS = {"Risk factors (Item 1A)": ["1A"], "MD&A (Item 7)": ["7"]}
-LAST_FY = 2025  # by FY2026 only the 80 companies whose fiscal year doesn't end in December had filed
+LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 MIN_N = 5  # heatmap cells with fewer companies discussing the topic are hatched instead
 MEASURES = [*DIMS, "discussed"]
 # dataviz reference palette: categorical slots 1-2 (validated), the blue sequential ramp, the blue-red diverging pair
@@ -46,7 +46,7 @@ DIVERGING = ["#e34948", "#f0efec", "#2a78d6"]  # hurts, neutral, helps
 INK, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#e1e0d9", "#c3c2b7", "#fcfcfb"
 NOTE = ("S&P 500 10-Ks. A company's cell is the mean over its on-topic passages (hybrid search's top 3 in that 10-K, "
         "scored by Claude Haiku 5.5). Fiscal years as the companies label them; most end in December. FY2026 is left "
-        "out: only the 80 companies whose fiscal year doesn't end in December had filed.")
+        "out: only companies whose fiscal year doesn't end in December had filed.")
 CHECKED = " Word-checked: a passage counts only if it names the topic."
 
 
@@ -203,7 +203,7 @@ def carryover() -> None:
     header(fig, "How much of each 10-K is carried over from the year before",
            "Mean over companies of the share of each section's text in sentences that closely match (difflib ratio "
            ">= 0.9) a sentence of the same section a year earlier", NOTE.split(". A company's")[0] + ". FY2019 has no "
-           "year before in the data; FY2026 is left out (80 companies).")
+           "year before in the data; FY2026 is left out (only part of the year had filed).")
     fig.tight_layout(rect=(0, 0.05, 1, 0.92))
     path = FIGURES / "carryover.png"
     fig.savefig(path, dpi=200, facecolor=SURFACE)

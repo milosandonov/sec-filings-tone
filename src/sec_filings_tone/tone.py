@@ -362,7 +362,8 @@ def masked_report() -> None:
             x = x.assign(**{c: x[c + sfx] for c in ["off_topic", *dims]})
             c = x.groupby(["ticker", "fy", "topic", "sector"], as_index=False)[["filing_date", "report_date"]].first()
             c = c.merge(x[~x.off_topic].groupby(["ticker", "fy", "topic"], as_index=False)[dims].mean(), how="left")
-            ch[name] = changes(c.assign(discussed=c[dims[0]].notna().astype(float)), e.date, e.topics.split(";"), e.after)
+            ch[name] = changes(c.assign(discussed=c[dims[0]].notna().astype(float)), e.date, e.topics.split(";"), e.after,
+                                 filed=True)  # the sample was drawn under the filed rule
         o, k = ch["original"], ch["masked"]
         hit = affected(e, o.sector)
         for d in [*dims, "discussed"]:

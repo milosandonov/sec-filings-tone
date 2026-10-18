@@ -15,14 +15,14 @@ c = pd.DataFrame({
     "report_date": ["2021-12-31", "2022-12-31", "2023-12-31", "2021-12-31", "2022-09-30"],
     "realization": [0, 2, 1, 1, 2], "discussed": [1.0] * 5})
 ch = changes(c, "2022-10-07", ["T"])
-# A: the last 10-K filed before the date (FY2021) against the first whose year ends after it (FY2022)
+# A: the last 10-K whose year ended before the date (FY2021) against the first whose year ends after it (FY2022)
 assert ch.loc["A", "realization"] == 2, ch
 # B's FY2022 10-K was filed after the date but covers a year that ended before it: not an 'after' filing
 assert "B" not in ch.index, ch
-# a date between A's FY2022 year end and its filing (the 2025 tariffs' case): the filed rule skips FY2022
-# (FY2021 -> FY2023: 1 - 0); fy_before takes it as "before" (FY2022 -> FY2023: 1 - 2)
-assert changes(c, "2023-01-15", ["T"]).loc["A", "realization"] == 1
-assert changes(c, "2023-01-15", ["T"], fy_before=True).loc["A", "realization"] == -1
+# a date between A's FY2022 year end and its filing (the 2025 tariffs' case): the fiscal-year rule takes
+# FY2022 as "before" (FY2022 -> FY2023: 1 - 2); the filed rule skips it (FY2021 -> FY2023: 1 - 0)
+assert changes(c, "2023-01-15", ["T"]).loc["A", "realization"] == -1
+assert changes(c, "2023-01-15", ["T"], filed=True).loc["A", "realization"] == 1
 
 est, lo, hi = did(pd.Series([1.0, 1.0, 1.0]), pd.Series([0.0, 0.0]))
 assert est == 1 and lo == hi == 1

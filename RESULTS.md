@@ -1,6 +1,6 @@
 # Results: tone scoring (Phases 5–9)
 
-What the tone scorer found, as of 2026-10-17. Retrieval results (Phase 4) are in
+What the tone scorer found, as of 2026-10-18. Retrieval results (Phase 4) are in
 [`eval/FINDINGS.md`](eval/FINDINGS.md); the plan, every decision and its date are in [`PLAN.md`](PLAN.md).
 Numbers in brackets are 95% bootstrap intervals. "n.s." means the interval includes zero: no
 change can be detected, which is not the same as no change.
@@ -8,10 +8,10 @@ change can be detected, which is not the same as no change.
 ## Key findings
 
 Reframed 2026-10-17 after an external review; every claim of the earlier one-paragraph summary is
-kept, with its caveat.
+kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix and the one-year event rule.
 
-- **The data:** Claude Haiku 5.5 scored 125,583 passages from 3,445 S&P 500 10-Ks (FY2019–FY2026) on
-  five tone dimensions toward 13 topics for $18.88, and its off-topic flag was right on all 11 gold
+- **The data:** Claude Haiku 5.5 scored 126,051 passages from 3,458 S&P 500 10-Ks (FY2019–FY2026) on
+  five tone dimensions toward 13 topics for $18.94, and its off-topic flag was right on all 11 gold
   passages it flagged, though it calls on topic many passages that never name the topic (over half
   of the early AI ones), so a word-checked version is kept beside every affected result.
 - **Against a person's labels, little is validated:** on one person's blind labels only
@@ -21,23 +21,23 @@ kept, with its caveat.
   +0.35 [−0.06, +0.76] in Spearman over a count of realization cues), with polarity impossible to judge.
 - **Stability and spread:** scored twice, **magnitude** misses the run-to-run bar fixed in advance
   (kappa 0.78, bar 0.8) but is kept by a dated decision, and polarity barely varies, with 86% of on-topic passages at −1.
-- **Events, the planned test:** against sectors the event didn't hit, only **2 of 11** expected
-  changes are detected (rate hikes' magnitude and specificity, the second only because other sectors'
-  specificity fell), the check for a break rather than a trend already under way passes only for the
-  2025 tariffs, which reached every sector and so fail the comparison, and no expected change passes
-  both.
-- **Events, before-after:** where the event hit, the model moved as expected in **10 of 15** tests
-  (9 of 15 with the tariff window corrected; 6 and 7 word-checked) and FinBERT and the
-  Loughran-McDonald dictionary in **0 of 9**, but this count also picks up drift, since from FY2019 to
-  FY2025 realization rose for 9 of 12 topics and polarity fell for all 12, event or not, and
-  realization beat polarity in 4 of 6 events before-after but in none of the 4 that have a
-  comparison group.
-- **Caveats on the event tests:** the 2025 tariff test as filed compared FY2023 with FY2025 for 75%
-  of companies (corrected to one year, the realization difference from other sectors is +0.00
-  [−0.13, +0.12]; which rule is primary is the owner's decision), the AI-boom test is selected on
-  retrieval rank and isn't interpretable as designed, and the scorer is told each filing's company
+- **Events, the planned test:** against sectors the event didn't hit, **0 of 11** expected changes
+  are detected (2 of 11 under the old filed rule: two rate-hike differences that are borderline in
+  every version, p = 0.04–0.07); the check for a break rather than a trend already under way passes
+  for 3 of 13 (COVID realization, export-control polarity and tariff realization, the last failing
+  the comparison because the tariffs reached every sector), and no expected change passes both.
+- **Events, before-after:** where the event hit, the model moved as expected in **9 of 15** tests
+  (10 under the filed rule; word-checked 7 and 6) and FinBERT and the Loughran-McDonald dictionary
+  in **0 of 9**, but this count also picks up drift, since from FY2019 to FY2025 realization rose for
+  9 of 12 topics and polarity fell for all 12, event or not, and realization beat polarity in 4 of 6
+  events before-after but in none of the 4 that have a comparison group.
+- **Caveats on the event tests:** "before" is now the last 10-K whose fiscal year ended before the
+  event (the owner's decision, 2026-10-17), since the filed rule compared FY2023 with FY2025 for 75%
+  of companies in the 2025 tariff test (with one year, the tariffs' realization difference from other
+  sectors is +0.00 [−0.12, +0.13]), the AI-boom test is selected on retrieval rank and isn't
+  interpretable as designed, and the scorer is told each filing's company
   and fiscal year while the baselines aren't, so the tests are free of labels but not of the model's
-  knowledge (masked, on 1,904 event-test passages, scores agree with the originals about as well as
+  knowledge (masked, on 1,903 event-test passages, scores agree with the originals about as well as
   a second run does and realization's changes hold, but COVID's rise in uncertainty falls from +0.21
   to +0.02).
 - **Quarterly 10-Qs:** a follow-up on Financials' 10-Qs ($1.45) detected neither SVB nor the rate
@@ -54,7 +54,9 @@ kept, with its caveat.
 ## Setup
 
 - **Unit:** a *cell* is one company, one 10-K (fiscal year) and one topic, such as NVDA × FY2023 ×
-  China: 41,861 cells. Each cell's passages are hybrid search's top 3 in that 10-K (125,583 passages).
+  China: 42,017 cells. Each cell's passages are hybrid search's top 3 in that 10-K (126,051 passages).
+  A 10-K's fiscal year is the calendar year its period ends in, except that a 52/53-week year ending
+  January 1–7 counts as the year before (fixed 2026-10-17 for 13 companies, PLAN.md Phase 9).
 - **Scorer:** `claude-haiku-5-5`, one call per passage, quoting evidence before each score, with the
   rules in [`labels/guidelines.md`](labels/guidelines.md). Message Batches API (half price). Each
   request names the topic, the company, the form, the fiscal year and the section ("Filing: NVDA
@@ -123,8 +125,11 @@ computation, not in the code): realization +0.35 [−0.06, +0.76], uncertainty a
 
 ## 2. Scoring the S&P 500
 
-- All 125,583 passages scored, none failed, **$18.88** (a smoke test on one company first, $0.05).
-- **24.7% of passages are off topic**, and 10% of cells have no on-topic passage ("topic not
+- All 126,051 passages scored, none failed, **$18.94** (a smoke test on one company first, $0.05).
+  That includes the fiscal-year fix (2026-10-17): 501 new passages scored and 968 rescored because
+  their request named the wrong fiscal year, for $0.21; $18.94 is what the kept scores cost, and
+  $19.09 was paid in all.
+- **24.8% of passages are off topic**, and 10% of cells have no on-topic passage ("topic not
   discussed", kept apart from neutral tone). Rare topics are off topic most often: AI 62%, China 60%,
   tariffs 53%, against government policy 1% and demand 4%.
 - **Score spread** on on-topic passages:
@@ -140,12 +145,13 @@ computation, not in the code): realization +0.35 [−0.06, +0.76], uncertainty a
   Polarity barely varies, as the project's premise expects for risk language that is negative by
   design. Realization varies the most.
 - **Run-to-run stability (B6, 2026-10-17, $0.79):** 5,000 random passages scored a second time with
-  the same request. The off-topic flag agrees on 97.7%. On passages both runs call on topic:
+  the same request (4,999 still match a passage after the fiscal-year fix; recomputed 2026-10-18).
+  The off-topic flag agrees on 97.6%. On passages both runs call on topic:
 
   | Dimension | Identical | Weighted kappa |
   |---|---|---|
   | Polarity | 95% | 0.89 [0.87, 0.91] |
-  | Magnitude | 76% | **0.78** [0.76, 0.79] |
+  | Magnitude | 75% | **0.78** [0.76, 0.79] |
   | Realization | 85% | 0.88 [0.87, 0.89] |
   | Uncertainty | 94% | 0.89 [0.87, 0.91] |
   | Specificity | 86% | 0.84 [0.83, 0.85] |
@@ -159,104 +165,114 @@ computation, not in the code): realization +0.35 [−0.06, +0.76], uncertainty a
 ## 3. Do the scores react to known events?
 
 **Method** ([`src/sec_filings_tone/events.py`](src/sec_filings_tone/events.py), events and expected
-directions in [`events.csv`](events.csv), fixed before results): for each company, the last 10-K
-filed before the event against the first 10-K whose fiscal year ends on or after it (for the AI
-boom, on or after 2025-01-01). The score is the mean over the cell's on-topic passages. Reported:
-the change where the event hit, the change elsewhere, and the difference between them. **The
-planned test is the difference** (difference-in-differences, PLAN.md Phase 7): an event should move
-tone where it hit more than where it didn't. The change where the event hit, on its own, also
-contains any drift that every filing shares. The break check (A4, fixed before computing, below)
-asks whether the change is larger than the one in the year before, so a trend already under way
-doesn't count.
+directions in [`events.csv`](events.csv), fixed before results): for each company, its last 10-K
+whose fiscal year ended before the event against its first 10-K whose fiscal year ends on or after
+it (for the AI boom, on or after 2025-01-01), which are consecutive fiscal years for nearly every
+company. The score is the mean over the cell's on-topic passages. Reported: the change where the
+event hit, the change elsewhere, and the difference between them. **The planned test is the
+difference** (difference-in-differences, PLAN.md Phase 7): an event should move tone where it hit
+more than where it didn't. The change where the event hit, on its own, also contains any drift that
+every filing shares. The break check (A4, fixed before computing, below) asks whether the change is
+larger than the one in the year before, so a trend already under way doesn't count.
 
-**Every test with an expected direction** (reframed 2026-10-17 after an external review; the first
-version led with the "where the event hit" column alone). Companies: those discussing the topic in
-both 10-Ks, where the event hit / elsewhere; for the break check, those whose "after" 10-K is the
-next fiscal year.
+**Which "before" 10-K (the owner's decision, 2026-10-17, after the results).** Until then "before"
+was the last 10-K *filed* before the event. With an "after" whose fiscal year ends on or after the
+event, that rule skipped a year wherever a 10-K ends before the event but is filed after it: in the
+2025 tariff test, 368 of the 489 companies with both 10-Ks (75%) were compared two fiscal years
+apart, 358 of them FY2023 with FY2025, so the change held two years of drift (found 2026-10-17 in the
+external review; not intended). The one-year rule compares consecutive fiscal years for all 494
+companies in that test. Its trade-off: a December company's FY2024 10-K was filed weeks after the
+first tariff orders, so "before" can already react, which biases the change toward zero. The
+one-year rule is primary for the main tests, the event studies and the break check; the filed rule
+is kept as the robustness version (`events.py --filed`, `data/tone/events_filed*.csv`, below).
+
+**Every test with an expected direction** (one-year rule; reframed 2026-10-17 after an external
+review, since the first version led with the "where the event hit" column alone; updated 2026-10-18
+after the fiscal-year fix). Companies: those discussing the topic in both 10-Ks, where the event hit
+/ elsewhere; for the break check, those whose "after" 10-K is the next fiscal year and that have the
+year before.
 
 | Event (companies) | Dimension | Expected | Where the event hit | Elsewhere | Difference (planned test) | Break check |
 |---|---|---|---|---|---|---|
-| COVID-19 (464 / no comparison) | realization | up | +0.20 [+0.16, +0.25] ✓ | – | – | can't check |
-| | uncertainty | up | +0.15 [+0.11, +0.18] ✓ | – | – | can't check |
-| Chip export controls, semiconductors (19 / 236) | polarity | down | −0.14 [−0.30, −0.01] ✓ | −0.03 n.s. | −0.11 n.s. ✗ | −0.22 n.s. ✗ (15) |
-| | magnitude | up | +0.09 n.s. ✗ | −0.02 n.s. | +0.10 n.s. ✗ | 0.00 n.s. ✗ (15) |
-| | realization | up | −0.04 n.s. ✗ | −0.04 n.s. | −0.01 n.s. ✗ | +0.03 n.s. ✗ (15) |
-| | specificity | up | +0.05 n.s. ✗ | −0.03 n.s. | +0.08 n.s. ✗ | +0.09 n.s. ✗ (15) |
-| Rate hikes, Financials and Real Estate (103 / 361) | magnitude | up | +0.14 [+0.06, +0.22] ✓ | +0.03 n.s. | **+0.11** [+0.01, +0.21] ✓ | +0.09 n.s. ✗ (101) |
-| | realization | up | +0.13 [+0.02, +0.25] ✓ | +0.10 [+0.03, +0.17] | +0.03 n.s. ✗ | +0.15 n.s. ✗ (101) |
-| | specificity | up | +0.01 n.s. ✗ | −0.10 [−0.15, −0.04] | **+0.11** [+0.02, +0.21] ✓ | +0.03 n.s. ✗ (101) |
+| COVID-19 (468 / no comparison) | realization | up | +0.20 [+0.16, +0.24] ✓ | – | – | **+0.29** [+0.04, +0.54] ✓ (21) |
+| | uncertainty | up | +0.13 [+0.10, +0.17] ✓ | – | – | −0.24 [−0.43, −0.05] ✗ (21) |
+| Chip export controls, semiconductors (19 / 232) | polarity | down | −0.16 [−0.32, −0.01] ✓ | −0.03 n.s. | −0.13 n.s. ✗ | **−0.28** [−0.56, −0.02] ✓ (18) |
+| | magnitude | up | +0.11 n.s. ✗ | −0.02 n.s. | +0.12 n.s. ✗ | +0.09 n.s. ✗ (18) |
+| | realization | up | −0.01 n.s. ✗ | −0.03 n.s. | +0.02 n.s. ✗ | +0.16 n.s. ✗ (18) |
+| | specificity | up | +0.05 n.s. ✗ | −0.01 n.s. | +0.06 n.s. ✗ | +0.07 n.s. ✗ (18) |
+| Rate hikes, Financials and Real Estate (103 / 361) | magnitude | up | +0.14 [+0.06, +0.22] ✓ | +0.04 n.s. | +0.09 n.s. ✗ (borderline) | +0.09 n.s. ✗ (101) |
+| | realization | up | +0.13 [+0.02, +0.25] ✓ | +0.12 [+0.05, +0.18] | +0.02 n.s. ✗ | +0.15 n.s. ✗ (101) |
+| | specificity | up | +0.01 n.s. ✗ | −0.08 [−0.14, −0.02] | +0.10 n.s. ✗ (borderline) | +0.03 n.s. ✗ (101) |
 | SVB, banks (75 / no comparison) | magnitude | up | +0.12 [+0.03, +0.21] ✓ | – | – | +0.09 n.s. ✗ (74) |
 | | realization | up | +0.02 n.s. ✗ | – | – | −0.01 n.s. ✗ (74) |
-| AI boom, IT and Communication Services MD&A (13 / 11), *not interpretable as designed* | polarity | up | +0.40 [+0.15, +0.65] ✓ | 0.00 n.s. | +0.40 n.s. ✗ | can't check |
-| | specificity | up | +0.58 [+0.08, +1.12] ✓ | +0.41 n.s. | +0.17 n.s. ✗ | can't check |
-| Tariffs 2025, Industrials, Consumer Discretionary, IT (170 / 179), *window flawed, corrected below* | realization | up | +0.32 [+0.22, +0.43] ✓ | +0.42 [+0.31, +0.52] | −0.09 n.s. ✗ | **+0.29** [+0.08, +0.49] ✓ (67) |
-| | uncertainty | up | +0.07 [+0.01, +0.14] ✓ | +0.05 n.s. | +0.03 n.s. ✗ | **+0.16** [+0.01, +0.33] ✓ (67) |
+| AI boom, IT and Communication Services MD&A (13 / 11), *not interpretable as designed* | polarity | up | +0.47 [+0.22, +0.73] ✓ | 0.00 n.s. | +0.47 n.s. ✗ | can't check |
+| | specificity | up | +0.73 [+0.19, +1.23] ✓ | +0.41 n.s. | +0.32 n.s. ✗ | can't check |
+| Tariffs 2025, Industrials, Consumer Discretionary, IT (182 / 222) | realization | up | +0.34 [+0.24, +0.44] ✓ | +0.33 [+0.25, +0.42] | +0.00 n.s. ✗ | **+0.27** [+0.13, +0.41] ✓ (163) |
+| | uncertainty | up | +0.03 n.s. ✗ | −0.02 n.s. | +0.06 n.s. ✗ | +0.07 n.s. ✗ (163) |
 
 How to read it:
 
-- **The planned test: 2 of 11.** COVID and SVB have no comparison group, so 11 of the 15 tests have
-  one. Two pass, both rate hikes: magnitude rose +0.11 more in Financials and Real Estate than
-  elsewhere, and specificity +0.11 more. The specificity result comes from the other companies'
-  specificity falling (−0.10), as LIBOR disappeared from their rate risk factors (section 7), not
-  from a rise where the hikes hit (+0.01 n.s.).
-- **The break check: 2 of the 11 that can be checked,** both tariffs (realization +0.29, uncertainty
-  +0.16). COVID ("before" is FY2019, the first year; 3 companies have a year before) and the AI boom
-  (a four-year window) can't be checked.
-- **No expected change passes both.** The two rate-hike results aren't clear breaks (+0.09 and
-  +0.03, n.s.); the tariff breaks fail the comparison, because the "unaffected" sectors rose more.
-- **Before-after where the event hit: 10 of 15,** the first headline. This count also picks up
-  drift (below). Of the 10, 3 have no comparison group (COVID, SVB magnitude), 1 passes it
-  (rate-hike magnitude) and 6 fail it. With the tariff window corrected (below) it is 9 of 15; the
-  planned test stays 2 of 11.
+- **The planned test: 0 of 11.** COVID and SVB have no comparison group, so 11 of the 15 tests have
+  one, and none passes. The two closest are the rate hikes, borderline in every version: magnitude
+  rose +0.09 [−0.005, +0.19] more in Financials and Real Estate than elsewhere (Welch t-test p =
+  0.065), and specificity +0.10 [−0.0001, +0.20] more (p = 0.058); over 5 bootstrap seeds of 10,000
+  resamples, the lower bounds run from −0.007 to −0.001. The specificity gap comes from the other
+  companies' specificity falling (−0.08), as LIBOR disappeared from their rate risk factors (section
+  7), not from a rise where the hikes hit (+0.01 n.s.).
+- **The break check: 3 of the 13 that can be checked:** COVID realization (+0.29, on the 21 companies
+  whose fiscal year ended in early 2020 and so have a year before), export-control polarity (−0.28,
+  18 chipmakers) and tariff realization (+0.27, 163 companies). COVID uncertainty's break is
+  negative (−0.24): for those 21 companies, uncertainty had already risen in the year before (+0.22,
+  event studies below). Tariff uncertainty isn't a break (+0.07 n.s.). The AI boom (a four-year
+  window) can't be checked.
+- **No expected change passes both,** now trivially. The rate-hike results aren't clear breaks
+  either (+0.09 and +0.03, n.s.), and the tariff realization break fails the comparison because the
+  "unaffected" sectors rose as much.
+- **Before-after where the event hit: 9 of 15** (10 under the filed rule, the count the first
+  headline led with). It also picks up drift (below). Of the 9, 3 have no comparison group (COVID, SVB magnitude) and 6 fail it.
 - **Word-checked version** (added 2026-10-17 after the results, both kept; `events.py --named`,
   `data/tone/events_named.csv`): when passages about AI, China and tariffs count only if they name
-  the topic, the before-after count falls to **6 of 15**. Lost: export-control polarity (−0.12
-  [−0.32, +0.05]), both AI results (below) and tariff uncertainty (+0.04 [−0.02, +0.11]), the four
-  weakest or smallest tests. Against other sectors it is **3 of 11**: AI polarity's difference
-  becomes +0.72 [+0.22, +1.37], on 9 companies against 7, because the others' AI polarity fell
-  (−0.43 [−1.00, −0.07]). The break check keeps tariff realization (+0.28 [+0.05, +0.50], 62
-  companies) and loses tariff uncertainty (+0.11 n.s.): **1 of 11**. The other events have no word
-  list, so their results are unchanged. With the tariff window corrected: 7 of 15 before-after and 3
-  of 11 against other sectors.
+  the topic, the before-after count falls to **7 of 15**. Lost: export-control polarity (−0.14
+  [−0.33, +0.05]) and AI specificity (+0.38 n.s.). Against other sectors it is **1 of 11**: AI
+  polarity's difference becomes +0.76 [+0.27, +1.39], on 8 companies against 7, because the others'
+  AI polarity fell (−0.43 [−1.00, −0.07]). The break check keeps COVID and tariff realization (+0.28
+  [+0.12, +0.43], 152 companies) and loses export-control polarity (−0.17 n.s.): **2 of 13**. The
+  other events have no word list, so their results are unchanged.
+- **The filed rule** (the robustness version, recomputed after the fiscal-year fix): before-after
+  **10 of 15** (6 word-checked) and against other sectors **2 of 11** (3 word-checked). Where it
+  differs from the table above:
+
+  | Event (companies) | Dimension | Where the event hit | Elsewhere | Difference |
+  |---|---|---|---|---|
+  | COVID-19 (464) | realization | +0.20 [+0.16, +0.24] ✓ | – | – |
+  | | uncertainty | +0.15 [+0.12, +0.18] ✓ | – | – |
+  | Chip export controls (19 / 233) | polarity | −0.14 [−0.30, −0.01] ✓ | −0.02 n.s. | −0.12 n.s. ✗ |
+  | Rate hikes (103 / 361) | magnitude | +0.14 [+0.06, +0.22] ✓ | +0.04 n.s. | **+0.10** [+0.00, +0.20] ✓ |
+  | | specificity | +0.01 n.s. ✗ | −0.09 [−0.15, −0.03] | **+0.11** [+0.01, +0.20] ✓ |
+  | AI boom (13 / 11) | polarity | +0.40 [+0.15, +0.65] ✓ | 0.00 n.s. | +0.40 n.s. ✗ |
+  | | specificity | +0.58 [+0.08, +1.12] ✓ | +0.41 n.s. | +0.17 n.s. ✗ |
+  | Tariffs 2025 (170 / 179) | realization | +0.32 [+0.22, +0.43] ✓ | +0.42 [+0.31, +0.52] | −0.09 n.s. ✗ |
+  | | uncertainty | +0.07 [+0.01, +0.14] ✓ | +0.05 n.s. | +0.02 n.s. ✗ |
+
+  The other six rows differ by at most 0.04 and keep their verdicts. The two passes are the rate
+  hikes, borderline here too: magnitude +0.10 (p = 0.050; across seeds the lower bound straddles
+  zero) and specificity +0.11 (p = 0.037). Before the fiscal-year fix they were +0.11 [+0.01, +0.21]
+  and +0.11 [+0.02, +0.21]. In the filed version the tariffs' negative magnitude and specificity
+  differences (−0.15 each; −0.02 and −0.00, n.s., under the one-year rule) were the other sectors'
+  extra year: their change spanned two fiscal years for 82% of them, against 58% where the tariffs
+  hit.
 
 **What limits these tests:**
 
 - **Drift.** Between FY2019 and FY2025, realization rose by 0.13 or more for 9 of 12 topics and
   polarity fell for all 12 (section 7), event or not. A before-after change where an event hit can be
   this drift, which is why the plan compares with unaffected sectors. The rate hikes show the
-  problem: the other companies' realization rose too (+0.10 [+0.03, +0.17]), from drift or because
+  problem: the other companies' realization rose too (+0.12 [+0.05, +0.18]), from drift or because
   the hikes reached every company's filings (A4 below), so Financials' and Real Estate's +0.13 is not
-  detectably larger (+0.03 n.s.).
+  detectably larger (+0.02 n.s.).
 - **Tariffs reached every sector.** In the "unaffected" sectors, the share of 10-Ks discussing
-  tariffs rose from 64% to 90% and realization rose +0.42, so the difference can't isolate the effect.
-  As filed, the two groups' windows also differ: the change spans two or more fiscal years for 82%
-  of the other companies and 58% of the affected ones (next point).
-- **The 2025 tariff window skips FY2024 (a flaw, found 2026-10-17 in the external review).** "Before"
-  is the last 10-K filed before 2025-02-01 and "after" the first whose fiscal year ends on or after
-  it. A December company's FY2024 10-K ends before that date but is filed after it, so it is neither:
-  for 368 of the 489 companies with both 10-Ks (75%), the change spans two or more fiscal years,
-  mostly FY2023 → FY2025, and so contains two years of drift. Skipping a year wasn't intended; it
-  comes from combining the two rules. The break check isn't affected, since it keeps only companies
-  whose "after" 10-K is the next fiscal year (mostly those whose fiscal year doesn't end in
-  December).
-- **The corrected version** (`events.py --fyrule`, `data/tone/events_fyrule.csv` and
-  `events_fyrule_named.csv`; added 2026-10-17 after the review, both versions kept): "before" is the
-  last 10-K whose fiscal year ended before the date, even if it was filed after it. Then 491 of the
-  494 companies compare consecutive fiscal years (3 compare two years apart). Tariffs, where the
-  event hit / elsewhere / difference:
-  - realization +0.34 [+0.24, +0.44] / +0.33 [+0.25, +0.42] / +0.00 [−0.13, +0.12]: still no
-    difference from the other sectors;
-  - uncertainty +0.05 n.s. / −0.02 n.s. / +0.07 n.s.: the before-after uncertainty result is lost;
-  - the filed version's negative magnitude and specificity differences (−0.15 each) vanish (−0.02
-    and −0.00, n.s.): they were the other sectors' extra year.
-
-  The trade-off: a December company's FY2024 10-K was filed weeks after the first orders, so
-  "before" can already react, which biases the change toward zero. The other events use the same
-  rule in this version, and no other verdict changes on the model's scores (rate-hike magnitude's
-  difference becomes +0.10 [+0.005, +0.20]). Counts: before-after 9 of 15 (word-checked 7 of 15,
-  gaining AI polarity, +0.33 [+0.08, +0.67] on 8 companies); against other sectors 2 of 11 (3
-  word-checked), unchanged. The baselines stay at 0 of 9 and 0 of 8. Which rule is primary is the
-  owner's decision; both are reported.
+  tariffs rose from 78% to 90% (from 64%, over two years, under the filed rule) and realization rose
+  +0.33, as much as where the tariffs hit, so the difference can't isolate the effect.
 - **Export controls hit a ceiling.** The chipmakers' China text was already realized and concrete
   from the 2019–2020 rules (Huawei, the entity list), so realization and specificity had no room to
   rise; only polarity and uncertainty moved. And only 19 semiconductor companies discuss China in
@@ -270,20 +286,23 @@ How to read it:
   in both years are therefore selected on retrieval rank, not on what their MD&A says. The numbers
   are kept as a record. A valid test needs a top 3 searched within MD&A: for AI in every year's 10-K,
   about 10,300 passages, about $1.30–1.55 at the full run's rate (the low end if the ~1,600 AI MD&A
-  passages already scored can be reused). That is a priced option, not done. In levels: the share of 10-Ks discussing AI went
-  from 58% to 99% in IT and Communication Services and from 34% to 94% elsewhere; across the whole
-  10-K, mostly risk factors, AI polarity turned more negative in every sector. AI arrived as a risk
-  everywhere, and as good news in tech's results.
+  passages already scored can be reused). That is a priced option, not done. In levels, across the
+  whole 10-K: the share of 10-Ks discussing AI went from 57% to 99% in IT and Communication Services
+  and from 34% to 94% elsewhere, and AI polarity, mostly from risk factors, turned more negative in
+  every sector but Utilities (+0.19, 7 companies in FY2021). AI arrived as a risk almost everywhere,
+  and as good news in tech's results.
 - **The scorer knows the company and the year.** Each request names them ("Filing: NVDA 10-K FY2023,
   Item 1A Risk Factors"; `sentiment.user_prompt`), so the model could score what it knows about
   that period rather than only what the passage says. The event tests are free of labels, not of the
   model's knowledge. FinBERT and LM see only the text. **Checked 2026-10-17, after the results**
   (`tone.py masked`, $0.27): 1,904 passages of the event tests' before and after cells (the 13
-  companies whose fiscal-year labels were being fixed left out) were scored again with the company
-  and year removed ("Filing: a 10-K, Item 1A Risk Factors"). Per passage, the masked scores agree
+  companies whose fiscal-year labels were then being fixed left out) were scored again with the
+  company and year removed ("Filing: a 10-K, Item 1A Risk Factors"). After the fix, 1,903 still match
+  a passage (one dropped out of the rankings) and every number below is unchanged; the comparison
+  keeps the filed rule, under which the sample was drawn. Per passage, the masked scores agree
   with the originals about as well as a second identical run does (weighted kappa 0.80–0.94, against
   0.79–0.91 for the run-to-run check on the same topics; off-topic flag 94.9% the same, against
-  97.0%). Pooled over the events, the masked change where the event hit differs from the original
+  96.9%). Pooled over the events, the masked change where the event hit differs from the original
   only for uncertainty (−0.06 [−0.12, −0.02]; realization +0.02 [−0.04, +0.08]). Most of that is
   COVID: on the 28 sampled companies, uncertainty rose +0.21 [+0.06, +0.35] with the year named and
   +0.02 [−0.14, +0.17] masked. The difference sits in the FY2019 "before" passages, which the model
@@ -293,95 +312,104 @@ How to read it:
   +0.37 → +0.36). Two limits: two thirds of the passages name a year, the company or COVID in their
   own text, which masking the header can't hide (on the 623 that name none, agreement is similar,
   kappa 0.73–0.93); and single events are small (10–56 companies), so only the pooled differences
-  are firm. The sample's companies are a subset, so its changes differ from the table above (COVID
-  uncertainty +0.21 here, +0.15 over all 464 companies).
-- **Robustness check, added 2026-10-17 after the results, both versions kept:** before FY2023, 53–59%
+  are firm. The sample's companies are a subset, so its changes differ from the tables above (COVID
+  uncertainty +0.21 here, +0.15 over all 464 companies under the filed rule).
+- **Robustness check, added 2026-10-17 after the results, both versions kept:** before FY2023, 52–58%
   of the passages the model called on topic for AI contain no AI word (limitations). Counting only
   passages that name AI (artificial intelligence, machine learning, "AI", generative and the like),
-  9 IT and Communication Services companies remain: polarity +0.30 [0.00, +0.59] and specificity
-  +0.22 [−0.22, +0.67], so **neither is detected**; magnitude +0.52 [0.00, +1.00]. Polarity's
-  difference from other sectors becomes positive, +0.72 [+0.22, +1.37], on 7 other companies. Part of
-  the reported change came from comparing general technology text in FY2021 with AI text in FY2025.
+  8 IT and Communication Services companies remain under the one-year rule: polarity +0.33 [+0.08,
+  +0.67] is still detected, specificity +0.38 [−0.12, +0.88] isn't; magnitude +0.62 [0.00, +1.25].
+  Polarity's difference from other sectors becomes positive, +0.76 [+0.27, +1.39], on 7 other
+  companies. Under the filed rule (9 companies): polarity +0.30 [0.00, +0.59] and specificity +0.22
+  [−0.22, +0.67], so **neither is detected**; magnitude +0.52 [0.00, +1.00]; difference +0.72 [+0.22,
+  +1.37]. Part of the reported change came from comparing general technology text in FY2021 with AI
+  text in FY2025.
 
 ### Robustness (A4): every year around each event, breaks, and each section alone
 
-Fixed in PLAN.md before computing (`events.py --robust`); each also word-checked.
+Fixed in PLAN.md before computing (`events.py --robust`); each also word-checked. Since 2026-10-17
+all three use the one-year rule's "before" 10-K.
 
-**Event studies** ([`figures/event_study_*.png`](figures/)): each company's change from its last 10-K
-before the event, for every fiscal year around it ("event year" 0 is that 10-K, 1 the next fiscal
-year), for the affected companies and the others. The shapes:
+**Event studies** ([`figures/event_study_*.png`](figures/)): each company's change from its "before"
+10-K, for every fiscal year around it ("event year" 0 is that 10-K, 1 the next fiscal year), for the
+affected companies and the others. The shapes:
 
-- **COVID: a shock that fades.** Realization rose +0.19 in the next 10-K and stayed about +0.2 for
-  years; uncertainty peaked at +0.15 to +0.17 in years 1–2 and fell back to +0.06 by year 6. (No year
-  before FY2019 to compare with.)
+- **COVID: a shock that fades.** Realization rose +0.20 in the next 10-K and stayed between +0.14 and
+  +0.26 for years; uncertainty peaked at +0.13 to +0.15 in years 1–2 and fell back to +0.06 by year
+  6. Only the 21 companies whose fiscal year ended in early 2020 have a year before: their
+  realization was flat that year (0.00), but their uncertainty had already risen (+0.22), which is
+  why COVID uncertainty fails the break check.
 - **SVB: a one-year spike.** Banks' magnitude was flat in the three years before, rose +0.12 in the
   next 10-K and was back to 0 a year later.
 - **Rate hikes:** Financials' and Real Estate's magnitude was flat before (−0.06, −0.03), jumped
-  +0.14 and eased; the other companies' barely moved (+0.02). Realization rose in both groups alike
-  (+0.13 and +0.09, then +0.20 and +0.18): the hikes reached every company's filings. The other
-  companies' specificity fell after 2022 (−0.10 to −0.15), the LIBOR phase-out of section 7.
-- **Tariffs 2025: flat for five years, then a sharp rise,** in the affected sectors and even more in
-  the others (realization +0.32 and +0.42 two fiscal years on). Most companies' fiscal year ends in
-  December, so their "before" 10-K is FY2023 and year 1 is the FY2024 10-K, filed weeks after the
-  first orders, which already rose. The before-after test skips that 10-K (see "What limits these
-  tests" above).
-- **Export controls:** no clear shape among the 19 chipmakers.
+  +0.14 and eased; the other companies' barely moved (+0.04). Realization rose in both groups alike
+  (+0.13 and +0.12, then +0.20 and +0.19): the hikes reached every company's filings. The other
+  companies' specificity fell after 2022 (−0.07 to −0.15), the LIBOR phase-out of section 7.
+- **Tariffs 2025: flat for five years, then a sharp rise** in both groups alike (realization +0.34
+  in the next fiscal year, against changes within 0.08 in the five years before). Most companies'
+  fiscal year ends in December, so their "before" 10-K is FY2024, filed weeks after the first orders;
+  it was only slightly more realized than FY2023 (+0.04 where the tariffs hit, +0.08 elsewhere). The
+  filed rule skipped that 10-K (section 3).
+- **Export controls:** the chipmakers' polarity fell −0.16 in the next 10-K after rising +0.09 in the
+  year before, which the break check picks up; with 18–19 companies, the years before swing almost as
+  much (−0.13 from two years before to one year before).
 
 **Break check** (the change before → after minus the change the year before, so a trend already under
-way doesn't count; only companies whose "after" 10-K is the next fiscal year; `data/tone/event_breaks.csv`,
-`event_breaks_named.csv`): the results are the last column of the table above, moved there on
-2026-10-17. Only the tariff changes are clear breaks; for tariffs the check covers mostly companies
-whose fiscal year doesn't end in December (61 of the 67), since December companies' "after" 10-K
-is two fiscal years on. The rate-hike
-and SVB changes point the right way and look like breaks in the charts, but subtracting a second,
-noisy change widens the intervals past zero, so this check can't rule out a trend. COVID (3
-companies) and the AI boom (a four-year window) can't be checked.
+way doesn't count; only companies whose "after" 10-K is the next fiscal year;
+`data/tone/event_breaks.csv`, `event_breaks_named.csv`): the results are the last column of the table
+above, moved there on 2026-10-17. Three changes are clear breaks: COVID realization, export-control
+polarity and tariff realization. The rate-hike and SVB changes point the right way and look like
+breaks in the charts, but subtracting a second, noisy change widens the intervals past zero, so this
+check can't rule out a trend. The AI boom (a four-year window) can't be checked, and COVID only on
+the 21 companies with a year before. (The first version, with the filed rule, found only the tariff
+changes, on 67 companies, mostly with fiscal years not ending in December; the one-year rule checks
+163, 58% of them December companies.)
 
-- **Not planned, added 2026-10-17 as a check on drift:** the same break check in the tariff window,
-  on six other topics and all companies with a one-year step (about 120), finds no realization break
-  in cybersecurity, demand, labor, geopolitics or interest rates (all n.s.), and one in supply chain
-  (+0.18 [+0.03, +0.33]), which tariffs also touch. So the tariff break isn't a 2025 shift in how
-  every topic is written. The "unaffected" companies show a tariff break too (realization +0.38
-  [+0.04, +0.67], 30 companies), as expected if the tariffs reached every sector.
+- **Not planned, added 2026-10-17 as a check on drift** (rerun 2026-10-18 with the one-year rule):
+  the same break check in the tariff window, on six other topics and all companies with a one-year
+  step (459–488), finds no realization break in cybersecurity, demand, labor, geopolitics or
+  interest rates (all n.s.), and one in supply chain (+0.18 [+0.09, +0.27]), which tariffs also
+  touch. So the tariff break isn't a 2025 shift in how every topic is written. The "unaffected"
+  companies show a tariff break too (realization +0.28 [+0.13, +0.42], 166 companies), as expected
+  if the tariffs reached every sector.
 
 **Each section alone** (`data/tone/events_1A.csv`, `events_7.csv`): the expected changes detected are
-7 of 15 in risk factors (6 word-checked) and 5 of 11 in MD&A (3 word-checked; chipmakers' China
-passages almost never come from MD&A), against 10 of 15 (6) for the whole 10-K. Each event shows up
-where one would look for it: rate-hike realization in risk factors (+0.27 [+0.12, +0.42], against +0.09
-n.s. in MD&A), SVB's magnitude in MD&A (+0.18 [+0.04, +0.32], against −0.05 n.s. in risk factors), COVID's
-realization in risk factors (+0.24) and its uncertainty in MD&A (+0.21), tariffs mostly in risk
-factors. AI polarity in risk factors fell (−0.19 [−0.32, −0.07]), the opposite of the MD&A prediction:
-AI arrived there as a risk. These counts are before-after changes where the event hit, so they pick
-up drift too. And each section's cell is the part of the whole-10-K top 3 that comes from that
-section, not a search within it, so which companies have an MD&A passage depends on how their MD&A
-ranks against their risk factors (as for the AI boom above).
+7 of 15 in risk factors (6 word-checked) and 6 of 11 in MD&A (5 word-checked; chipmakers' China
+passages almost never come from MD&A), against 9 of 15 (7) for the whole 10-K. Each event shows up
+where one would look for it: rate-hike realization in risk factors (+0.27 [+0.12, +0.42], against
++0.09 n.s. in MD&A), SVB's magnitude in MD&A (+0.18 [+0.04, +0.32], against −0.05 n.s. in risk
+factors), COVID's realization in risk factors (+0.22) and its uncertainty in MD&A (+0.20), tariffs
+in both (realization +0.25 [+0.15, +0.35] in risk factors, 174 companies; +0.59 [+0.30, +0.93] in
+MD&A, 27). AI polarity in risk factors fell (−0.23 [−0.38, −0.10]), the opposite of the MD&A
+prediction: AI arrived there as a risk. These counts are before-after changes where the event hit,
+so they pick up drift too. And each section's cell is the part of the whole-10-K top 3 that comes
+from that section, not a search within it, so which companies have an MD&A passage depends on how
+their MD&A ranks against their risk factors (as for the AI boom above).
 
 ## 4. The LLM profile against FinBERT and Loughran-McDonald
 
 Each baseline was tested against the expected direction of the dimension it stands in for.
-Expected changes detected (reframed 2026-10-17 after an external review; the first version showed
-only the first column):
+Expected changes detected (reframed 2026-10-17 after an external review, since the first version
+showed only the first column; one-year rule, with the filed rule in brackets):
 
 | | Before-after where the event hit (also picks up drift) | Difference from other sectors (the planned test) |
 |---|---|---|
-| LLM tone profile | **10 of 15** (6 of 15 word-checked) | **2 of 11** (3 of 11 word-checked) |
-| FinBERT polarity, LM polarity, LM uncertainty, details per 100 words | **0 of 9** (0 of 9 word-checked) | **0 of 8** (0 of 8 word-checked) |
+| LLM tone profile | **9 of 15** (7 word-checked) [filed: 10 (6)] | **0 of 11** (1 word-checked) [filed: 2 (3)] |
+| FinBERT polarity, LM polarity, LM uncertainty, details per 100 words | **0 of 9** (0 word-checked) [filed: 0 (0)] | **0 of 8** (0 word-checked) [filed: 0 (0)] |
 
-With the tariff window corrected (section 3), the LLM's before-after count is 9 of 15 (7
-word-checked); the other three cells are unchanged.
+In the 7 cases testing the same event and dimension, the LLM's before-after change detects 4 (5
+under the filed rule) and the baselines none (e.g. COVID: LM uncertainty share −0.0002 [−0.0008,
++0.0003]; AI boom: FinBERT +0.08 [−0.06, +0.22]). Word-checked, the LLM detects 2 of the 7 (COVID
+uncertainty and AI polarity). Against other sectors (6 of the 7 have a comparison), the LLM detects
+none (under the filed rule, rate-hike specificity, which comes from the comparison group's fall), and
+the baselines none. FinBERT does pick up COVID's negative turn (−0.03 [−0.04, −0.02]), but reads
+tariff text as slightly *more* positive after 2025 (+0.05 [+0.02, +0.07]) where the LLM reads it as
+more negative (−0.08 [−0.12, −0.04]).
 
-In the 7 cases testing the same event and dimension, the LLM's before-after change detects 5 (4
-with the corrected tariff window) and the baselines none (e.g. COVID: LM uncertainty share −0.0002 [−0.0008, +0.0004]; AI boom: FinBERT
-+0.08 [−0.06, +0.22]). Word-checked, the LLM detects 1 of the 7 (COVID uncertainty). Against other
-sectors (6 of the 7 have a comparison), the LLM detects 1, rate-hike specificity, which comes from
-the comparison group's fall (section 3), and the baselines none. FinBERT does pick up COVID's
-negative turn (−0.03 [−0.04, −0.02]), but reads tariff text as slightly *more* positive after 2025
-(+0.05 [+0.02, +0.07]) where the LLM reads it as more negative (−0.07 [−0.11, −0.03]).
-
-So the LLM's scores move where the baselines' don't, but on the planned test neither scorer shows
-much. Two differences in what they see are part of the gap. The baselines score the whole passage
-and the LLM scores the topic, which is the design's point. And the LLM is told the company and
-fiscal year while the baselines see only the text, so some of its movement may come from what it
+So the LLM's scores move where the baselines' don't, but on the planned test neither scorer detects
+anything. Two differences in what they see are part of the gap. The baselines score the whole
+passage and the LLM scores the topic, which is the design's point. And the LLM is told the company
+and fiscal year while the baselines see only the text, so some of its movement may come from what it
 knows about the period (section 3: with both masked, COVID's uncertainty rise mostly goes; the
 realization changes hold).
 
@@ -389,30 +417,32 @@ realization changes hold).
 
 The Phase 2 hypothesis: after a shock, risk language moves from hypothetical and generic to realized
 and specific more than it turns negative. Change where the event hit (before-after, so drift is
-included), as a share of each scale's range (polarity spans 4 points, magnitude and uncertainty 3,
-realization and specificity 2):
+included; one-year rule), as a share of each scale's range (polarity spans 4 points, magnitude and
+uncertainty 3, realization and specificity 2):
 
 | Event | Polarity | Magnitude | Realization | Uncertainty | Specificity |
 |---|---|---|---|---|---|
-| COVID-19 | −3% | +6% | **+10%** | +5% | +1% n.s. |
-| Chip export controls | **−4%** | +3% n.s. | −2% n.s. | −5% | +3% n.s. |
+| COVID-19 | −3% | +6% | **+10%** | +4% | +1% n.s. |
+| Chip export controls | **−4%** | +4% n.s. | 0% n.s. | −4% n.s. | +3% n.s. |
 | Rate hikes | +1% n.s. | +5% | **+7%** | 0% n.s. | +1% n.s. |
 | SVB | +2% n.s. | **+4%** | +1% n.s. | +2% n.s. | +1% n.s. |
-| AI boom (13 companies; not interpretable as designed, section 3) | +10% | +24% | +19% | +8% n.s. | **+29%** |
-| Tariffs 2025 (window as filed, section 3) | −2% | +8% | **+16%** | +2% | +7% |
+| AI boom (13 companies; not interpretable as designed, section 3) | +12% | +27% | +26% | +10% n.s. | **+37%** |
+| Tariffs 2025 | −2% | +8% | **+17%** | +1% n.s. | +7% |
 
 Before-after, realization moved more than polarity in 4 of 6 events (COVID, rate hikes, AI,
-tariffs); magnitude moved in 5 of 6, specificity in only 2. **But this is the comparison that picks
-up drift** (reframed 2026-10-17 after an external review), and realization is the dimension that
-drifted most: it rose for 9 of 12 topics from FY2019 to FY2025, event or not, while polarity fell for
-all 12. Against the comparison group, in the 4 events that have one, realization's difference is
-n.s. in all 4. Only rate hikes' magnitude (+4% of the range) and specificity (+5%) are detected, and
-in tariffs the affected sectors moved *less* than the others (magnitude −5%, specificity −7%, polarity
-−2%). With the tariff window corrected, only polarity's −2% remains (the others came from the other
-sectors' extra year), and tariffs' before-after realization is +17%. So the before-after changes fit the hypothesis for realization but don't establish it, and
-nothing supports it for specificity. COVID's realization (+10%), with no comparison group, rose in
-one year and stayed up (the event study above), which looks more like a shock than a trend, but
-there is no year before FY2019 to check. This range comparison is a rough reading, not a formal test.
+tariffs); magnitude moved in 5 of 6, specificity in only 2 (the same under the filed rule). **But
+this is the comparison that picks up drift** (reframed 2026-10-17 after an external review), and
+realization is the dimension that drifted most: it rose for 9 of 12 topics from FY2019 to FY2025,
+event or not, while polarity fell for all 12. Against the comparison group, in the 4 events that
+have one, realization's difference is n.s. in all 4, and so is everything else but tariffs' polarity
+(−2% of the range: the affected sectors turned slightly more negative than the others). Under the
+filed rule, rate hikes' magnitude (+3%) and specificity (+5%) were detected, and in tariffs the
+affected sectors moved *less* than the others (magnitude −5%, specificity −7%), which came from the
+other sectors' extra year. So the before-after changes fit the hypothesis for realization but don't
+establish it, and nothing supports it for specificity. COVID's realization (+10%), with no
+comparison group, rose in one year and stayed up, and was flat in the year before for the 21
+companies that have one (the event study above), which looks more like a shock than a trend. This
+range comparison is a rough reading, not a formal test.
 
 ## 6. Quarterly 10-Qs: Financials, deposits and interest rates
 
@@ -508,7 +538,7 @@ previous filing (Phase 8), or add event-specific queries.
 ## 7. Topic tone over time and across sectors (annual 10-Ks)
 
 **What the charts show** ([`charts.py`](src/sec_filings_tone/charts.py), PNGs and their numbers in
-[`figures/`](figures/)), FY2019–FY2025, 464–494 companies a year. FY2026 is left out: only the 80
+[`figures/`](figures/)), FY2019–FY2025, 467–497 companies a year. FY2026 is left out: only the 74
 companies whose fiscal year doesn't end in December had filed.
 
 - **Line charts** for AI, tariffs and interest rates
@@ -522,7 +552,7 @@ companies whose fiscal year doesn't end in December had filed.
   are hatched.
 
 **How to read the section split:** a company's top 3 passages per topic come mostly from risk
-factors, so the MD&A line covers fewer companies (for AI, 85 in FY2025 against 466). Its share
+factors, so the MD&A line covers fewer companies (for AI, 85 in FY2025 against 469). Its share
 measures how often an MD&A passage made the top 3, not how often MD&A mentions the topic.
 
 None of this was tested in advance; it is description, with the surprising patterns checked by
@@ -542,20 +572,22 @@ effects (magnitude 0.96 → 1.28) and more uncertainty (0.43 → 1.01). Charts: 
 word-checked `lines_ai_named.png`; the heatmaps show the risk factors spreading to every sector from
 FY2023 on in both.
 
-**Tariffs were realized twice** (the word-checked version is nearly identical). In MD&A, tariff text was largely realized in FY2019 (0.94 [0.73,
-1.14], after the 2018–19 China tariffs), faded toward hypothetical by FY2023 (0.57), then jumped in
-FY2025 (1.18 [1.08, 1.29]), with magnitude 0.57 → 0.99 and the share of 10-Ks with a tariff passage in
-MD&A 15% → 42%. Realization in risk factors rose too (0.45 → 0.70). By sector, realization rose most
+**Tariffs were realized twice** (the word-checked version is nearly identical). In MD&A, tariff text
+was largely realized in FY2019 (0.94 [0.73, 1.15], after the 2018–19 China tariffs), faded toward
+hypothetical by FY2023 (0.57), then jumped in FY2025 (1.20 [1.08, 1.31]); from FY2024 to FY2025,
+magnitude went 0.56 → 0.99 and the share of 10-Ks with a tariff passage in MD&A 16% → 42%.
+Realization in risk factors rose too (0.45 → 0.70). By sector, realization rose most
 from FY2024 to FY2025 in Health Care (+0.52), Consumer Staples (+0.47) and Materials (+0.46), least in
 Financials (+0.10): the 2025 tariffs reached well beyond the sectors `events.csv` lists, as section 3
 found.
 
 **Interest rates: the hikes registered in risk factors.** Risk-factor realization rose from 0.37
-(FY2021) to 0.56 (FY2022) and 0.60 (FY2023), then eased (0.49 in FY2025). In MD&A, polarity went from
-−0.45 (FY2020, near-zero rates) to −0.18 (FY2023) and back to −0.33, and magnitude peaked in FY2023
-(1.18). **One surprise, explained:** risk-factor specificity fell steadily, 1.43 → 1.24. It isn't
+(FY2021) to 0.56 (FY2022) and 0.61 (FY2023), then eased (0.49 in FY2025). In MD&A, polarity went from
+−0.44 (FY2020, near-zero rates) to −0.19 (FY2023) and back to −0.33, and magnitude peaked in FY2023
+(1.18). **One surprise, explained:** risk-factor specificity fell steadily, 1.43 → 1.23. It isn't
 vaguer writing. Rate risk factors that name LIBOR or SOFR score 2.0 in every year, the rest about 1.2
-in every year, and the LIBOR share fell from 28% to 3% with LIBOR's phase-out (June 2023). Specificity
+in every year, and the share naming either fell from 28% to 3% with LIBOR's phase-out (June 2023;
+LIBOR alone, to 0% by FY2025). Specificity
 did what the rules ask: a named benchmark counts as concrete, and when it went, the scores fell.
 
 **Across all 12 topics** (whole 10-K, FY2019 → FY2025, differences of means; their standard errors are
@@ -563,26 +595,26 @@ did what the rules ask: a named benchmark counts as concrete, and when it went, 
 
 | Topic | Discussed | Polarity | Magnitude | Realization | Uncertainty | Specificity |
 |---|---|---|---|---|---|---|
-| Geopolitics and war | 92% → 97% | −0.03 | +0.18 | +0.33 | +0.03 | +0.12 |
-| Cybersecurity | 100% → 100% | −0.04 | +0.08 | +0.32 | −0.01 | +0.09 |
-| Tariffs | 76% → 92% | −0.05 | +0.26 | +0.29 | +0.08 | +0.08 |
+| Geopolitics and war | 92% → 97% | −0.02 | +0.18 | +0.33 | +0.03 | +0.12 |
+| Cybersecurity | 100% → 100% | −0.04 | +0.08 | +0.31 | −0.01 | +0.09 |
+| Tariffs | 76% → 92% | −0.05 | +0.27 | +0.30 | +0.08 | +0.09 |
 | Supply chain | 93% → 97% | −0.12 | +0.15 | +0.26 | +0.12 | −0.07 |
-| Inflation and costs | 100% → 100% | −0.13 | +0.13 | +0.21 | +0.21 | −0.01 |
-| Labor and workforce | 98% → 99% | −0.06 | +0.08 | +0.19 | +0.08 | +0.01 |
-| AI | 28% → 95% | −0.33 | +0.34 | +0.16 | +0.54 | +0.44 |
+| Inflation and costs | 100% → 100% | −0.13 | +0.14 | +0.22 | +0.20 | −0.01 |
+| Labor and workforce | 99% → 99% | −0.06 | +0.09 | +0.20 | +0.08 | +0.01 |
+| AI | 28% → 95% | −0.34 | +0.34 | +0.17 | +0.55 | +0.45 |
 | Energy transition and climate | 73% → 95% | −0.06 | +0.10 | +0.14 | +0.02 | +0.20 |
-| Demand | 100% → 100% | −0.04 | +0.05 | +0.13 | +0.02 | +0.04 |
-| Interest rates | 96% → 99% | −0.13 | +0.02 | +0.01 | −0.01 | −0.15 |
-| China | 63% → 68% | −0.04 | +0.10 | 0.00 | +0.02 | +0.09 |
+| Demand | 100% → 100% | −0.04 | +0.06 | +0.13 | +0.02 | +0.04 |
+| Interest rates | 96% → 99% | −0.12 | +0.02 | +0.01 | −0.01 | −0.15 |
+| China | 63% → 68% | −0.04 | +0.10 | +0.01 | +0.02 | +0.09 |
 | Government policy | 100% → 100% | −0.12 | +0.01 | −0.05 | +0.12 | −0.01 |
-| *AI, word-checked* | 12% → 94% | −0.51 | +0.12 | −0.16 | +0.51 | +0.07 |
-| *China, word-checked* | 50% → 56% | −0.06 | +0.02 | −0.12 | +0.05 | +0.03 |
-| *Tariffs, word-checked* | 68% → 90% | −0.03 | +0.25 | +0.30 | +0.06 | +0.06 |
+| *AI, word-checked* | 12% → 94% | −0.51 | +0.12 | −0.15 | +0.51 | +0.06 |
+| *China, word-checked* | 50% → 57% | −0.06 | +0.02 | −0.12 | +0.05 | +0.02 |
+| *Tariffs, word-checked* | 68% → 90% | −0.03 | +0.26 | +0.30 | +0.05 | +0.07 |
 
 - **Realization rose for 9 of 12 topics** (each by 0.13 or more; over three standard errors for 8,
-  AI's +0.16 is 2.8, rechecked 2026-10-17; 8 with
-  the word check, under which AI and China fall), **polarity fell for all 12** (beyond two standard
-  errors for 10), and magnitude rose for most. Word-checked AI changes mix sections: AI-naming
+  AI's +0.17 is 2.9, rechecked 2026-10-18; 8 with the word check, under which AI and China fall),
+  **polarity fell for all 12** (beyond two standard errors for 10), and magnitude rose for all 12
+  (beyond two standard errors for 8). Word-checked AI changes mix sections: AI-naming
   passages were more often upbeat MD&A in FY2019 and mostly risk factors by FY2025. 10-Ks in 2025 describe more of their risks as things that have happened, with larger effects.
   The same model scored every year, so this is not a change of scorer, though it may partly be a
   general change in how 10-Ks are written rather than in the topics themselves. And each request
@@ -603,8 +635,8 @@ did what the rules ask: a named benchmark counts as concrete, and when it went, 
 **Method** ([`diff.py`](src/sec_filings_tone/diff.py), fixed in PLAN.md before any result): each
 sentence of a 10-K's risk factors and MD&A counts as **carried over** if it closely matches (`difflib`
 ratio ≥ 0.9) a sentence of the same section in the company's 10-K a year earlier; a passage's
-carryover share is the share of its characters in such sentences. FY2020–FY2025, 2,931 10-Ks (FY2019
-has no year before). Checked against an all-pairs comparison on four filings: within 0.2 points. Free:
+carryover share is the share of its characters in such sentences. FY2020–FY2025, 2,887 10-Ks (FY2019
+has no year before; recounted 2026-10-18: the first count, 2,931, also took in FY2026 10-Ks). Checked against an all-pairs comparison on four filings: within 0.2 points. Free:
 the saved scores are reused, nothing is scored again.
 
 **How much is copied** ([`figures/carryover.png`](figures/carryover.png)), mean over companies:
@@ -619,14 +651,14 @@ Sectors differ little: risk factors 77–85% in FY2025 (Real Estate the most), M
 the most). MD&A carries over less because its numbers change, though a sentence whose only change is
 a figure can still pass 0.9.
 
-**Scores of new and copied text.** Of the on-topic scored passages, 8,587 are *new* (at most 20%
-copied), 40,552 *carried over* (at least 80%) and 32,433 mixed. Within each company, new minus
+**Scores of new and copied text.** Of the on-topic scored passages, 8,616 are *new* (at most 20%
+copied), 41,025 *carried over* (at least 80%) and 32,737 mixed. Within each company, new minus
 carried over (the planned comparison, pooling the company's topics and years):
 
 | | Polarity | Magnitude | Realization | Uncertainty | Specificity |
 |---|---|---|---|---|---|
-| Risk factors (452 companies) | −0.06 [−0.08, −0.04] | +0.03 (n.s.) | **+0.18** [+0.13, +0.22] | +0.09 [+0.06, +0.11] | +0.01 (n.s.) |
-| MD&A (448 companies) | −0.11 [−0.17, −0.04] | **+0.44** [+0.38, +0.49] | **+0.47** [+0.42, +0.53] | −0.15 [−0.22, −0.07] | +0.08 [+0.04, +0.12] |
+| Risk factors (451 companies) | −0.07 [−0.09, −0.05] | +0.03 (n.s.) | **+0.17** [+0.12, +0.22] | +0.09 [+0.07, +0.12] | +0.01 (n.s.) |
+| MD&A (451 companies) | −0.11 [−0.17, −0.04] | **+0.44** [+0.38, +0.50] | **+0.47** [+0.41, +0.52] | −0.15 [−0.23, −0.07] | +0.08 [+0.04, +0.12] |
 
 **Within the same topic and year** (added 2026-10-17 after an external review, which recomputed it;
 both versions kept). Pooling a company's passages also compares topics and years that have more new
@@ -637,16 +669,18 @@ count, so fewer of them:
 
 | | Polarity | Magnitude | Realization | Uncertainty | Specificity |
 |---|---|---|---|---|---|
-| Risk factors (388 companies) | −0.07 [−0.10, −0.05] | −0.04 n.s. | **+0.16** [+0.08, +0.24] | +0.09 [+0.06, +0.13] | **−0.07** [−0.13, −0.01] |
-| MD&A (196 companies) | +0.13 n.s. | **+0.39** [+0.30, +0.49] | **+0.45** [+0.32, +0.58] | −0.41 [−0.57, −0.25] | +0.07 n.s. |
+| Risk factors (389 companies) | −0.08 [−0.11, −0.05] | −0.02 n.s. | **+0.17** [+0.09, +0.25] | +0.10 [+0.06, +0.14] | **−0.07** [−0.13, −0.01] |
+| MD&A (196 companies) | +0.14 [+0.01, +0.27] | **+0.40** [+0.30, +0.49] | **+0.46** [+0.32, +0.60] | −0.42 [−0.58, −0.26] | +0.07 n.s. |
 
 Realization holds in both sections. Specificity now fails in both, and in risk factors new text is
-slightly *less* specific than copied text (word-checked the same, −0.08 [−0.13, −0.02]). MD&A
-polarity and uncertainty change sign or size (−0.11 → +0.13 n.s.; −0.15 → −0.41), so the pooled
-MD&A numbers for them partly reflect which topics and years have new text.
+slightly *less* specific than copied text (word-checked the same, −0.07 [−0.13, −0.01]). MD&A
+polarity and uncertainty change sign or size (−0.11 → +0.14; −0.15 → −0.42), so the pooled MD&A
+numbers for them partly reflect which topics and years have new text. Within topic and year, new
+MD&A text is slightly more positive than copied text (+0.13 n.s. before the fiscal-year fix, +0.14
+[+0.01, +0.27] after it, so read it as borderline).
 
 - **The planned specificity check fails in risk factors** (expected: new text more specific; +0.01
-  [−0.03, +0.04]) and passes only weakly in MD&A (+0.08); within the same topic and year it fails in
+  [−0.02, +0.04]) and passes only weakly in MD&A (+0.08); within the same topic and year it fails in
   both (above). Across passages, carryover share and
   specificity barely correlate (Spearman −0.04). The word-checked version is the same. **Read by
   hand:** of 8 copied risk-factor passages scored 2, 6 name a law, product or event (the Fair Labor
@@ -656,14 +690,14 @@ MD&A numbers for them partly reflect which topics and years have new text.
   is often concrete boilerplate, and specificity, as defined, measures concreteness, not novelty. The
   check can't validate the dimension; the plan's premise that copied text is generic doesn't hold.
 - **Realization separates new from copied text**, with no direction set in advance: new risk-factor
-  text is more realized by 0.18, new MD&A by 0.47, with larger effects (magnitude +0.44); within the
-  same topic and year, by 0.16 and 0.45 (magnitude +0.39 in MD&A). New text reports what happened,
+  text is more realized by 0.17, new MD&A by 0.47, with larger effects (magnitude +0.44); within the
+  same topic and year, by 0.17 and 0.46 (magnitude +0.40 in MD&A). New text reports what happened,
   the project's starting hypothesis.
 - **The LLM agrees a little less with the baselines on copied text:** Spearman with FinBERT polarity
   +0.37 [+0.35, +0.39] on new passages against +0.33 [+0.32, +0.34] on copied ones; with LM polarity
   +0.36 against +0.27. The intervals resample passages, not companies, so they are too narrow.
 - **Does tone in new text react more to the events? Can't tell.** Rerun on new passages only, the
-  event tests keep 1 to 9 companies each (`data/tone/events_new.csv`): too few, since only a tenth of
+  event tests keep 1 to 14 companies each (`data/tone/events_new.csv`): too few, since only a tenth of
   on-topic passages are new and a company needs one in both 10-Ks.
 - **Not done:** the planned "what changed" summary per filing, an LLM call; it fits the Q&A layer.
 
@@ -681,27 +715,27 @@ direction was expected", which a one-sided test contradicts).
 
 | Dimension | Same sector | Different sectors | Difference | p |
 |---|---|---|---|---|
-| Polarity | +0.003 | −0.002 | +0.006 | 0.002 |
-| Magnitude | +0.002 | −0.003 | +0.004 | 0.002 |
-| Realization | +0.003 | −0.003 | +0.007 | 0.001 |
-| Uncertainty | +0.000 | −0.003 | +0.003 | 0.04 |
-| Specificity | +0.003 | −0.003 | +0.006 | 0.001 |
+| Polarity | +0.004 | −0.002 | +0.006 | 0.002 |
+| Magnitude | +0.001 | −0.003 | +0.004 | 0.005 |
+| Realization | +0.003 | −0.003 | +0.006 | 0.001 |
+| Uncertainty | +0.000 | −0.003 | +0.003 | 0.03 |
+| Specificity | +0.004 | −0.003 | +0.007 | 0.0005 |
 
-121,261 pairs, 13,597 of them in the same sector.
+121,314 pairs, 13,609 of them in the same sector (rerun 2026-10-17 after the fiscal-year fix).
 
 - **Same-sector pairs do move together more, on every dimension, but by almost nothing:** both
   averages are within 0.004 of zero. The difference is detectable only because there are so many
   pairs. Recomputed for 2,938 random pairs with separate code: identical.
 - **Versions:** without removing the shared shift, correlations are 0.01–0.04 and the same-sector
-  excess is 0.004–0.008 (p ≤ 0.03). Word-checked: the same, but uncertainty drops out (p = 0.13). On
-  text that isn't mostly copied, only polarity stays (+0.007, p = 0.01; the others p = 0.16–0.91), but
+  excess is 0.003–0.008 (p ≤ 0.03). Word-checked: the same, but uncertainty drops out (p = 0.09). On
+  text that isn't mostly copied, only polarity stays (+0.008, p = 0.01; the others p = 0.13–0.81), but
   that version has a year less and a fifth fewer pairs, so it can't tell copied boilerplate from lost
   power. New text only: 85 pairs, too few.
 - **By sector** (mean same-sector correlation): Consumer Staples, Utilities and Energy move together
-  most (up to +0.026, on polarity, magnitude, realization or specificity); Materials least.
+  most (up to +0.029, on polarity, magnitude, realization or specificity); Materials least.
 - **Why so small (description, not planned in advance):** the shift all companies shared in a
   topic-year explains only 1.3–3.7% of the variance of the changes; adding sector explains another
-  2.9–3.3%, against 2.4–2.7% with shuffled sectors, so about half a percentage point is sector-wide.
+  2.8–3.2%, against 2.4–2.6% with shuffled sectors, so about half a percentage point is sector-wide.
   The other ~95% is each company's own movement or measurement noise: a cell is 3 passages, and which
   3 can change from year to year. That is why the averaged charts and event tests, over hundreds of
   companies, show clear movement while single pairs barely correlate. The test can't separate a
@@ -713,18 +747,19 @@ direction was expected", which a one-sided test contradicts).
 Added 2026-10-17 after an external review: the first six points below.
 
 - **Before-after changes include drift.** Realization rose for 9 of 12 topics and polarity fell for
-  all 12 from FY2019 to FY2025, event or not. The 10 of 15 before-after count can't tell an event
-  from that drift; only the comparison with unaffected sectors and the break check can, and they
+  all 12 from FY2019 to FY2025, event or not. The 9 of 15 before-after count (10 under the filed
+  rule) can't tell an event from that drift; only the comparison with unaffected sectors and the break check can, and they
   find little.
-- **Few clean tests.** The planned comparison detects 2 of 11 expected changes and the break check 2
-  of 11; none passes both. COVID and SVB have no comparison group, the tariffs reached every sector,
-  and the rate-hike specificity result comes from the comparison group's fall.
-- **The 2025 tariff window skips FY2024** for 75% of companies, a flaw of combining "before = last
-  10-K filed before the date" with "after = first fiscal year ending on or after it"; their change
-  spans two or more fiscal years. The corrected version (section 3) compares consecutive years for
-  491 of 494 companies: realization still shows no difference from other sectors (+0.00), and the
-  before-after uncertainty result is lost. Its "before" 10-K can already react to the orders. Which
-  version is primary is the owner's decision.
+- **Few clean tests.** The planned comparison detects 0 of 11 expected changes (2 of 11 under the
+  filed rule, both borderline rate-hike differences) and the break check 3 of 13; none passes both.
+  COVID and SVB have no comparison group, the tariffs reached every sector, and the rate-hike
+  specificity gap comes from the comparison group's fall.
+- **Which "before" 10-K matters.** The filed rule ("before" = last 10-K filed before the date)
+  skipped FY2024 for 75% of companies in the 2025 tariff test. The one-year rule, primary since the
+  owner's decision of 2026-10-17, compares consecutive fiscal years (all 494 companies in that test),
+  but its "before" 10-K can already react to an event that falls between the year's end and the
+  filing. Both are reported: under the one-year rule tariff uncertainty is no longer detected and the
+  rate-hike differences fall just short.
 - **The AI-boom test is selected on retrieval rank** and isn't interpretable as designed: an AI cell
   has an MD&A passage only if MD&A out-ranks the risk factors, which happened less often as AI risk
   factors spread. The section-only tests (section 3, A4) share this: they split the whole-10-K top 3
@@ -748,22 +783,23 @@ Added 2026-10-17 after an external review: the first six points below.
   or after the event (the first rule counted 10-Ks filed weeks after the 2025 tariff orders, and one
   filed on the export-control date); export controls narrowed from all of IT to semiconductors (as
   `events.csv`'s note already said); the AI boom's "after" year moved from FY2022 to FY2025. Of 36
-  verdicts, the first change altered 3, none on an expected direction. The first change is also what
-  makes the 2025 tariff test skip FY2024 (above).
+  verdicts, the first change altered 3, none on an expected direction. The first change, combined
+  with the filed "before", is what made the 2025 tariff test skip FY2024; the one-year rule
+  (2026-10-17, also after the results) removes that.
 - **The adjudicated labels lean toward the model,** so they can't validate it.
-- **Magnitude is the least stable dimension:** scored twice, the same passage gets the same magnitude 76%
+- **Magnitude is the least stable dimension:** scored twice, the same passage gets the same magnitude 75%
   of the time (weighted kappa 0.78, under the 0.8 bar set in Phase 6). Averages over many companies
   absorb that, but single-company magnitude changes are half scorer noise.
 - **The off-topic flag is lenient (found 2026-10-17, from a question about the charts).** The gold set
   confirmed that passages the model flags as off topic are off topic; the reverse error was never
   measured. Checked with topic words (`events.TOPIC_WORDS`): of the passages called on topic, those
-  not naming the topic are 53–59% for AI in FY2019–FY2022 (15% in FY2023, 3% in FY2025), 20–23% for
-  tariffs until FY2023 (7% in FY2025) and 20–25% for China in every year. The model's evidence shows why: it counts general
+  not naming the topic are 52–58% for AI in FY2019–FY2022 (15% in FY2023, 3% in FY2025), 20–23% for
+  tariffs until FY2023 (6% in FY2025) and 20–26% for China in every year (rechecked 2026-10-18). The model's evidence shows why: it counts general
   technology (data analytics, blockchain, autonomous vehicles) as AI, and general trade restrictions as
   China or tariffs; in one passage its own evidence says "not import/export tariffs" next to an on-topic
   flag. So AI's early share is overstated and its early tone averages mix in other text. Independent of the
   model, FY2019 10-Ks naming the topic anywhere in risk factors or MD&A: tariffs 78% (the trade war of
-  2018–19), China 62%, AI 16%, against the model-based 76%, 63% and 28%: only AI's level is far off.
+  2018–19), China 62%, AI 15%, against the model-based 76%, 63% and 28%: only AI's level is far off.
   A word-checked version of the event tests and of the AI, China and tariff charts is kept next to
   the model's (decision 2026-10-17); the other topics have no clear vocabulary to check.
 
@@ -778,6 +814,7 @@ uv run python -m sec_filings_tone.sentiment gold-report [--adjudicated]
 uv run python -m sec_filings_tone.sentiment gold-baselines   # FinBERT, LM and counts vs the labels (section 1), local
 uv run python -m sec_filings_tone.events --named     # word-checked event tests (section 3)
 uv run python -m sec_filings_tone.events --robust    # A4: event studies, breaks, sections
+uv run python -m sec_filings_tone.events --filed     # robustness: the filed "before" rule (section 3)
 uv run python -m sec_filings_tone.diff carryover     # Phase 8 (section 8), ~2 minutes
 uv run python -m sec_filings_tone.diff report        # also the event tests on new text
 uv run python -m sec_filings_tone.comove             # co-movement (section 9), ~1 minute
