@@ -31,7 +31,7 @@ from matplotlib.ticker import PercentFormatter  # noqa: E402
 from sec_filings_tone.diff import CARRYOVER, ITEMS, filings  # noqa: E402
 from sec_filings_tone.events import DIMS, EVENTS, TOPIC_WORDS, cells, did, named  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
-from sec_filings_tone.tone import OUT  # noqa: E402
+from sec_filings_tone.tone import OUT, S_TOPICS  # noqa: E402
 
 FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
@@ -48,6 +48,7 @@ NOTE = ("S&P 500 10-Ks. A company's cell is the mean over its on-topic passages 
         "scored by Claude Haiku 5.5). Fiscal years as the companies label them; most end in December. FY2026 is left "
         "out: only companies whose fiscal year doesn't end in December had filed.")
 CHECKED = " Word-checked: a passage counts only if it names the topic."
+WITHIN = " MD&A line: each 10-K's top 3 searched within its MD&A, not the MD&A part of the whole 10-K's top 3."  # S_TOPICS (PLAN.md Phase 7, 2026-10-18)
 
 
 def title(m: str) -> str:
@@ -119,7 +120,8 @@ def lines(t: pd.DataFrame, topic: str, path: Path, checked: bool = False) -> Non
     n = t[(t.measure == "discussed") & (t.group == t.group.iloc[0])].n
     panels(t, "fy", marks, f"{topic}: tone in S&P 500 10-Ks, risk factors and MD&A, by fiscal year" + (" (word-checked)" if checked else ""),
            f"{n.min()}–{n.max()} companies a year; dimension means cover the companies with an on-topic passage "
-           "from that section", NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if checked else ""), path)
+           "from that section", NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if checked else "")
+           + (WITHIN if topic in S_TOPICS else ""), path)
 
 
 def event_studies() -> None:

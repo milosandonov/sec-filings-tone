@@ -6,6 +6,9 @@ every topic for every company, and deposits and liquidity for Financials only.
 With --quarterly (PLAN.md option B5), a cell is one 10-Q instead: Financials only, deposits and
 liquidity and interest rates only, written to the q_ files so the annual ones are never touched.
 
+With --section (PLAN.md Phase 7, 2026-10-18), for AI only, a cell is one 10-K's MD&A instead: its top 3
+within Item 7, written to the s_ files. Passages already scored for the same cell copy their score.
+
 Each passage is scored with the same call as the gold benchmark (sentiment.score: model, prompt,
 schema, effort), sent through the Message Batches API at half price.
 
@@ -18,6 +21,7 @@ Usage:
     uv run python -m sec_filings_tone.tone retrieve --quarterly   # any command, on the 10-Q cells
     uv run python -m sec_filings_tone.tone rerun --budget 1.2      # B6: score 5,000 random passages again, compare
     uv run python -m sec_filings_tone.tone masked --budget 0.5     # masked check: event-test passages without company and year; --budget 0 just shows sample and cost
+    uv run python -m sec_filings_tone.tone retrieve --section      # AI's top 3 within each 10-K's MD&A; then score and baselines --section
 """
 
 import argparse
@@ -49,9 +53,12 @@ BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per d
 FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
          "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),
          "rerun": (*(OUT / f"rerun_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # B6: a sample scored again
-         "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None)}  # masked check: event-test passages, no company or year
+         "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # masked check: event-test passages, no company or year
+         "section": tuple(OUT / f"s_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}  # S_TOPICS within S_ITEM (sections)
 KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
+S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
+QUERIES = Path("data/fyfix/queries.npy")  # the query vectors passages.parquet was ranked with, in TOPICS order
 K = 3
 BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
 USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
@@ -128,6 +135,38 @@ def retrieve_cells(form: str = "10-K") -> None:
           f"{len(c):,} cells")
 
 
+def within(df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, topic: str, item: str | None) -> list[dict]:
+    """Each 10-K's top K for `topic` among its chunks of `item` (None: the whole 10-K, as retrieve_cells ranks
+    it). Scores `vs` and `bs` are over all of df's rows, so BM25 keeps the whole corpus's word weights."""
+    m = np.ones(len(df), bool) if item is None else (df["item"] == item).to_numpy()
+    c = cells("10-K", df[m])  # only 10-Ks that have the item
+    return top(c[c.topic == topic], df[m], vs[m], bs[m], "10-K")
+
+
+def sections() -> None:
+    """Section-level cells (PLAN.md Phase 7, 2026-10-18): for S_TOPICS, each 10-K's top K within S_ITEM, ranked
+    as retrieve_cells ranks the whole 10-K, with the query vectors passages.parquet was ranked with (QUERIES),
+    so nothing is embedded. First, the same code grouped by 10-K must reproduce passages.parquet."""
+    passages, scores, state, _ = FILES["section"]
+    if scores.exists() or state.exists():  # as in retrieve_cells: scores point at row numbers
+        raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
+    df, vec, old = retrieve.chunks(), vectors(), pd.read_parquet(PASSAGES)
+    q, rows = dict(zip(TOPICS, np.load(QUERIES))), []
+    for topic in S_TOPICS:
+        vs = vec @ (q[topic] / np.linalg.norm(q[topic]))
+        bs = retrieve.bm25_index().get_scores(bm25s.tokenize([TOPICS[topic]], stopwords="en", return_ids=False,
+                                                             show_progress=False)[0])
+        mine, want = pd.DataFrame(within(df, vs, bs, topic, None)), old[old.topic == topic].reset_index(drop=True)
+        same = len(mine) == len(want) and (mine[want.columns].to_numpy() == want.to_numpy()).all()
+        if not same:
+            raise SystemExit(f"{topic}: grouped by 10-K, this code doesn't reproduce {PASSAGES}; nothing written")
+        rows += within(df, vs, bs, topic, S_ITEM)
+        print(f"{topic}: {len(want):,} passages of {PASSAGES} reproduced exactly; {len(rows):,} within Item {S_ITEM}")
+    out = pd.DataFrame(rows)
+    out.to_parquet(passages, index=False)
+    print(f"{passages}: {len(out):,} passages for {out.groupby(['ticker', 'fy', 'topic']).ngroups:,} cells")
+
+
 def check(n: int, form: str = "10-K", seed: int = 0) -> None:
     """n random cells' top 3 against retrieve.search's hybrid top 3."""
     p = pd.read_parquet(FILES[form][0])
@@ -146,7 +185,8 @@ def check(n: int, form: str = "10-K", seed: int = 0) -> None:
 
 def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10-K", prompt=user_prompt) -> None:
     """Submit every passage not yet scored, in batches, then wait and collect. Failed requests aren't
-    stored, so running again resubmits just those. `prompt` writes each user message (the masked check: masked_prompt)."""
+    stored, so running again resubmits just those. `prompt` writes each user message (the masked check: masked_prompt).
+    A passage whose (ticker, fy, topic, chunk_id) SCORES already has would be the same request: its score is copied."""
     passages, scores, saved, _ = FILES[form]
     client = anthropic.Anthropic()
     state = json.loads(saved.read_text()) if saved.exists() else []
@@ -156,10 +196,17 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
             p = p[p.ticker.isin(tickers)]
         if scores.exists():
             p = p[~p.pid.isin(pd.read_parquet(scores, columns=["pid"]).pid)]
+        key, copied = ["ticker", "fy", "topic", "chunk_id"], pd.DataFrame()
+        if prompt is user_prompt and form != "rerun" and SCORES.exists():  # B6 scores the same requests again on purpose
+            done = pd.read_parquet(PASSAGES, columns=key).reset_index(names="pid").merge(pd.read_parquet(SCORES), on="pid")
+            copied = p[["pid", *key]].merge(done.drop(columns="pid"), on=key, validate="1:1").drop(columns=key).assign(usd=0.0)
+            p = p[~p.pid.isin(copied.pid)]
         est = len(p) * USD_PER_REQUEST
-        print(f"{len(p):,} passages to score, about ${est:.2f}")
+        print(f"{len(p):,} passages to score, about ${est:.2f}; {len(copied):,} scores copied from {SCORES}")
         if est > budget:
-            raise SystemExit(f"over --budget ${budget:.2f}; nothing submitted")
+            raise SystemExit(f"over --budget ${budget:.2f}; nothing submitted or copied")
+        if len(copied):  # usd 0: nothing was paid for these
+            pd.concat([pd.read_parquet(scores), copied] if scores.exists() else [copied]).to_parquet(scores, index=False)
         # only these chunks' texts, not all 674k
         rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]).set_index("chunk_id", drop=False)
         system, fmt = system_prompt(), transform_schema(schema(list(DIMENSIONS)))
@@ -416,9 +463,12 @@ def main() -> None:
     p.add_argument("--tickers", nargs="+")
     p.add_argument("--budget", type=float, default=0.5, help="USD; nothing is submitted if the estimate is over it")
     p.add_argument("--quarterly", action="store_true", help="B5: Financials' 10-Q cells, in the q_ files")
+    p.add_argument("--section", action="store_true", help="AI within each 10-K's MD&A (sections), in the s_ files")
     a = p.parse_args()
-    form = "10-Q" if a.quarterly else "10-K"
-    if a.command == "retrieve":
+    form = "10-Q" if a.quarterly else "section" if a.section else "10-K"
+    if a.command == "retrieve" and a.section:
+        sections()
+    elif a.command == "retrieve":
         retrieve_cells(form)
     elif a.command == "check":
         check(a.n, form)

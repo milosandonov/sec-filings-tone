@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from sec_filings_tone.sentiment import DIMENSIONS, TOPICS, user_prompt
-from sec_filings_tone.tone import MASK_SKIP, Q_TOPICS, cells, masked_prompt, masked_sample, top
+from sec_filings_tone.tone import MASK_SKIP, Q_TOPICS, cells, masked_prompt, masked_sample, top, within
 
 # a bank with two 10-Qs in the same fiscal year and a 10-K, and a non-financial company's 10-Q
 k = pd.DataFrame({
@@ -29,6 +29,16 @@ march = p[p.report_date == "2023-03-31"].sort_values("rank")
 # RRF of the vector order (q1-1, q1-2, q1-3, q1-0) and the BM25 order (q1-3, q1-1, q1-2; q1-0 has no query word)
 assert march.chunk_id.tolist() == ["q1-1", "q1-3", "q1-2"], march
 assert set(p[p.report_date == "2023-06-30"].chunk_id) <= {f"q2-{i}" for i in range(4)}, p
+
+# section-level cells: A's risk factors outrank its MD&A, and B's 10-K has no MD&A
+k = pd.DataFrame({"chunk_id": ["a1-0", "a1-1", "a1-2", "a7-0", "a7-1", "a7-2", "b1-0"], "ticker": ["A"] * 6 + ["B"],
+                  "sector": ["Energy"] * 7, "form": ["10-K"] * 7, "fy": [2023] * 7, "item": ["1A"] * 3 + ["7"] * 3 + ["1A"]})
+vs, bs = np.array([.9, .8, .7, .2, .3, .1, .5]), np.array([9., 8., 7., 3., 0., 2., 5.])
+whole = pd.DataFrame(within(k, vs, bs, "AI", None))
+assert whole[whole.ticker == "A"].chunk_id.tolist() == ["a1-0", "a1-1", "a1-2"], whole  # no MD&A chunk makes A's top 3
+s = pd.DataFrame(within(k, vs, bs, "AI", "7"))
+# one cell, A's, ranked within its MD&A: RRF of the vector order (a7-1, a7-0, a7-2) and BM25's (a7-0, a7-2; a7-1 has no query word)
+assert s.chunk_id.tolist() == ["a7-0", "a7-2", "a7-1"] and set(s.ticker) == {"A"} and s["rank"].tolist() == [1, 2, 3], s
 
 # masked check: the masked prompt has neither the company nor the fiscal year, and is otherwise the production prompt
 row = pd.Series({"ticker": "NVDA", "form": "10-K", "fy": 2023, "item": "1A", "text": "Export rules may change."})

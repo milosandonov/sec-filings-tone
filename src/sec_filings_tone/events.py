@@ -62,10 +62,19 @@ BASELINE_FOR = {"finbert_polarity": "polarity", "lm_polarity": "polarity", "lm_u
                 "details_per_100w": "specificity"}
 
 
+def section() -> pd.DataFrame:
+    """The section-level passages (tone.sections: AI's top 3 within each 10-K's MD&A) with their scores, pid
+    -1 - row number, so cells() and named() can pool them with the 10-K passages without a clash."""
+    s = pd.read_parquet(FILES["section"][0]).reset_index(names="pid").merge(pd.read_parquet(FILES["section"][1]), on="pid")
+    return s.assign(pid=-1 - s.pid)
+
+
 def named(form: str = "10-K") -> set[int]:
-    """Passages (pid: row number in the passages file) that pass the word check: all of a topic without
-    a vocabulary, and those of a TOPIC_WORDS topic whose text names it."""
+    """Passages (pid: row number in the passages file; the 10-K's section passages too, as section() numbers
+    them) that pass the word check: all of a topic without a vocabulary, and those of a TOPIC_WORDS topic whose text names it."""
     p = pd.read_parquet(FILES[form][0]).reset_index(names="pid")
+    if form == "10-K" and FILES["section"][1].exists():
+        p = pd.concat([p, section()[p.columns]], ignore_index=True)
     q = p[p.topic.isin(TOPIC_WORDS)]
     text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"],
                            filters=[("chunk_id", "in", q.chunk_id.unique().tolist())]).set_index("chunk_id").text
@@ -76,14 +85,20 @@ def named(form: str = "10-K") -> set[int]:
 def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None = None) -> pd.DataFrame:
     """One row per cell (a 10-K: ticker, fy, topic; a 10-Q: ticker, report_date, topic): sector, dates,
     `discussed`, and the mean of each dimension (and each baseline, once computed for every chunk)
-    over the on-topic passages, using only passages from `items`, and only passages (pid) in `keep`, if given."""
+    over the on-topic passages, using only passages from `items`, and only passages (pid) in `keep`, if given.
+    A 10-K analysis of MD&A alone takes AI's cells from section(): its top 3 searched within MD&A (PLAN.md
+    Phase 7, 2026-10-18), not the MD&A part of the whole 10-K's top 3."""
     passages, scores, _, baselines = FILES[form]
     p = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
+    bases = [baselines]
+    if form == "10-K" and items and set(items) <= {"7", "mdna"} and FILES["section"][1].exists():
+        s = section()
+        p, bases = pd.concat([p[~p.topic.isin(s.topic)], s], ignore_index=True), [baselines, FILES["section"][3]]
     p = p.merge(pd.read_parquet(CHUNKS, columns=["chunk_id", *[x for x in ("filing_date", "report_date", "item")
                                                                if x not in p]]), on="chunk_id")
     cols = DIMS.copy()
-    if baselines.exists():
-        b = pd.read_parquet(baselines, columns=["chunk_id", *BASELINE_FOR])
+    if all(f.exists() for f in bases):
+        b = pd.concat([pd.read_parquet(f, columns=["chunk_id", *BASELINE_FOR]) for f in bases]).drop_duplicates("chunk_id")
         if set(p.chunk_id) <= set(b.chunk_id):  # partial baselines would compare different companies
             p, cols = p.merge(b, on="chunk_id"), cols + list(BASELINE_FOR)
     key = [*KEY[form], "topic"]

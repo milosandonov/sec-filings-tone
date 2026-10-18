@@ -17,10 +17,10 @@ from difflib import SequenceMatcher
 
 import pandas as pd
 
-from sec_filings_tone.events import DIMS, EVENTS, did, named, report as event_report
+from sec_filings_tone.events import DIMS, EVENTS, did, named, report as event_report, section
 from sec_filings_tone.ingest import CHUNKS
 from sec_filings_tone.sentiment import sentences, spearman_ci
-from sec_filings_tone.tone import BASELINES, OUT, PASSAGES, SCORES
+from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES
 
 CARRYOVER = OUT / "carryover.parquet"  # one row per 10-K chunk of a company with the year before's 10-K
 RATIO = 0.9
@@ -129,6 +129,9 @@ def report() -> None:
                 print(f"  {b:16} {kind:12} {fmt(*spearman_ci(x.polarity, x[b], n_boot=500))}  passages={len(x)}")
 
     new = set(p.pid[p.kind == "new"])
+    if FILES["section"][1].exists():  # the MD&A tests' AI passages (events.cells), as events.section numbers them
+        s = section().merge(pd.read_parquet(CARRYOVER, columns=["chunk_id", "share"]), on="chunk_id")
+        new |= set(s.pid[s.share <= NEW])
     for label, k, out in [("model only", new, OUT / "events_new.csv"), ("word-checked", new & keep, OUT / "events_new_named.csv")]:
         print(f"\n=== event tests on new passages only ({label})")
         event_report(EVENTS, "10-K", out, keep=k)

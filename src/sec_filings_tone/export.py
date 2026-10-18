@@ -5,7 +5,7 @@ a new --version; files the previous export wrote are removed first, README.md (t
 
 What goes in (data/release/README.md describes each file): every scored passage keyed by (ticker,
 fy or report_date, topic, rank, chunk_id), the baselines, the cells, the carryover shares, the
-passage text, the run-to-run and masked-prompt rescorings, the label sheets and guidelines, the
+passage text, the section-level AI passages, the run-to-run and masked-prompt rescorings, the label sheets and guidelines, the
 event definitions, companies.csv (sectors and
 sub-industries, which the export-control test needs) and the result CSVs; plus
 provenance.json (model, prompt and schema hashes, row counts) and SHA256SUMS. Left out: the
@@ -62,22 +62,25 @@ def scored(form: str, chunks: pd.DataFrame) -> pd.DataFrame:
 
 
 def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
-    forms = ("10-K", "10-Q", "rerun", "masked")  # rerun and masked can hold a chunk no cell retrieves any more
+    forms = ("10-K", "10-Q", "rerun", "masked", "section")  # rerun and masked can hold a chunk no cell retrieves any more
     ids = pd.concat([pd.read_parquet(FILES[f][0], columns=["chunk_id"]) for f in forms]).chunk_id
     chunks = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", ids.unique().tolist())])
     keep = events.named()
     k = scored("10-K", chunks)
     k["names_topic"] = k.pid.isin(keep)  # the word check (events.TOPIC_WORDS); True for topics without a word list
     rerun = scored("rerun", chunks).drop(columns="pid")  # B6's second run; orig_pid points into passages
+    s = scored("section", chunks)  # AI's top 3 within each 10-K's MD&A; pid is its row in s_passages
+    s["names_topic"] = (-1 - s.pid).isin(keep)  # named() numbers section passages as events.section does
     tables = {
         "passages": k,
+        "s_passages": s,
         "q_passages": scored("10-Q", chunks),
         "rerun": rerun,
         "masked": scored("masked", chunks).drop(columns="pid"),  # the masked-prompt check; orig_pid as in rerun
         "cells": pd.concat([events.cells().assign(version="model"), events.cells(keep=keep).assign(version="word-checked")]),
         "q_cells": events.cells(form="10-Q"),
-        "baselines": pd.concat([pd.read_parquet(FILES[f][3]) for f in ("10-K", "10-Q")], ignore_index=True)
-                     .loc[lambda b: b.chunk_id.isin(ids)],  # chunks no passage uses any more, since a fix, left out
+        "baselines": pd.concat([pd.read_parquet(FILES[f][3]) for f in ("10-K", "10-Q", "section")], ignore_index=True)
+                     .drop_duplicates("chunk_id").loc[lambda b: b.chunk_id.isin(ids)],  # chunks no passage uses any more, since a fix, left out
         "carryover": pd.read_parquet(CARRYOVER),
         "gold_scores": pd.read_parquet(SENTIMENT / f"gold_scores_{MODEL}.parquet"),
         "chunks": chunks,
