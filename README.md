@@ -17,7 +17,8 @@ magnitude, realization, uncertainty and specificity. FinBERT and the Loughran-Mc
 serve as baselines. The tests were fixed in advance, with later changes dated and both versions
 kept. This page reports what passed and what didn't.
 
-Full results: [RESULTS.md](RESULTS.md). Design log, with every decision and its date: [PLAN.md](PLAN.md).
+Full results: [RESULTS.md](RESULTS.md). Design log, with every decision and its date: [PLAN.md](https://github.com/milosandonov/sec-filings-tone/blob/bc75b404e4cf8425a1e73dd6b09bc6b0532cd8b5/PLAN.md)
+(archived in git history; the working tree no longer carries it).
 Retrieval eval: [eval/FINDINGS.md](eval/FINDINGS.md).
 
 ## Research questions
@@ -143,11 +144,13 @@ Financials only.
 
 ## Methodology
 
-- **Fixed in advance.** Every test, its expected direction and its decision rule went into PLAN.md
-  before the result existed. That covers the events and directions in `events.csv`, the
+- **Fixed in advance.** Every test, its expected direction and its decision rule went into the design log,
+  [PLAN.md](https://github.com/milosandonov/sec-filings-tone/blob/bc75b404e4cf8425a1e73dd6b09bc6b0532cd8b5/PLAN.md), before the result existed; its dated
+  entries and their commits show the order. That covers the events and directions in `events.csv`, the
   robustness checks, the co-movement test and the agreement bars (kappa 0.6 with people, 0.8 run to
   run). Changes made after seeing results are dated and give the reason. Both versions are kept
-  (for example `events_v1.csv`, and the filed event rule as `--filed`).
+  (for example [`events_v1.csv`](https://huggingface.co/datasets/milosand1/sec-filings-tone/blob/main/results/events_v1.csv)
+  in the data release, and the filed event rule as `--filed`).
 - **Results reported against the rules.** By the label rule only realization would be kept. By the
   run-to-run rule magnitude would be dropped; it was kept by a dated decision after the result.
   Both are reported, not hidden.

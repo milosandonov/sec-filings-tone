@@ -5,11 +5,9 @@ __pycache__/
 data/cache/
 vector_db/
 *.log
-data/chunks.parquet
 data/ingest_skipped.csv
 data/experiment/
 data/sentiment/
-eval/labels
 # working files from runs: rebuilt or resumed locally, never committed
 data/*.parquet
 data/*.skipped.csv
@@ -20,6 +18,8 @@ data/tone/
 data/fyfix/
 data/release/
 .DS_Store
+# internal design log; archived in git history (linked from the README)
+PLAN.md
 data/bm25/
 # Q&A eval: the second judge (gpt-6-sol) and its comparison, kept locally
 eval/qa_judge_gpt-*.jsonl

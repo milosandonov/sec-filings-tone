@@ -31,12 +31,11 @@ from matplotlib.ticker import PercentFormatter  # noqa: E402
 from sec_filings_tone.diff import CARRYOVER, ITEMS, filings  # noqa: E402
 from sec_filings_tone.events import DIMS, EVENTS, TOPIC_WORDS, cells, did, named  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
-from sec_filings_tone.tone import FILES, OUT, S_TOPICS  # noqa: E402
+from sec_filings_tone.tone import FILES, LAST_FY, OUT, S_TOPICS  # noqa: E402
 
 FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
 SECTIONS = {"Risk factors (Item 1A)": ["1A"], "MD&A (Item 7)": ["7"]}
-LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 MIN_N = 5  # heatmap cells with fewer companies discussing the topic are hatched instead
 MEASURES = [*DIMS, "discussed"]
 # dataviz reference palette: categorical slots 1-2 (validated), the blue sequential ramp, the blue-red diverging pair

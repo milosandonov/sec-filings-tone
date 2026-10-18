@@ -40,3 +40,10 @@ class Cap:
 def call_usd(model: str, input_tokens: float, output_tokens: float) -> float:
     pin, pout = PRICES[model]
     return (input_tokens * pin + output_tokens * pout) / 1e6
+
+
+def rerank_call_usd(n_input_tokens: float) -> float:
+    """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
+    from sec_filings_tone import retrieve
+
+    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)

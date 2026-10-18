@@ -32,8 +32,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from eval import K, TESTS, Cap, CapReached, contains, rerank_call_usd, score
+from eval import K, TESTS, Cap, CapReached, contains, score
 from sec_filings_tone import retrieve
+from sec_filings_tone.budget import PRICES, rerank_call_usd
 from sec_filings_tone.ingest import build_chunks, embed_text, n_tokens
 
 PILOT = ["AMAT", "AMD", "AVGO", "INTC", "KLAC", "LRCX", "MU", "NVDA", "QCOM", "TXN"]
@@ -76,7 +77,7 @@ MODELS = {
 MAIN_DIMS = 1024  # what Chroma stores; variants are compared here
 DEPTH = 50  # ranks saved per stage, so recall@k is computable up to 50
 RERANK_REPEATS = 2  # the reranker isn't deterministic; two runs show how much it moves
-RERANK_PRICE = 0.10  # USD per 1M input tokens, claude-haiku-5-5
+RERANK_PRICE = PRICES[retrieve.RERANK_MODEL][0]  # USD per 1M input tokens
 TOKEN_BUDGETS = (2000, 5000)  # keyword coverage within this much ranked text, fair across chunk sizes
 API_TIMEOUT = 60  # seconds per request, so a stuck call fails instead of hanging
 CAP = Cap()  # main() sets the run's budget and time limit; every paid call checks it first

@@ -62,13 +62,14 @@ Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for F
 S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
 QUERIES = Path("data/fyfix/queries.npy")  # the query vectors passages.parquet was ranked with, in TOPICS order
 K = 3
+LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
 USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
 # the masked check leaves these out: their fiscal-year labels are being fixed (2026-10-17)
 MASK_SKIP = ["AVY", "CDNS", "DPZ", "ILMN", "JNJ", "LDOS", "LHX", "RVTY", "SNA", "SWK", "TDY", "TRMB", "TXT"]
 
 
-def cells(form: str = "10-K", k: pd.DataFrame | None = None) -> pd.DataFrame:
+def cell_grid(form: str = "10-K", k: pd.DataFrame | None = None) -> pd.DataFrame:
     """One row per (filing, topic) from chunk metadata `k` (default: every chunk). 10-K: every topic,
     deposits and liquidity for Financials only. 10-Q: Financials only, Q_TOPICS only."""
     k = retrieve.chunks() if k is None else k
@@ -145,7 +146,7 @@ def retrieve_cells(form: str = "10-K") -> None:
         raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
     start = time.time()
     df = retrieve.chunks()
-    vec, c = vectors(), cells(form, df)
+    vec, c = vectors(), cell_grid(form, df)
     rows = []
     for topic in c.topic.unique():
         q = np.asarray(retrieve.embed_query(TOPICS[topic]), np.float32)
@@ -164,7 +165,7 @@ def within(df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, topic: str, item: s
     """Each 10-K's top K for `topic` among its chunks of `item` (None: the whole 10-K, as retrieve_cells ranks
     it). Scores `vs` and `bs` are over all of df's rows, so BM25 keeps the whole corpus's word weights."""
     m = np.ones(len(df), bool) if item is None else (df["item"] == item).to_numpy()
-    c = cells("10-K", df[m])  # only 10-Ks that have the item
+    c = cell_grid("10-K", df[m])  # only 10-Ks that have the item
     return top(c[c.topic == topic], df[m], vs[m], bs[m], "10-K")
 
 

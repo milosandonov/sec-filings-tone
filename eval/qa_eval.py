@@ -13,7 +13,6 @@ expected ones; the plan kind), keywords in the passages given to the answer mode
 import argparse
 import json
 import random
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -30,8 +29,7 @@ from pydantic import BaseModel
 from sec_filings_tone import answer, retrieve
 from sec_filings_tone.budget import Cap, call_usd
 
-sys.path.insert(0, str(Path(__file__).parent))
-from eval import contains  # noqa: E402
+from eval import contains
 
 load_dotenv()
 HERE = Path(__file__).parent

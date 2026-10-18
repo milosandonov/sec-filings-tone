@@ -15,11 +15,10 @@ import numpy as np
 import pandas as pd
 
 from sec_filings_tone.events import DIMS, cells, named
-from sec_filings_tone.tone import OUT
+from sec_filings_tone.tone import LAST_FY, OUT
 
 MIN_SHARED = 10
 PERMUTATIONS = 2000
-LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
 RESULTS = OUT / "comove.csv"
 
 

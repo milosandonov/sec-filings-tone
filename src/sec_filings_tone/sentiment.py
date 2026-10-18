@@ -33,7 +33,7 @@ import pandas as pd
 from pydantic import Field, create_model
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import Cap, CapReached, call_usd
+from sec_filings_tone.budget import Cap, CapReached, call_usd, rerank_call_usd
 from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
 
 GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
@@ -557,11 +557,6 @@ def gold_baselines(model: str) -> None:
             k = [i for i in both if pd.notna(x.at[i, f"llm_{d}"]) and pd.notna(x.at[i, c])]
             est, lo, hi = spearman_gap_ci(human.loc[k, d], x.loc[k, f"llm_{d}"], x.loc[k, c])
             print(f"  {d:12} llm_{d} - {c}: {est:+.2f} [{lo:+.2f}, {hi:+.2f}]  n={len(k)}")
-
-
-def rerank_call_usd(n_input_tokens: float) -> float:
-    """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
-    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
 
 
 def kappa(a, b, labels) -> float:

@@ -23,16 +23,11 @@ from pathlib import Path
 import pandas as pd
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import Cap, CapReached, call_usd
+from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd
 from sec_filings_tone.retrieve import STAGES, chunks, search, subset
 
 TESTS = Path(__file__).parent / "tests.jsonl"
 K = 10
-def rerank_call_usd(n_input_tokens: float) -> float:
-    """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
-    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
-
-
 def contains(text: str, keyword: str) -> bool:
     # whole word, and not part of a longer number: "15%" doesn't match "2.15%", "$1.6" not "$1.65"
     return re.search(rf"(?<![\w.,]){re.escape(keyword)}(?!\w|[.,]\d)", text) is not None

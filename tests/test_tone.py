@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from sec_filings_tone.sentiment import DIMENSIONS, TOPICS, user_prompt
-from sec_filings_tone.tone import MASK_SKIP, Q_TOPICS, cells, masked_prompt, masked_sample, top, within
+from sec_filings_tone.tone import MASK_SKIP, Q_TOPICS, cell_grid, masked_prompt, masked_sample, top, within
 
 # a bank with two 10-Qs in the same fiscal year and a 10-K, and a non-financial company's 10-Q
 k = pd.DataFrame({
@@ -13,12 +13,12 @@ k = pd.DataFrame({
     "form": ["10-Q"] * 8 + ["10-K", "10-Q"], "fy": [2023] * 10,
     "report_date": ["2023-03-31"] * 4 + ["2023-06-30"] * 4 + ["2023-12-31", "2023-03-31"]})
 
-c = cells("10-Q", k)
+c = cell_grid("10-Q", k)
 # one cell per (Financials 10-Q, topic): the IT company's 10-Q and the 10-K are left out
 assert len(c) == 4 and set(c.ticker) == {"B"} and set(c.topic) == set(Q_TOPICS), c
 assert sorted(c.report_date.unique()) == ["2023-03-31", "2023-06-30"], c
 # the annual cells are unchanged: one per 10-K and topic, keyed by fiscal year
-a = cells("10-K", k)
+a = cell_grid("10-K", k)
 assert list(a.columns) == ["ticker", "sector", "fy", "topic"] and len(a) == len(TOPICS), a
 
 # the June 10-Q's chunks and the 10-K score highest, but each cell ranks only its own filing's chunks
