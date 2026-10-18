@@ -1,7 +1,7 @@
 # Results: tone scoring (Phases 5–9)
 
 What the tone scorer found, as of 2026-10-18. Retrieval results (Phase 4) are in
-[`eval/FINDINGS.md`](eval/FINDINGS.md); the plan, every decision and its date are in [`PLAN.md`](https://github.com/milosandonov/sec-filings-tone/blob/bc75b404e4cf8425a1e73dd6b09bc6b0532cd8b5/PLAN.md)
+[`eval/FINDINGS.md`](eval/FINDINGS.md); the plan, every decision and its date are in [`PLAN.md`](https://github.com/milosandonov/sec-filings-tone/blob/5954d50662d72c42d8b4583764022588c27edffb/PLAN.md)
 (archived in git history).
 Numbers in brackets are 95% bootstrap intervals. "n.s." means the interval includes zero: no
 change can be detected, which is not the same as no change.
