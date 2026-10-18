@@ -22,10 +22,13 @@ kept, with its caveat. Updated 2026-10-18 for the fiscal-year fix and the one-ye
 - **Stability and spread:** scored twice, **magnitude** misses the run-to-run bar fixed in advance
   (kappa 0.78, bar 0.8) but is kept by a dated decision, and polarity barely varies, with 86% of on-topic passages at −1.
 - **Events, the planned test:** against sectors the event didn't hit, **0 of 11** expected changes
-  are detected (2 of 11 under the old filed rule: two rate-hike differences that are borderline in
-  every version, p = 0.04–0.07); the check for a break rather than a trend already under way passes
-  for 3 of 13 (COVID realization, export-control polarity and tariff realization, the last failing
-  the comparison because the tariffs reached every sector), and no expected change passes both.
+  are detected, where chance alone would pass about 0.3, each test being one-sided at 2.5% (2 of 11
+  under the old filed rule: two rate-hike differences that are borderline in every version,
+  p = 0.04–0.07); the check for a break rather than a trend already under way passes for 3 of 13,
+  against about 0.3 by chance (COVID realization on only the 21 companies whose fiscal year ended in
+  early 2020, export-control polarity on 18 chipmakers and tariff realization on 163 companies, the
+  last failing the comparison because the tariffs reached every sector; the tests share companies,
+  so the chance rates are rough), and no expected change passes both.
 - **Events, before-after:** where the event hit, the model moved as expected in **9 of 15** tests
   (10 under the filed rule; word-checked 7 and 6) and FinBERT and the Loughran-McDonald dictionary
   in **0 of 9**, but this count also picks up drift, since from FY2019 to FY2025 realization rose for

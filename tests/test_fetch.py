@@ -1,6 +1,8 @@
 """Run: uv run python tests/test_fetch.py"""
 
-from sec_filings_tone.fetch import find_section, fiscal_year
+import pandas as pd
+
+from sec_filings_tone.fetch import find_section, fiscal_year, merge_manifest
 
 DOC = """\
 | Item 7. | Management's Discussion and Analysis | 29 |
@@ -25,4 +27,14 @@ assert find_section(DOC, "1A") == ""
 assert fiscal_year("2021-01-03") == 2020 and fiscal_year("2023-01-01") == 2022 and fiscal_year("2020-01-07") == 2019
 assert fiscal_year("2020-01-08") == 2020  # later in January: that year (no S&P 500 10-K ends Jan 5-24)
 assert fiscal_year("2022-12-31") == 2022 and fiscal_year("2023-02-03") == 2023 and fiscal_year("2019-06-28") == 2019
+
+# a rerun replaces each fetched ticker's rows; a ticker that fails keeps its earlier ones (a network error
+# used to replace them with one failure row, and ingest then dropped the company)
+old = pd.DataFrame({"ticker": ["AAPL", "AAPL", "MSFT"], "report_date": ["2023-09-30", "2024-09-28", "2024-06-30"], "ok": True})
+new = merge_manifest(old, [{"ticker": "MSFT", "report_date": "2025-06-30", "ok": True}],
+                     [{"ticker": "AAPL", "sector": "IT", "ok": False}, {"ticker": "NVDA", "sector": "IT", "ok": False}])
+assert new[new.ticker == "AAPL"].report_date.tolist() == ["2023-09-30", "2024-09-28"], new
+assert new[new.ticker == "MSFT"].report_date.tolist() == ["2025-06-30"], new
+assert new[new.ticker == "NVDA"].ok.tolist() == [False], new  # no earlier rows: the failure shows up in the manifest
+assert merge_manifest(None, [], [{"ticker": "NVDA", "sector": "IT", "ok": False}]).ticker.tolist() == ["NVDA"]
 print("ok")

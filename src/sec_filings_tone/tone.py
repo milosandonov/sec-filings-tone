@@ -25,6 +25,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import re
 import time
@@ -46,6 +47,7 @@ from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, p
 OUT = Path("data/tone")
 PASSAGES = OUT / "passages.parquet"
 VECTORS = OUT / "vectors.npy"  # every chunk's stored embedding, unit length, in chunks() order (2.8 GB)
+VECTOR_ORDER = OUT / "vectors_order.sha256"  # hash of the chunk ids in VECTORS' row order
 SCORES = OUT / "scores.parquet"  # one row per scored passage, keyed by its row number in PASSAGES (pid)
 STATE = OUT / "batches.json"  # submitted batches not yet collected
 BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per distinct chunk
@@ -91,11 +93,33 @@ def top(c: pd.DataFrame, df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, form:
     return rows
 
 
+def order_hash(ids: pd.Series) -> str:
+    return hashlib.sha256("\n".join(ids).encode()).hexdigest()
+
+
+def matches_chroma(v: np.ndarray, ids: pd.Series, n: int = 200, seed: int = 0) -> bool:
+    """Whether n random rows of v are the Chroma embeddings of the chunks in those rows of chunks()."""
+    pick = np.sort(np.random.default_rng(seed).choice(len(ids), min(n, len(ids)), replace=False))
+    want = ids.iloc[pick].tolist()
+    got = retrieve.collection().get(ids=want, include=["embeddings"])
+    if sorted(got["ids"]) != sorted(want):
+        return False
+    e = pd.DataFrame(np.asarray(got["embeddings"], np.float32), index=got["ids"]).loc[want].to_numpy()
+    return bool(np.allclose((e / np.linalg.norm(e, axis=1, keepdims=True) * v[pick]).sum(axis=1), 1, atol=1e-4))
+
+
 def vectors() -> np.ndarray:
-    """Read from Chroma once, then from disk."""
-    if VECTORS.exists():
-        return np.load(VECTORS, mmap_mode="r")
+    """Read from Chroma once, then from disk. Rows follow chunks()'s order, which moves if chunks.parquet is
+    rebuilt from a changed manifest, so the order is recorded (VECTOR_ORDER) and checked on every load."""
     ids = retrieve.chunks().chunk_id
+    if VECTORS.exists():
+        v = np.load(VECTORS, mmap_mode="r")
+        if not VECTOR_ORDER.exists() and len(v) == len(ids) and matches_chroma(v, ids):
+            VECTOR_ORDER.write_text(order_hash(ids))  # saved before the order was recorded: checked against Chroma first
+        if not VECTOR_ORDER.exists() or VECTOR_ORDER.read_text() != order_hash(ids):
+            raise SystemExit(f"{VECTORS} doesn't follow the rows of {CHUNKS}; delete it and {VECTOR_ORDER.name} "
+                             "to rebuild it from Chroma")
+        return v
     pos = pd.Series(np.arange(len(ids)), index=ids.to_numpy())
     v = np.zeros((len(ids), EMBED_DIMS), np.float32)
     col, page = retrieve.collection(), 20_000
@@ -107,6 +131,7 @@ def vectors() -> np.ndarray:
         raise SystemExit(f"{int((norms == 0).sum())} chunks have no vector in Chroma; re-embed them first")
     OUT.mkdir(parents=True, exist_ok=True)
     np.save(VECTORS, v / norms)
+    VECTOR_ORDER.write_text(order_hash(ids))
     return np.load(VECTORS, mmap_mode="r")
 
 

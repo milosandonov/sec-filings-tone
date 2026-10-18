@@ -31,7 +31,7 @@ from matplotlib.ticker import PercentFormatter  # noqa: E402
 from sec_filings_tone.diff import CARRYOVER, ITEMS, filings  # noqa: E402
 from sec_filings_tone.events import DIMS, EVENTS, TOPIC_WORDS, cells, did, named  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
-from sec_filings_tone.tone import OUT, S_TOPICS  # noqa: E402
+from sec_filings_tone.tone import FILES, OUT, S_TOPICS  # noqa: E402
 
 FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
@@ -121,7 +121,8 @@ def lines(t: pd.DataFrame, topic: str, path: Path, checked: bool = False) -> Non
     panels(t, "fy", marks, f"{topic}: tone in S&P 500 10-Ks, risk factors and MD&A, by fiscal year" + (" (word-checked)" if checked else ""),
            f"{n.min()}–{n.max()} companies a year; dimension means cover the companies with an on-topic passage "
            "from that section", NOTE + " Bands: 95% bootstrap intervals over companies." + (CHECKED if checked else "")
-           + (WITHIN if topic in S_TOPICS else ""), path)
+           # events.cells switches the MD&A line to the section-level cells only once they're scored
+           + (WITHIN if topic in S_TOPICS and FILES["section"][1].exists() else ""), path)
 
 
 def event_studies() -> None:

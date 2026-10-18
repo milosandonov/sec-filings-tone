@@ -60,3 +60,43 @@ assert "JNJ" in MASK_SKIP and set(s.ticker) == {"NVDA", "XOM"} and len(s) == 12,
 assert s.groupby("cell").fy.unique().map(list).to_dict() == {"after": [2022], "before": [2021]}, s
 assert s.groupby("ticker").group.first().to_dict() == {"NVDA": "affected", "XOM": "others"}, s
 print("ok")
+
+# vectors.npy is used only while its rows follow chunks()'s order: recorded when it's built, and checked
+# against Chroma first for a file saved before the order was recorded
+import tempfile  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import sec_filings_tone.tone as tone  # noqa: E402
+from sec_filings_tone import retrieve  # noqa: E402
+
+ids = pd.Series([f"c{i}" for i in range(300)])
+emb = dict(zip(ids, np.random.default_rng(1).normal(size=(300, 8)).astype(np.float32)))
+
+
+class FakeChroma:
+    def count(self):
+        return len(emb)
+
+    def get(self, ids=None, include=(), limit=None, offset=0):
+        got = ids if ids is not None else list(emb)[offset:offset + limit]
+        return {"ids": got, "embeddings": np.array([emb[i] for i in got])}
+
+
+retrieve.chunks, retrieve.collection = (lambda: pd.DataFrame({"chunk_id": ids})), FakeChroma
+tone.EMBED_DIMS = 8
+with tempfile.TemporaryDirectory() as tmp:
+    tone.VECTORS, tone.VECTOR_ORDER = Path(tmp, "vectors.npy"), Path(tmp, "vectors_order.sha256")
+    v = tone.vectors()  # built from Chroma: unit rows in chunks() order, order recorded
+    assert np.allclose(v[5], emb["c5"] / np.linalg.norm(emb["c5"])) and tone.VECTOR_ORDER.exists()
+    tone.VECTOR_ORDER.unlink()  # a file saved before the order was recorded
+    assert tone.vectors().shape == (300, 8) and tone.VECTOR_ORDER.exists()  # matches Chroma: order recorded
+    ids = ids[::-1].reset_index(drop=True)  # chunks.parquet rebuilt in another order
+    for unlink in (False, True):  # with the recorded order, and for an older file without it
+        if unlink:
+            tone.VECTOR_ORDER.unlink()
+        try:
+            tone.vectors()
+            raise AssertionError("vectors in another order than chunks() must stop the run")
+        except SystemExit as e:
+            assert "doesn't follow" in str(e), e
+print("ok")

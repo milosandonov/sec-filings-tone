@@ -1,8 +1,8 @@
 """Phase 2: clean and chunk cached sections into data/chunks.parquet, then embed into Chroma.
 
 Usage:
-    uv run python -m sec_filings_tone.ingest --tickers NVDA AMD          # chunk only (local, free)
-    uv run python -m sec_filings_tone.ingest --tickers NVDA AMD --embed  # chunk, then embed (costs money)
+    uv run python -m sec_filings_tone.ingest --tickers NVDA AMD          # chunk only, into data/chunks_subset.parquet (local, free)
+    uv run python -m sec_filings_tone.ingest --tickers NVDA AMD --embed  # chunk those, then embed them (costs money)
     uv run python -m sec_filings_tone.ingest --embed --budget 30         # everything; stops first if over $30
     uv run python -m sec_filings_tone.ingest --embed --batch --wait --budget 17 --no-rebuild  # Batch API: half price
     uv run python -m sec_filings_tone.ingest                             # chunk everything
@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from sec_filings_tone.fetch import CACHE, DATA, FORMS, MIN_CHARS
 
 CHUNKS = DATA / "chunks.parquet"
+SUBSET = DATA / "chunks_subset.parquet"  # --tickers: never CHUNKS, which every later phase reads for all companies
 SKIPPED = DATA / "ingest_skipped.csv"
 VECTOR_DB = "vector_db"
 EMBED_MODEL = "text-embedding-3-large"
@@ -210,6 +211,8 @@ def sections(tickers: list[str] | None) -> tuple[list[dict], list[dict]]:
 
 def build_chunks(tickers: list[str] | None = None, max_tokens: int = 800, target_tokens: int = 500,
                  out: Path = CHUNKS, heading_min_tokens: int = HEADING_MIN_TOKENS) -> pd.DataFrame:
+    if tickers and out == CHUNKS:  # the analyses inner-join CHUNKS, so a subset there would silently drop every other company
+        raise SystemExit(f"{len(tickers)} tickers would replace {CHUNKS}, which holds every company; write them to another file")
     keep, skipped = sections(tickers)
     rows = []
     for sec in keep:
@@ -473,7 +476,7 @@ def main() -> None:
     p.add_argument("--wait", action="store_true", help="with --batch: keep polling until every chunk is in")
     p.add_argument("--no-rebuild", action="store_true", help="embed the existing chunks.parquet instead of rebuilding it")
     args = p.parse_args()
-    chunks = pd.read_parquet(CHUNKS) if args.no_rebuild else build_chunks(args.tickers)
+    chunks = pd.read_parquet(CHUNKS) if args.no_rebuild else build_chunks(args.tickers, out=SUBSET if args.tickers else CHUNKS)
     if args.embed:
         if not os.environ.get("OPENAI_API_KEY"):
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")

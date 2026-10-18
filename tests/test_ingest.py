@@ -1,6 +1,6 @@
 """Run: uv run python tests/test_ingest.py"""
 
-from sec_filings_tone.ingest import chunk_section, embed_text, n_tokens
+from sec_filings_tone.ingest import build_chunks, chunk_section, embed_text, n_tokens
 
 PARA = "Demand for our products may decline if customers delay purchases. " * 8  # ~100 tokens
 LONG = "Export rules from the U.S. Government limit sales to China. " * 120  # ~1,400 tokens
@@ -115,4 +115,12 @@ assert take([400] * 10, max_inputs=100, max_tokens=300) == 0  # queue full: wait
 assert queue_limit(["Enqueued token limit reached for text-embedding-3-large in organization org-x. "
                     "Limit: 20,000,000 enqueued tokens. Please try again"]) == 20_000_000
 assert queue_limit(["some other error"]) is None
+print("ok")
+
+# a ticker subset never replaces chunks.parquet, which every later phase inner-joins for all companies
+try:
+    build_chunks(["NVDA"])
+    raise AssertionError("a subset must not overwrite the full chunk table")
+except SystemExit as e:
+    assert "would replace" in str(e), e
 print("ok")

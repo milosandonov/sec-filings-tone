@@ -1,5 +1,13 @@
 # SEC Filings Tone
 
+**In short:** this project measures how S&P 500 companies write about 13 topics, such as AI, China
+and tariffs, in their annual reports (10-Ks) from FY2019 to FY2025, and its 126,051 scored passages
+will be released as a dataset. Two parts of the measurement hold up against one person's labels:
+when the model says a passage isn't about the topic, it was right every time (11 of 11), and its
+realization score (has the risk already happened?) agrees with the person's. The other four scores
+aren't validated, and the main test, whether tone moved more where a known event such as COVID or
+the 2023 bank failures hit than elsewhere, comes out mostly null.
+
 How do S&P 500 companies write about AI, China, tariffs, interest rates and nine other topics in
 their 10-Ks, and how did that change from FY2019 to FY2025? Polarity alone can't answer that. Risk
 factors are negative by design: 86% of on-topic passages score −1. A risk can go from "export
@@ -40,12 +48,16 @@ event rule.
   Scored twice, **magnitude** misses the run-to-run bar fixed in advance (kappa 0.78, bar 0.8); it
   is kept by a decision made after seeing that result, since 0.78 is close to the bar.
 - **The planned event test detects 0 of 11.** Each event's change is compared with the same change
-  in sectors it didn't hit. The closest are two rate-hike differences, borderline in every version
+  in sectors it didn't hit. Each test is one-sided at 2.5%, so chance alone would pass about 0.3 of
+  11. The closest are two rate-hike differences, borderline in every version
   (p = 0.04–0.07): magnitude +0.09 [−0.005, +0.19] and specificity +0.10 [−0.0001, +0.20]. The
   specificity gap comes from other sectors' specificity falling. Under the old filed rule both pass
   (2 of 11). A second check asks whether a change is a break rather than a trend already under way.
-  It passes for 3 of 13: COVID realization, export-control polarity and tariff realization. The
-  tariffs reached every sector, so that one fails the comparison. No expected change passes both.
+  It passes for 3 of 13, against about 0.3 by chance: COVID realization, on only the 21 companies
+  whose fiscal year ended in early 2020 (the only ones with a year before), export-control polarity
+  (18 chipmakers) and tariff realization (163 companies). The tests share companies, so these chance
+  rates are rough. The tariffs reached every sector, so that one fails the comparison. No expected
+  change passes both.
 - **Before-after counts also pick up drift.** Where the event hit, the model moved as expected in
   **9 of 15** tests (10 under the filed rule; word-checked 7 and 6). FinBERT and the
   Loughran-McDonald dictionary managed **0 of 9**. But from FY2019 to FY2025, realization rose for 9

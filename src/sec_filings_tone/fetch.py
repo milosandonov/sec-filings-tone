@@ -164,7 +164,7 @@ def main() -> None:
         if missing := set(tickers) - set(companies.ticker):
             sys.exit(f"Not in {COMPANIES}: {sorted(missing)}")
 
-    rows = []
+    rows, failed = [], []
     for i, (ticker, sector) in enumerate(zip(companies.ticker, companies.sector), 1):
         try:
             got = fetch_ticker(ticker, sector, form)
@@ -172,18 +172,26 @@ def main() -> None:
             print(f"[{i}/{len(companies)}] {ticker}: {len(got)} filings, {sum(not r['ok'] for r in got)} short")
         except Exception as e:  # one bad company shouldn't stop a 500-company run
             print(f"[{i}/{len(companies)}] {ticker}: FAILED {type(e).__name__}: {e}")
-            rows.append({"ticker": ticker, "sector": sector, "ok": False})
+            failed.append({"ticker": ticker, "sector": sector, "ok": False})
 
-    new = pd.DataFrame(rows)
-    if manifest.exists():  # replace this run's tickers, keep the rest
-        old = pd.read_csv(manifest)
-        new = pd.concat([old[~old.ticker.isin(new.ticker)], new])
+    new = merge_manifest(pd.read_csv(manifest) if manifest.exists() else None, rows, failed)
     new.sort_values(["ticker", "report_date"]).to_csv(manifest, index=False)
 
     bad = new[~new.ok]
     print(f"\n{len(new)} rows in {manifest}, {len(bad)} failed or short:")
     if len(bad):
         print(bad.to_string(index=False))
+    if failed:
+        print(f"failed this run, earlier rows kept: {', '.join(f['ticker'] for f in failed)}")
+
+
+def merge_manifest(old: pd.DataFrame | None, rows: list[dict], failed: list[dict]) -> pd.DataFrame:
+    """This run's rows replace each fetched ticker's earlier ones; other tickers keep theirs. A ticker
+    that failed keeps its earlier rows, so a network error doesn't drop it from the next ingest, and
+    gets a failure row only if it has none."""
+    kept = pd.DataFrame(columns=["ticker"]) if old is None else old[~old.ticker.isin({r["ticker"] for r in rows})]
+    failed = [f for f in failed if f["ticker"] not in set(kept.ticker)]
+    return pd.concat([x for x in (kept, pd.DataFrame(rows + failed)) if len(x)], ignore_index=True)
 
 
 if __name__ == "__main__":
