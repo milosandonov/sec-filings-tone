@@ -115,9 +115,10 @@ on topic:
 | Specificity | details per 100 words +0.52 [+0.15, +0.80] | +0.54 [+0.15, +0.84] |
 | Realization | realization cues per 100 words +0.33 n.s. | **+0.68** [+0.33, +0.91] |
 
-Paired gaps, model minus baseline on the same 20 items (bootstrap over items; a scratch
-computation, not in the code): realization +0.35 [−0.06, +0.76], uncertainty against hedges +0.07
-[−0.38, +0.51], specificity +0.01 [−0.44, +0.43], and polarity against FinBERT −0.57 [−1.13, +0.01].
+Paired gaps, model minus baseline on the same 20 items (bootstrap over items; `sentiment.py
+gold-baselines`, first computed as a scratch calculation): realization +0.35 [−0.06, +0.76],
+uncertainty against hedges +0.07 [−0.38, +0.51], specificity +0.01 [−0.44, +0.43], and polarity
+against FinBERT −0.57 [−1.13, +0.01].
 
 - **Answer to question 1, against labels:** on blind labels the model isn't detectably better than
   free word counts on any dimension (realization comes closest), and polarity can't be judged, since
@@ -664,11 +665,11 @@ carried over (the planned comparison, pooling the company's topics and years):
 | MD&A (451 companies) | −0.11 [−0.17, −0.04] | **+0.44** [+0.38, +0.50] | **+0.47** [+0.41, +0.52] | −0.15 [−0.23, −0.07] | +0.08 [+0.04, +0.12] |
 
 **Within the same topic and year** (added 2026-10-17 after an external review, which recomputed it;
-both versions kept). Pooling a company's passages also compares topics and years that have more new
-text (supply chain in FY2020, geopolitics and inflation in FY2022, tariffs in FY2025) with those
-that have less. Here new and carried-over passages are compared within each company × topic ×
-fiscal year, then averaged per company. Only companies with both kinds in the same topic and year
-count, so fewer of them:
+both versions kept; `diff.py report` prints both since 2026-10-18). Pooling a company's passages
+also compares topics and years that have more new text (supply chain in FY2020, geopolitics and
+inflation in FY2022, tariffs in FY2025) with those that have less. Here new and carried-over
+passages are compared within each company × topic × fiscal year, then averaged per company. Only
+companies with both kinds in the same topic and year count, so fewer of them:
 
 | | Polarity | Magnitude | Realization | Uncertainty | Specificity |
 |---|---|---|---|---|---|

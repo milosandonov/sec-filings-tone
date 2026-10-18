@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from sec_filings_tone.diff import matcher, shares
+from sec_filings_tone.diff import matcher, new_minus_carried, shares
 
 old = ["Changes in trade policy, including tariffs, could adversely affect our business and results.",
        "We sell our products in over 100 countries around the world."]
@@ -19,4 +19,15 @@ g = pd.DataFrame({
 r = shares(g)
 assert [x["chunk_id"] for x in r] == ["a24"], r
 assert r[0]["carried"] == len(old[0]) and r[0]["chars"] > r[0]["carried"], r
+
+# new minus carried over: pooled over a company's topics, a topic with more new text looks like a gap;
+# within topic and year there is none. A: T1 scores 2 and is mostly new, T2 scores 0 and is mostly copied
+x = pd.DataFrame({"ticker": "A", "fy": 2024, "topic": ["T1"] * 4 + ["T2"] * 4 + ["T3"],
+                  "kind": ["new"] * 3 + ["carried over"] + ["new"] + ["carried over"] * 3 + ["mixed"],
+                  "realization": [2.0] * 4 + [0.0] * 4 + [9.0]})
+assert new_minus_carried(x, "realization", []).loc["A"] == 1.0  # (2+2+2+0)/4 - (2+0+0+0)/4; mixed left out
+assert new_minus_carried(x, "realization", ["topic", "fy"]).loc["A"] == 0.0
+# a topic-year with only one kind doesn't count; a company with no topic-year having both drops out
+y = pd.concat([x, pd.DataFrame({"ticker": "B", "fy": 2024, "topic": "T1", "kind": ["new"], "realization": [1.0]})])
+assert list(new_minus_carried(y, "realization", ["topic", "fy"]).index) == ["A"]
 print("ok")

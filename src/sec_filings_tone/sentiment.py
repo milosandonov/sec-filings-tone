@@ -225,6 +225,20 @@ def spearman_ci(a: pd.Series, b: pd.Series, n_boot: int = 2000, seed: int = 0) -
     return r, lo, hi
 
 
+def spearman_gap_ci(h: pd.Series, a: pd.Series, b: pd.Series, n_boot: int = 2000, seed: int = 0) -> tuple[float, float, float]:
+    """Spearman(h, a) minus Spearman(h, b) on the same items, with a 95% bootstrap interval that resamples
+    the items once for both, so the two correlations share each resample."""
+    h, a, b = (np.asarray(v, float) for v in (h, a, b))
+    rng = np.random.default_rng(seed)
+
+    def gap(k):
+        hk = pd.Series(h[k])
+        return hk.corr(pd.Series(a[k]), method="spearman") - hk.corr(pd.Series(b[k]), method="spearman")
+
+    boot = [gap(rng.integers(0, len(h), len(h))) for _ in range(n_boot)]
+    return gap(np.arange(len(h))), *np.nanpercentile(boot, [2.5, 97.5])
+
+
 def baselines(n: int, model: str) -> None:
     """Score the pilot passages with FinBERT and LM, and compare with the LLM's first combined run."""
     items = pd.read_parquet(OUT / f"pilot_sample_{n}_{SELECTION}.parquet")
@@ -488,6 +502,9 @@ GOLD_PAIRS = [("polarity", "finbert_polarity"), ("polarity", "lm_polarity"), ("p
               ("uncertainty", "lm_uncertainty"), ("uncertainty", "hedges_per_100w"), ("uncertainty", "llm_uncertainty"),
               ("specificity", "details_per_100w"), ("specificity", "llm_specificity"),
               ("realization", "realized_per_100w"), ("realization", "llm_realization")]
+# dimension -> the free baseline the LLM's gap is measured against (RESULTS.md section 1, "Paired gaps")
+GAP_PAIRS = [("realization", "realized_per_100w"), ("uncertainty", "hedges_per_100w"),
+             ("specificity", "details_per_100w"), ("polarity", "finbert_polarity")]
 
 
 def label_spearman(human: pd.DataFrame, x: pd.DataFrame, ids) -> list[tuple]:
@@ -534,6 +551,12 @@ def gold_baselines(model: str) -> None:
               "\n|---|---|---|---|---|---|")
         for (d, c, na, r, lo, hi), (*_, nb, rb, lob, hib) in zip(label_spearman(human, x, both), label_spearman(human, x, on)):
             print(f"| {d} | {c} | {na} | {r:+.2f} [{lo:+.2f}, {hi:+.2f}] | {nb} | {rb:+.2f} [{lob:+.2f}, {hib:+.2f}] |")
+        print("\nIs the LLM closer to the person than the free baseline? Spearman of each with the person, LLM minus "
+              "baseline, on items (a), resampling the items for both:")
+        for d, c in GAP_PAIRS:
+            k = [i for i in both if pd.notna(x.at[i, f"llm_{d}"]) and pd.notna(x.at[i, c])]
+            est, lo, hi = spearman_gap_ci(human.loc[k, d], x.loc[k, f"llm_{d}"], x.loc[k, c])
+            print(f"  {d:12} llm_{d} - {c}: {est:+.2f} [{lo:+.2f}, {hi:+.2f}]  n={len(k)}")
 
 
 def rerank_call_usd(n_input_tokens: float) -> float:

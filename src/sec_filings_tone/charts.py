@@ -45,8 +45,9 @@ BLUES = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d3
 DIVERGING = ["#e34948", "#f0efec", "#2a78d6"]  # hurts, neutral, helps
 INK, MUTED, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#e1e0d9", "#c3c2b7", "#fcfcfb"
 NOTE = ("S&P 500 10-Ks. A company's cell is the mean over its on-topic passages (hybrid search's top 3 in that 10-K, "
-        "scored by Claude Haiku 5.5). Fiscal years as the companies label them; most end in December. FY2026 is left "
-        "out: only companies whose fiscal year doesn't end in December had filed.")
+        "scored by Claude Haiku 5.5). A fiscal year is labelled by the calendar year it ends in; most end in December, "
+        "and the 9% of 10-Ks whose year ends January to May mostly cover the year before. FY2026 is left out: only "
+        "companies whose fiscal year doesn't end in December had filed.")
 CHECKED = " Word-checked: a passage counts only if it names the topic."
 WITHIN = " MD&A line: each 10-K's top 3 searched within its MD&A, not the MD&A part of the whole 10-K's top 3."  # S_TOPICS (PLAN.md Phase 7, 2026-10-18)
 

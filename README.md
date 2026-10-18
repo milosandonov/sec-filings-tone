@@ -258,11 +258,18 @@ Results are written to `data/tone/`, which is not in git. The 10-Q commands are 
   company or COVID in their own text anyway.
 - **Short scales hit ceilings.** Realization and specificity have three levels. Where a topic was
   already live, as China was for chipmakers, they can't rise.
-- **Fiscal years are as the companies label them.** Most end in December, but NVDA's ends in
-  January; a 52/53-week year ending January 1–7 counts as the year before. Charts use that
-  fiscal-year label. Event windows compare the last 10-K whose fiscal year ended before the event
-  with the first whose fiscal year ends on or after it. That "before" 10-K can be filed after the
-  event and already react to it, which biases the change toward zero. The filed rule
+- **A fiscal year is labelled by the calendar year it ends in.** Most end in December, and a
+  52/53-week year ending January 1–7 counts as the year before. But 43 companies (9% of the
+  FY2019–FY2025 10-Ks) end their year between January 8 and May 31, so their FY t mostly covers
+  calendar t−1: NVDA's FY2024 ended in January 2024. Some retailers (HD, LOW, TGT) name that year by
+  the earlier calendar year, so their label here is one more than their own. Charts use this label.
+  Estimated from the plotted numbers, relabelling those 43 companies would move no line-chart point
+  by more than about 0.05, always within its 95% band; it matters most in the Consumer Staples
+  (31% of 10-Ks) and Consumer Discretionary (26%) heatmap rows around fast events such as the 2022
+  invasion of Ukraine. The event tests pick 10-Ks by date, so the label doesn't affect them: they
+  compare the last 10-K whose fiscal year ended before the event with the first whose fiscal year
+  ends on or after it. That "before" 10-K can be filed after the event and already react to it,
+  which biases the change toward zero. The filed rule
   (`events.py --filed`) takes the last 10-K filed before the event instead; in the 2025 tariff test
   it skipped FY2024 for 75% of companies.
 - **No claim that tone predicts returns.** The results describe how companies write about risk and

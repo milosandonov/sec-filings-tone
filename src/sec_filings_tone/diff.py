@@ -97,6 +97,16 @@ def passages() -> pd.DataFrame:
     return p
 
 
+def new_minus_carried(x: pd.DataFrame, m: str, within: list[str]) -> pd.Series:
+    """Per company: dimension m's mean on new passages minus its mean on carried-over ones, compared within
+    each group of `within` and then averaged over the company's groups; only groups with both kinds count.
+    With topic and fiscal year as `within`, a topic or year that simply has more new text (supply chain in
+    FY2020, tariffs in FY2025) doesn't show up as a difference between new and carried-over text."""
+    g = x[x.kind != "mixed"].groupby(["ticker", *within, "kind"], observed=True)[m].mean().unstack("kind")
+    g = g.reindex(columns=["new", "carried over"])
+    return (g["new"] - g["carried over"]).dropna().groupby(level="ticker").mean()
+
+
 def fmt(e: float, lo: float, hi: float) -> str:
     return f"{e:+.2f} [{lo:+.2f}, {hi:+.2f}]"
 
@@ -115,11 +125,12 @@ def report() -> None:
         print(f"\n=== {label}: on-topic passages by class: {q.kind.value_counts().to_dict()}")
         for item, name in ITEMS.items():
             x = q[q["item"] == item]
-            print(f"{name}: new minus carried over, within company (expected for specificity: > 0)")
-            for m in DIMS:
-                means = x[x.kind != "mixed"].groupby(["ticker", "kind"], observed=True)[m].mean().unstack()
-                d = (means["new"] - means["carried over"]).dropna()
-                print(f"  {m:12} {fmt(*did(d, d[:0]))}  companies={len(d)}")
+            for how, within in [("within company, pooling its topics and years", []),
+                                ("within company x topic x fiscal year, then per company", ["topic", "fy"])]:
+                print(f"{name}: new minus carried over, {how} (expected for specificity: > 0)")
+                for m in DIMS:
+                    d = new_minus_carried(x, m, within)
+                    print(f"  {m:12} {fmt(*did(d, d[:0]))}  companies={len(d)}")
             r = spearman_ci(x.share, x.specificity, n_boot=500)
             print(f"  Spearman(carryover share, specificity) {fmt(*r)}  passages={len(x)}")
         print("Agreement of the LLM's polarity with the baselines (Spearman; intervals resample passages):")

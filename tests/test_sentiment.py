@@ -108,3 +108,15 @@ assert abs(res["lm_polarity"][1] + 1) < 1e-9
 assert res["llm_polarity"][0] == 4 and abs(res["llm_polarity"][1] - 1) < 1e-9
 assert all(n == 3 for _, _, n, *_ in label_spearman(human, x, ids[:3]))
 print("ok")
+
+# the LLM's gap over a baseline: Spearman with the person, LLM minus baseline, resampling items for both
+from sec_filings_tone.sentiment import spearman_gap_ci  # noqa: E402
+
+h = pd.Series([0, 1, 2, 3, 4, 5])
+est, lo, hi = spearman_gap_ci(h, h * 2, -h)  # perfect against reversed
+assert abs(est - 2) < 1e-9 and lo <= est <= hi, (est, lo, hi)
+est, lo, hi = spearman_gap_ci(h, h, h + 1)  # the same ranking: no gap in any resample
+assert est == 0 and lo == hi == 0, (est, lo, hi)
+r = [0, 2, 1, 4, 3, 5]
+assert abs(spearman_gap_ci(h, pd.Series(r), h)[0] - (h.corr(pd.Series(r), method="spearman") - 1)) < 1e-9
+print("ok")
