@@ -302,8 +302,8 @@ def compare(model: str) -> None:
     big = [i for i in sorted(ids, key=lambda i: -gap[i]) if gap[i] >= 3 or max(abs(a[i][k] - b[i][k]) for k in SCORES) >= 2]
     rows, ans = {r["id"]: r for r in load(TESTS)}, {x["id"]: x for x in load(ANSWERS)}
     doc = [f"# Where the two judges differ most ({len(big)} of {len(ids)} answers)\n",
-           f"Scores are accuracy / completeness / groundedness, 1–5. Listed when the summed difference is at least 3 "
-           f"or one score differs by 2 or more. Written by `eval/qa_eval.py compare`.\n"]
+           "Scores are accuracy / completeness / groundedness, 1–5. Listed when the summed difference is at least 3 "
+           "or one score differs by 2 or more. Written by `eval/qa_eval.py compare`.\n"]
     for i in big:
         g = lambda j: f"{j['accuracy']} / {j['completeness']} / {j['groundedness']}"
         claims = lambda j: "".join(f"\n  - {c}" for c in j["unsupported_claims"]) or " none"

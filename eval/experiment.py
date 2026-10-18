@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from eval import K, TESTS, Cap, CapReached, contains, score
+from eval import TESTS, Cap, CapReached, contains, score
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import PRICES, rerank_call_usd
 from sec_filings_tone.ingest import build_chunks, embed_text, n_tokens

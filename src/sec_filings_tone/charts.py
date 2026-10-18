@@ -218,17 +218,17 @@ def carryover() -> None:
 def main() -> None:
     plt.rcParams.update({"font.family": ["Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"], "font.size": 9})
     FIGURES.mkdir(exist_ok=True)
-    sec = {g: cells(items).query("fy <= @LAST_FY") for g, items in SECTIONS.items()}
+    sec = {g: cells(items).query(f"fy <= {LAST_FY}") for g, items in SECTIONS.items()}
     for topic in LINES:
         lines(table({g: x[x.topic == topic] for g, x in sec.items()}), topic,
               FIGURES / f"lines_{topic.lower().replace(' ', '_')}.png")
-    lims = heatmaps(cells().query("fy <= @LAST_FY"))
+    lims = heatmaps(cells().query(f"fy <= {LAST_FY}"))
     keep = named()
-    sec = {g: cells(items, keep=keep).query("fy <= @LAST_FY") for g, items in SECTIONS.items()}
+    sec = {g: cells(items, keep=keep).query(f"fy <= {LAST_FY}") for g, items in SECTIONS.items()}
     for topic in [t for t in LINES if t in TOPIC_WORDS]:
         lines(table({g: x[x.topic == topic] for g, x in sec.items()}), topic,
               FIGURES / f"lines_{topic.lower().replace(' ', '_')}_named.png", checked=True)
-    heatmaps(cells(keep=keep).query("fy <= @LAST_FY and topic in @TOPIC_WORDS"), lims, checked=True)
+    heatmaps(cells(keep=keep).query(f"fy <= {LAST_FY} and topic in @TOPIC_WORDS"), lims, checked=True)
     if CARRYOVER.exists():
         carryover()
     if (OUT / "event_study.csv").exists():
