@@ -192,7 +192,7 @@ def lm(text: str) -> dict:
 
 
 def sentences(text: str) -> list[str]:
-    # ponytail: regex split; "U.S. Government" splits in two. Fine for an average over a passage.
+    # a regex split; "U.S. Government" splits in two. Fine for an average over a passage.
     return [s for s in re.split(r"(?<=[.!?])\s+(?=[A-Z(\"“])|\n+", text) if s.strip()] or [text]
 
 

@@ -48,7 +48,7 @@ def chunks() -> pd.DataFrame:
 
 @cache
 def bm25_index() -> bm25s.BM25:
-    # ponytail: rebuilt in every process (seconds on the pilot); save()/load() it once the full set is in
+    # rebuilt in every process; bm25s's save()/load() would avoid that
     index = bm25s.BM25()
     index.index(bm25s.tokenize(chunks().text.tolist(), stopwords="en", show_progress=False), show_progress=False)
     return index

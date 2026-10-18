@@ -31,7 +31,7 @@ ITEMS = {"1A": "Risk factors", "7": "MD&A"}
 def matcher(prev: list[str]):
     """Whether a sentence closely matches (difflib ratio >= RATIO) one of `prev`. Exact copies are
     looked up; otherwise only the 5 sentences sharing the most 4-word runs with it are compared."""
-    # ponytail: top 5 by shared 4-word runs; a sentence at ratio >= 0.9 shares most of its runs, so it ranks first
+    # shortcut: top 5 by shared 4-word runs; a sentence at ratio >= 0.9 shares most of its runs, so it ranks first
     exact, runs = set(prev), defaultdict(set)
     for i, s in enumerate(prev):
         w = s.split()

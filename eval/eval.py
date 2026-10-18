@@ -6,7 +6,7 @@ Usage:
     uv run python eval/eval.py 3            # one test, with each keyword's first-hit rank per stage
     uv run python eval/eval.py --budget 0.25 --max-minutes 10   # caps (defaults: $0.50, 15 minutes)
 
-Metrics follow the course's week5/evaluation/eval.py: MRR, nDCG@k and keyword coverage per keyword,
+Metrics follow week5/evaluation/eval.py in github.com/ed-donner/llm_engineering (MIT): MRR, nDCG@k and keyword coverage per keyword,
 averaged per test, then over tests. Two changes:
 - A chunk contains a keyword only as a case-sensitive whole word; substring matching makes "Arm" hit
   "harm" and "CAC" hit inside other words.
