@@ -50,7 +50,7 @@ def chunks() -> pd.DataFrame:
 @cache
 def bm25_index() -> bm25s.BM25:
     """Built once and saved under BM25_DIR: building takes about a minute on the full set, loading seconds."""
-    # ponytail: keyed on the chunk count only; delete BM25_DIR if chunks.parquet changes but keeps its count
+    # keyed on the chunk count only; delete BM25_DIR if chunks.parquet changes but keeps its count
     path = BM25_DIR / str(len(chunks()))
     if path.exists():
         return bm25s.BM25.load(path, show_progress=False)

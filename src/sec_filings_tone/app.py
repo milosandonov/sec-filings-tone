@@ -1,0 +1,55 @@
+"""Phase 10: a local chat window over answer.answer(), the same function the CLI uses.
+
+Usage:
+    uv run python -m sec_filings_tone.app               # http://127.0.0.1:7860, $0.50 per chat session
+    uv run python -m sec_filings_tone.app --budget 0.20 --effort medium
+
+Local only: no share link, since anyone with the link could spend the API key.
+"""
+
+import argparse
+
+import gradio as gr
+
+from sec_filings_tone import answer
+from sec_filings_tone.budget import Cap
+
+EXAMPLES = [
+    "How did NVIDIA describe the financial impact of the US license requirement for H20 exports to China, and when did it learn of it?",
+    "Compare how NVIDIA and AMD described China export-control risk in fiscal 2022 versus fiscal 2024.",
+    "How did the large regional banks describe deposit outflows and funding costs in their first 10-Qs after the SVB failure in March 2023?",
+    "Which Energy companies reported a direct financial hit from Russia's invasion of Ukraine (impairments, exits from projects), and how large was it?",
+    "Which sectors' 10-Ks treated tariffs as an effect that already happened in FY2025, rather than a hypothetical risk, and how does that compare with FY2023?",
+    "Which Health Care companies added AI as a risk factor after 2022, and what specifically are they worried about?",
+    "How did REITs describe the effect of higher interest rates on their financing costs and property values in FY2023?",
+    "Which companies disclosed an actual cybersecurity incident, not just a hypothetical one, in their FY2024 10-K?",
+    "What were Apple's main supply-chain risks in FY2023?",
+    "What risk factors did JPMorgan add to its FY2023 10-K compared with FY2022?",
+    "Will NVIDIA's stock outperform next quarter?",
+]
+
+HEADER = (f"Ask about the 10-K risk factors and MD&A (FY2019–FY2025) and 10-Q MD&A of the current S&P 500 companies. "
+          f"Answers come from the filings only, cite the passages they use, and show the precomputed tone profile. "
+          f"Model: {answer.MODEL}. Follow-up questions use the conversation so far.")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--budget", type=float, default=0.50, help="USD per chat session")
+    ap.add_argument("--model", default=answer.MODEL)
+    ap.add_argument("--effort", default=answer.EFFORT, choices=["low", "medium", "high"])
+    a = ap.parse_args()
+    caps = {}  # browser session -> its cap
+
+    def chat(message: str, history: list[dict], request: gr.Request):
+        cap = caps.setdefault(request.session_hash, Cap(a.budget))
+        yield from answer.answer(message, history, cap, a.model, a.effort)
+
+    print("loading chunks, the BM25 index and the tone cells ...", flush=True)
+    answer.warm()
+    gr.ChatInterface(chat, type="messages", title="SEC Filings Tone: ask the filings", description=HEADER,
+                     examples=EXAMPLES, cache_examples=False).launch()
+
+
+if __name__ == "__main__":
+    main()

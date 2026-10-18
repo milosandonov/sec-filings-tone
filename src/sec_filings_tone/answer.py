@@ -269,11 +269,12 @@ def rank(c: pd.DataFrame, a: Aggregate, names: pd.Series) -> tuple[pd.DataFrame,
     key = t["change"] if a.by_change and len(years) > 1 else t[years[-1]]
     t = t.loc[key.sort_values(ascending=a.lowest_first, na_position="last").index].dropna(how="all")
     n = c.groupby("fy").agg(companies=("ticker", "nunique"), discussing=("discussed", "sum"))
-    counts = "; ".join(f"FY{y}: {int(r.discussing)} of {r.companies} companies' 10-Ks discuss {a.topic}" for y, r in n.iterrows())
+    counts = "; ".join(f"FY{r.fy}: {int(r.discussing)} of {r.companies} companies' 10-Ks discuss {a.topic}"
+                       for r in n.reset_index().itertuples())
     shown = t.head(MAX_ROWS)
     dim = a.dimension if a.dimension != "discussed" else "discussed" if a.unit == "companies" else "share"
     out = pd.DataFrame({"Sector" if a.unit == "sectors" else "Company":
-                        shown.index if a.unit == "sectors" else [f"{x} ({names.get(x, '')})" for x in shown.index]})
+                        shown.index if a.unit == "sectors" else [f"{x} ({names[x]})" if x in names else x for x in shown.index]})
     for y in years:
         out[f"{a.dimension} FY{y}"] = [fmt(v, dim) for v in shown[y]]
     if "change" in shown:
@@ -294,7 +295,8 @@ def top_cells(c: pd.DataFrame, ids: list[str], a: Aggregate, n: int = 3) -> list
     return [(c[c.sector == s].ticker.iloc[0], fy) for s in ids if s in set(c.sector)][:n]
 
 
-def cell_passages(p: pd.DataFrame, cells_: list[tuple[str, int]], a: Aggregate, keep: set | None, per: int = 2) -> list[str]:
+def cell_passages(p: pd.DataFrame, cells_: list[tuple[str, int]], a: Aggregate, keep: set | None = None,
+                  per: int = 2) -> list[str]:
     """chunk_ids of each cell's on-topic passages (word-checked where keep is given), the ones scoring
     highest on the dimension first (lowest with lowest_first), then by search rank."""
     p = p[(p.topic == a.topic) & ~p.off_topic & (p["item"] == a.item if a.item else True)
@@ -391,9 +393,9 @@ def stream(blocks: list, history: list[dict], cap: Cap, model: str, effort: str)
 def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     parts = []
     if out["citations"]:
-        docs = out["docs"]
+        docs = list(out["docs"].itertuples())
         parts.append("**Sources**\n\n" + "\n".join(
-            f"{i}. {title(docs.iloc[d])}: “{' '.join(span.split())[:300]}”" for i, (d, span) in enumerate(out["citations"], 1)))
+            f"{i}. {title(docs[d])}: “{' '.join(span.split())[:300]}”" for i, (d, span) in enumerate(out["citations"], 1)))
     if out["cells"]:
         parts.append(out["cells"])
     if out["profile"] is not None and len(out["profile"]):
