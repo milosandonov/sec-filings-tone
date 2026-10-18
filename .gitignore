@@ -19,3 +19,4 @@ data/tone/
 # staging for the fiscal-year fix and the data release; not committed
 data/fyfix/
 data/release/
+.DS_Store
