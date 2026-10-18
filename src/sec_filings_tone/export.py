@@ -8,10 +8,13 @@ fy or report_date, topic, rank, chunk_id), the baselines, the cells, the carryov
 passage text, the section-level AI passages, the run-to-run and masked-prompt rescorings, the label sheets and guidelines, the
 event definitions, companies.csv (sectors and
 sub-industries, which the export-control test needs) and the result CSVs; plus
-provenance.json (model, prompt and schema hashes, row counts) and SHA256SUMS. Left out: the
-embeddings (vectors.npy, 2.8 GB), backups, logs, batch state and the Loughran-McDonald dictionary
-itself (only the per-passage shares derived from it are in). --no-text also leaves out the passage
-text and the model's quoted evidence; the label sheets still quote their 40 passages, as the repo does.
+provenance.json (model, prompt and schema hashes, row counts) and SHA256SUMS. Since 0.4.0 also the
+whole corpus (every chunk, not only the scored ones), its embeddings (vectors.npy as Parquet, 2.8 GB)
+and the topic query vectors, so the retrieval can be redone without SEC fetching or embedding calls.
+Left out: the Chroma index (rebuildable from the embeddings), backups, logs, batch state and the
+Loughran-McDonald dictionary itself (only the per-passage shares derived from it are in). --no-text
+leaves out the corpus, the embeddings and the model's quoted evidence; the label sheets still quote
+their 40 passages, as the repo does.
 
 Usage:
     uv run python -m sec_filings_tone.export --version 0.1.0
@@ -26,16 +29,19 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 from anthropic.lib._parse._transform import transform_schema  # what tone.py sends, so the hash is of that
 
-from sec_filings_tone import events
+from sec_filings_tone import events, retrieve
 from sec_filings_tone.diff import CARRYOVER
 from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS, EMBED_MODEL
 from sec_filings_tone.retrieve import CANDIDATES, RRF_K
 from sec_filings_tone.sentiment import (DIMENSIONS, FINBERT, LM_PATH, MODEL, OUT as SENTIMENT, TOPICS, schema,
                                         system_prompt, user_prompt)
-from sec_filings_tone.tone import FILES, K, KEY, OUT, masked_prompt
+from sec_filings_tone.tone import FILES, K, KEY, OUT, QUERIES, masked_prompt, vectors
 
 RELEASE = Path("data/release")
 ROOT = Path(__file__).parents[2]
@@ -44,6 +50,18 @@ META = ["item", "filing_date", "report_date", "accession"]  # chunk metadata the
 
 def sha(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
+
+def write_embeddings(path: Path, ids: pd.Series, part: int = 50_000) -> None:
+    """Every chunk's embedding (tone.vectors: float32, unit length) beside its chunk_id, written a row
+    group at a time so the 2.8 GB is never held in memory."""
+    v = vectors()  # checks that its rows follow chunks.parquet's
+    schema = pa.schema([("chunk_id", pa.string()), ("embedding", pa.list_(pa.float32(), EMBED_DIMS))])
+    with pq.ParquetWriter(path, schema, compression="zstd") as w:
+        for i in range(0, len(v), part):
+            flat = pa.array(np.ascontiguousarray(v[i:i + part], np.float32).reshape(-1))
+            w.write_table(pa.table([pa.array(ids.iloc[i:i + part], pa.string()),
+                                    pa.FixedSizeListArray.from_arrays(flat, EMBED_DIMS)], schema=schema))
 
 
 def scored(form: str, chunks: pd.DataFrame) -> pd.DataFrame:
@@ -64,7 +82,7 @@ def scored(form: str, chunks: pd.DataFrame) -> pd.DataFrame:
 def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
     forms = ("10-K", "10-Q", "rerun", "masked", "section")  # rerun and masked can hold a chunk no cell retrieves any more
     ids = pd.concat([pd.read_parquet(FILES[f][0], columns=["chunk_id"]) for f in forms]).chunk_id
-    chunks = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", ids.unique().tolist())])
+    chunks = retrieve.chunks().reset_index(drop=True)  # the whole corpus, in the row order of the embeddings
     keep = events.named()
     k = scored("10-K", chunks)
     k["names_topic"] = k.pid.isin(keep)  # the word check (events.TOPIC_WORDS); True for topics without a word list
@@ -84,6 +102,8 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
         "carryover": pd.read_parquet(CARRYOVER),
         "gold_scores": pd.read_parquet(SENTIMENT / f"gold_scores_{MODEL}.parquet"),
         "chunks": chunks,
+        "queries": pd.DataFrame({"topic": list(TOPICS), "query": list(TOPICS.values()),  # what the cells were ranked with
+                                 "embedding": [q.astype(np.float32) for q in np.load(QUERIES)]}),
     }
     if not text:
         del tables["chunks"]
@@ -120,7 +140,7 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
                      "fiscal_years": [int(k.fy.min()), int(k.fy.max())],
                      "cells": int((tables["cells"].version == "model").sum()),
                      "10-Qs": len(tables["q_passages"].drop_duplicates(["ticker", "report_date"]))},
-        "rows": {f"{n}.parquet": len(t) for n, t in tables.items()},
+        "rows": {f"{n}.parquet": len(t) for n, t in tables.items()} | ({"embeddings.parquet": len(chunks)} if text else {}),
     }
 
     out.mkdir(parents=True, exist_ok=True)
@@ -129,12 +149,15 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
             (out / line.split("  ", 1)[1]).unlink(missing_ok=True)
     for n, t in tables.items():
         t.to_parquet(out / f"{n}.parquet", index=False, compression="zstd")
+    if text:
+        write_embeddings(out / "embeddings.parquet", chunks.chunk_id)
     for dest, src in copies.items():
         (out / dest).parent.mkdir(exist_ok=True)
         shutil.copyfile(src, out / dest)
     (out / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n")
-    written = [f"{n}.parquet" for n in tables] + list(copies) + ["provenance.json"]
-    old.write_text("".join(f"{sha((out / f).read_bytes())}  {f}\n" for f in written))  # check: sha256sum -c SHA256SUMS
+    written = [f"{n}.parquet" for n in tables] + (["embeddings.parquet"] if text else []) + list(copies) + ["provenance.json"]
+    digest = {f: hashlib.file_digest((out / f).open("rb"), "sha256").hexdigest() for f in written}  # streamed: 2.8 GB files
+    old.write_text("".join(f"{digest[f]}  {f}\n" for f in written))  # check: sha256sum -c SHA256SUMS
 
     for f in written:
         print(f"{(out / f).stat().st_size / 1e6:9.2f} MB  {f}")

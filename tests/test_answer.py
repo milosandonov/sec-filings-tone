@@ -77,6 +77,10 @@ assert t["discussed FY2023"].tolist() == ["100%", "0%"]
 t, _ = A.rank(c, agg(fy=[2023], dimension="discussed"), names)
 assert t["discussed FY2023"].tolist() == ["yes", "yes", "no"]
 assert A.rank(c, agg(topic="AI"), names)[0].empty
+# ties: the more specific cell first, then alphabetical; the count of tied rows is reported
+tie = c.assign(realization=[0, 2, 0, 2, 0, 2, 0], specificity=[1, 1, 1, 2, 1, 1, 1], discussed=1.0)
+t, counts = A.rank(tie, agg(), names)
+assert t._id.tolist() == ["B", "A", "C"] and "3 companies share the highest value, 2.00" in counts
 
 # which cells to quote: top companies, or the best company in each top sector
 assert A.top_cells(c, ["A", "B", "C"], agg()) == [("A", 2025), ("B", 2025), ("C", 2025)]

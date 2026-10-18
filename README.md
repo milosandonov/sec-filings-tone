@@ -191,16 +191,18 @@ companies (2026-10-15, $0.07):
 
 ## Data availability
 
-**Coming: a GitHub release, data version 0.3.0.** It is not published yet.
+**On the Hugging Face Hub: [milosand1/sec-filings-tone](https://huggingface.co/datasets/milosand1/sec-filings-tone),
+data version 0.4.0** (published 2026-10-18, CC BY 4.0; third-party parts keep their own terms, as the card lists).
 
 The scored passages, cells, FinBERT and Loughran-McDonald baselines, carryover shares, human labels
-and every result table will be released as versioned Parquet files (about 57 MB). The release's
-`README.md` is a dataset card describing each file and column. Its `provenance.json` records the
+and every result table are there as versioned Parquet files (about 26 MB). So are the whole corpus
+(674,816 chunks, 159 MB) and its embeddings with the topic query vectors (2.5 GB): with these, the
+retrieval can be redone exactly without fetching filings or calling an embedding API. Its `README.md` is a
+dataset card describing each file and column. Its `provenance.json` records the
 scoring model, hashes of the prompt and output schema, and row counts. With it, every result in
 RESULTS.md from the event tests on can be rerun locally, with no SEC download, embeddings or API
 calls. Rebuilding from scratch takes about 14 hours of SEC fetching, roughly $35 of API calls and
-several hours of FinBERT. The final frozen version will also go to Zenodo (with a DOI) and the
-Hugging Face Hub.
+several hours of FinBERT. The final frozen version (1.0.0) will also go to Zenodo, with a DOI.
 
 ## Setup
 

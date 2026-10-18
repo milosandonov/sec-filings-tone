@@ -384,7 +384,7 @@ sec-filings-tone/
 **D. Ship it.**
 
 10. **Phase 10, Q&A layer** (`answer.py`): chat over the retrieval with follow-up questions and tone profiles attached. Paid per question (cents).
-11. **Phase 11:** the README, then the paper. Zenodo and the Hugging Face Hub get the gold labels, the guidelines and the scored cells.
+11. **Phase 11:** the README, then the paper. Zenodo and the Hugging Face Hub get the gold labels, the guidelines and the scored cells. **Hugging Face done 2026-10-18 (the owner's decision: public, with the filing text):** data version 0.3.0 at [milosand1/sec-filings-tone](https://huggingface.co/datasets/milosand1/sec-filings-tone), 43 files, 56.8 MB, CC BY 4.0 with the third-party terms listed on the card; every file checked against the local release. Then 0.4.0 the same day (the owner's decision, after reading OpenAI's Services Agreement: Output is the customer's, and nothing restricts publishing it): the whole corpus (674,816 chunks), every chunk's embedding (2.5 GB) and the 13 query vectors. From the release alone, with no API key, `tone retrieve --section` reproduced every AI cell of `passages.parquet` and all of `s_passages.parquet` exactly. Zenodo (with a DOI) waits for the frozen 1.0.0.
 
 **Recommended order:** D10 (the Q&A layer; Phase 11's README expects a demo), then D11 (A1–A4, B5 and B6 done 2026-10-17). B7 (LLM polarity-only baseline) stays optional. B7 (LLM polarity-only baseline, paid) is optional: it would show whether the gain over FinBERT comes from the LLM or from the profile.
 

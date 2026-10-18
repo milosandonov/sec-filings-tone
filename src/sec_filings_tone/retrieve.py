@@ -108,6 +108,25 @@ def vector_search(query: str, where: dict | None, n: int) -> tuple[list[str], li
     return res["ids"][0], [1 - d for d in res["distances"][0]]  # cosine similarity
 
 
+@cache
+def stored_vectors() -> np.ndarray:
+    """Every chunk's embedding in chunks() order (data/tone/vectors.npy, memory-mapped; tone.vectors checks the order)."""
+    from sec_filings_tone.tone import vectors
+
+    return vectors()
+
+
+def exact_vector_search(query: str, mask: np.ndarray, n: int) -> tuple[list[str], list[float]]:
+    """vector_search by exact cosine over the stored vectors of the chunks in mask. Chroma's filtered
+    queries take 4-19 seconds on the full set; this takes well under one. Phase 9 ranks cells the same way."""
+    v, q = stored_vectors(), np.asarray(embed_query(query), np.float32)
+    idx = np.arange(len(v)) if mask.all() else np.flatnonzero(mask)
+    s = (v if mask.all() else v[idx]) @ (q / np.linalg.norm(q))
+    top = np.argsort(-s, kind="stable")[:n] if len(s) <= 10 * n else np.argpartition(-s, n)[:n]
+    top = top[np.argsort(-s[top], kind="stable")]
+    return chunks().chunk_id.iloc[idx[top]].tolist(), s[top].tolist()
+
+
 def bm25_search(query: str, mask: np.ndarray, n: int) -> tuple[list[str], list[float]]:
     q = bm25s.tokenize([query], stopwords="en", return_ids=False, show_progress=False)
     docs, scores = bm25_index().retrieve(q, k=n, weight_mask=mask.astype(np.float32), show_progress=False)
@@ -153,14 +172,16 @@ def rows(ids: list[str], scores: list[float]) -> pd.DataFrame:
 
 
 def search(query: str, k: int = 10, rerank: bool = True, date_from: str | None = None,
-           date_to: str | None = None, **filters) -> dict[str, pd.DataFrame]:
+           date_to: str | None = None, exact: bool = False, **filters) -> dict[str, pd.DataFrame]:
     """Top k of each stage, as chunks.parquet rows plus `score`: vector (cosine similarity), bm25,
-    hybrid (RRF score) and rerank (the hybrid top CANDIDATES reordered by Claude, keeping RRF scores)."""
+    hybrid (RRF score) and rerank (the hybrid top CANDIDATES reordered by Claude, keeping RRF scores).
+    exact: vector search by exact_vector_search instead of Chroma (the Q&A layer, for speed)."""
     mask, where = subset({**filters, "date_from": date_from, "date_to": date_to})
     n = min(CANDIDATES, int(mask.sum()))
     if n == 0:
         return dict.fromkeys(STAGES[:4 if rerank else 3], rows([], []))
-    vec, bm = vector_search(query, where, n), bm25_search(query, mask, n)
+    vec = exact_vector_search(query, mask, n) if exact else vector_search(query, where, n)
+    bm = bm25_search(query, mask, n)
     fused = rrf(vec[0], bm[0])
     out = {"vector": rows(*vec), "bm25": rows(*bm), "hybrid": rows(list(fused), list(fused.values()))}
     if rerank:

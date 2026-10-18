@@ -89,7 +89,7 @@ The data: the 10-K risk factors (item "1A") and MD&A (item "7") of the current S
 A fiscal year (fy) is the year a company's fiscal period ends. NVIDIA's ends in late January, so its FY2024 is mostly calendar 2023; a 52/53-week year ending January 1-7 counts as the year before. "Fiscal 2023", "FY2023" and "the 2023 10-K" all mean fy 2023. For a calendar date window ("the first 10-Qs after March 2023"), use 10-Qs with a filing-date range.
 
 Choose kind:
-- "passages": the answer is in the text of particular filings. Write one sub-query per company, fiscal year and aspect: comparing 2 companies in 2 years is 4 sub-queries. At most 6. Each query is standalone search text in the filings' own words; rewrite follow-ups from the conversation ("what about AMD?" after a question on NVIDIA's FY2024 supply chain becomes "supply chain risks" with ticker AMD and fy 2024). Put every company and year the question names into the filters: tickers from the company list, fy, form, item, sector, or a filing-date range. Leave a filter empty when the question doesn't limit it. Set topic when the sub-query is about one of the topics below.
+- "passages": the answer is in the text of particular filings. Write one sub-query per company, fiscal year and aspect: comparing 2 companies in 2 years is 4 sub-queries. At most 6. Each query is standalone search text in the filings' own words; rewrite follow-ups from the conversation ("what about AMD?" after a question on NVIDIA's FY2024 supply chain becomes "supply chain risks" with ticker AMD and fy 2024). Put every company and year the question names into the filters: tickers from the company list, fy, form, item, sector, or a filing-date range. Leave a filter empty when the question doesn't limit it. For a group of companies narrower than a sector ("regional banks", "airlines"), list their tickers from the sub-industry column. A question about change between years needs a sub-query for each year compared, including a year from earlier in the conversation. Set topic when the sub-query is about one of the topics below.
 - "aggregate": the question asks which or how many companies or sectors did something, across a sector or the whole index ("which Energy companies ...", "which sectors ..."). A search returns only a few passages, so these are answered from a table of tone scores: one row per company, 10-K and topic. Fill aggregate: topic (one of the topics below; if none fits, use "passages" with a sector filter instead), sectors (empty for all), fy (each year compared; for "after 2022", 2022 and the years after it), item ("1A" for risk factors, "7" for MD&A, empty for both), the dimension asked about, lowest_first (true for "most negative", "least ..."), by_change (true when the question asks what changed or was added between the first and the last year) and unit.
 - "decline": the filings can't answer it: predictions, stock prices or returns, investment advice, companies outside the list, years outside the data, or anything else not in these filings. Write message: one or two sentences saying what you can't do and what the filings do cover. Also decline when the company or year is ambiguous, and ask in message which one the user means.
 
@@ -109,9 +109,16 @@ ANSWER_SYSTEM = """You answer an analyst's questions about S&P 500 companies' SE
 - Don't compute numbers that aren't in the text (sums, growth rates); quote amounts as written.
 - No investment advice, price targets or predictions.
 - Name the company, form and fiscal year when you report what a filing says. Mention a company's fiscal-year convention when it matters: NVIDIA's fiscal year ends in late January, so its FY2024 is mostly calendar 2023.
+- Write in your own words, in the third person ("NVIDIA said that ..."); the citations show the exact text.
 - Be concise: the short answer first, then the details, in a few short paragraphs or bullets."""
 
-CELLS_NOTE = """The table below comes from model-scored cells: for each company's 10-K and topic, Claude Haiku 5.5 scored the 3 passages a search ranked highest on the topic, and a cell's value is the mean over the passages it judged on topic ({version}). Answer the "which" part from this table, and say that the list comes from model-scored cells and which version. Use the passages for examples and details. Don't say that companies outside the table did or didn't do something."""
+CELLS_NOTE = """The table below comes from model-scored cells: for each company's 10-K and topic, Claude Haiku 5.5 scored the 3 passages a search ranked highest on the topic, and a cell's value is the mean over the passages it judged on topic ({version}). The scale of {dimension}: {scale}. Answer the "which" part from this table, and say that the list comes from model-scored cells and which version. Use the passages for examples and details. Don't say that companies outside the table did or didn't do something."""
+SCALES = {"polarity": "-2 (the topic hurts the company) to +2 (it helps)",
+          "magnitude": "0 (no described effect) to 3 (a large effect)",
+          "realization": "0 hypothetical, 1 under way, 2 happened",
+          "uncertainty": "0 (predictable effects) to 3 (highly unpredictable)",
+          "specificity": "0 boilerplate, 1 company-specific, 2 named products, dates or amounts",
+          "discussed": "whether the 10-K has an on-topic passage; for a sector, the share of its companies that do"}
 
 PROFILE_NOTE = ("**Tone profile** of the cells this answer draws on: the mean over each 10-K's on-topic passages, "
                 "scored by Claude Haiku 5.5 (polarity −2..+2, magnitude 0–3, realization 0–2, uncertainty 0–3, "
@@ -181,7 +188,7 @@ def check(p: Plan, tickers: set[str]) -> Plan:
 
 def plan(question: str, history: list[dict], cap: Cap, model: str = MODEL, effort: str = EFFORT) -> tuple[Plan, object]:
     """The checked plan and the call's usage."""
-    cap.check(call_usd(model, 20_000, PLAN_TOKENS))  # upper bound: system prompt and history, full output
+    cap.check(call_usd(model, 25_000, PLAN_TOKENS))  # upper bound: the 15,740-token system prompt and history, full output
     convo = "\n\n".join(f"{m['role'].title()}: {m['content'][:1500]}" for m in history)
     text = (f"<conversation>\n{convo}\n</conversation>\n\n" if convo else "") + f"Question: {question}"
     resp = client().messages.parse(
@@ -257,22 +264,31 @@ def rank(c: pd.DataFrame, a: Aggregate, names: pd.Series) -> tuple[pd.DataFrame,
     """The cell table for an aggregate question, ranked, and a line of counts. Rows are companies or
     sectors, columns fiscal years. A company's value is its cell's; a sector's is the mean over its
     companies discussing the topic (for `discussed`: the share discussing it). Ranked on the last year,
-    or with by_change on the last year minus the first; companies with no value are left out."""
+    or with by_change on the last year minus the first; ties go to the more specific (concrete) cells,
+    then alphabetically. Companies with no value are left out."""
     c = c[(c.topic == a.topic) & (c.sector.isin(a.sectors) if a.sectors else True)
           & (c.fy.isin(a.fy) if a.fy else c.fy.le(2025))]
     if c.empty:
         return pd.DataFrame(), "No cells match."
-    t = c.pivot_table(index="sector" if a.unit == "sectors" else "ticker", columns="fy", values=a.dimension, aggfunc="mean")
+    by = "sector" if a.unit == "sectors" else "ticker"
+    t = c.pivot_table(index=by, columns="fy", values=a.dimension, aggfunc="mean")
     years = sorted(t.columns)
     if len(years) > 1:
         t["change"] = t[years[-1]] - t[years[0]]
     key = t["change"] if a.by_change and len(years) > 1 else t[years[-1]]
-    t = t.loc[key.sort_values(ascending=a.lowest_first, na_position="last").index].dropna(how="all")
+    spec = c[c.fy == years[-1]].groupby(by).specificity.mean()
+    order = pd.DataFrame({"key": key, "spec": spec.reindex(t.index)}).sort_index().sort_values(
+        ["key", "spec"], ascending=[a.lowest_first, False], na_position="last", kind="stable")
+    t = t.loc[order.index].dropna(how="all")
     n = c.groupby("fy").agg(companies=("ticker", "nunique"), discussing=("discussed", "sum"))
     counts = "; ".join(f"FY{r.fy}: {int(r.discussing)} of {r.companies} companies' 10-Ks discuss {a.topic}"
                        for r in n.reset_index().itertuples())
     shown = t.head(MAX_ROWS)
     dim = a.dimension if a.dimension != "discussed" else "discussed" if a.unit == "companies" else "share"
+    best = key.min() if a.lowest_first else key.max()
+    if (n_best := int((key == best).sum())) > 1:
+        counts += (f". {n_best} {'sectors' if a.unit == 'sectors' else 'companies'} share the "
+                   f"{'lowest' if a.lowest_first else 'highest'} value, {fmt(best, dim)}")
     out = pd.DataFrame({"Sector" if a.unit == "sectors" else "Company":
                         shown.index if a.unit == "sectors" else [f"{x} ({names[x]})" if x in names else x for x in shown.index]})
     for y in years:
@@ -430,7 +446,8 @@ def answer(question: str, history: list[dict] = (), cap: Cap | None = None, mode
             if len(table):
                 out["cells"] = (f"**Tone cells**, {p.aggregate.topic}, {p.aggregate.dimension} "
                                 f"({version}; {counts})\n\n{md(table)}")
-                notes = [CELLS_NOTE.format(version=version) + f"\n{counts}\n\n{md(table)}"]
+                notes = [CELLS_NOTE.format(version=version, dimension=p.aggregate.dimension,
+                                           scale=SCALES[p.aggregate.dimension]) + f"\n{counts}\n\n{md(table)}"]
         out["docs"] = docs
         if p.kind == "decline":
             out["text"] = p.message

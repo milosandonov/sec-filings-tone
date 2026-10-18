@@ -33,22 +33,30 @@ HEADER = (f"Ask about the 10-K risk factors and MD&A (FY2019–FY2025) and 10-Q 
           f"Model: {answer.MODEL}. Follow-up questions use the conversation so far.")
 
 
+def text(content) -> str:
+    """Gradio 6 passes a message's content as a list of parts; the text parts, joined."""
+    return content if isinstance(content, str) else "".join(p.get("text", "") for p in content if isinstance(p, dict))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=float, default=0.50, help="USD per chat session")
     ap.add_argument("--model", default=answer.MODEL)
     ap.add_argument("--effort", default=answer.EFFORT, choices=["low", "medium", "high"])
     a = ap.parse_args()
-    caps = {}  # browser session -> its cap
+    # browser session -> its cap. Reranking spend is counted process-wide (retrieve.usage), so with
+    # several sessions open each cap also counts the others' reranking: a cap stops early, never late.
+    caps = {}
 
     def chat(message: str, history: list[dict], request: gr.Request):
         cap = caps.setdefault(request.session_hash, Cap(a.budget))
+        history = [{"role": m["role"], "content": text(m["content"])} for m in history]
         yield from answer.answer(message, history, cap, a.model, a.effort)
 
     print("loading chunks, the BM25 index and the tone cells ...", flush=True)
     answer.warm()
-    gr.ChatInterface(chat, type="messages", title="SEC Filings Tone: ask the filings", description=HEADER,
-                     examples=EXAMPLES, cache_examples=False).launch()
+    gr.ChatInterface(chat, title="SEC Filings Tone: ask the filings", description=HEADER, examples=EXAMPLES,
+                     cache_examples=False, analytics_enabled=False).launch(server_name="127.0.0.1", share=False)
 
 
 if __name__ == "__main__":
