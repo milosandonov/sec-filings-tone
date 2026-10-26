@@ -228,7 +228,8 @@ to the cited spans listed under it:
 took a median 21 seconds in that run, most of it Chroma's filtered search. Since 2026-10-26 the app
 searches the stored vectors exactly instead: on the eval's 82 sub-queries it gives the reranker the same
 candidates as Chroma (all 81 that match any chunk), and a search takes a median 0.11 seconds instead of 3.9.
-The end-to-end time hasn't been measured again. It meets one of four bars:
+Asked the 69 eval questions again with it (answers only, $0.27, 2026-10-26), the median answer took
+11 seconds instead of 21. It meets one of four bars:
 
 | Metric | Result | Bar |
 |---|---|---|

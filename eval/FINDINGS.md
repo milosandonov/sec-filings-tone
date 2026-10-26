@@ -580,7 +580,12 @@ What the numbers mean:
   in this eval, the reranker's 20 candidates are the same set as Chroma's for all 81 that match any chunk
   (the vector top 20 differs in 3), and a search takes a median 0.11 s (max 5.1) against
   3.9 s (max 36.8) for Chroma. The judged results above are from the Chroma run and weren't redone, since the
-  reranker sees the same candidates; the end-to-end time hasn't been measured again.
+  reranker sees the same candidates. Answers only, rerun on all 69 questions ($0.265, not judged): median
+  10.7 s against 21.4 s, faster on 49 of 69. The planner gave the same plan as the first run on only 28 of 69
+  questions (it runs before any search), and its scores moved with it: tickers 80% (83% first), fiscal years
+  46% (54%), forms 42% (54%). So a single run's planner numbers are uncertain by several points; both runs
+  miss the 90% bar. On the 28 identical plans, 25 gave the answer model the same passages; the rest differ
+  in the reranker's order.
 
 **Smoke tests (before the eval, on the analyst questions, $0.164):** 12 answers at effort low
 ($0.078) and at medium ($0.079) cost and took the same; low stays the default. Tuning made then, not
