@@ -5,7 +5,8 @@ conversation so far into one of three plans: sub-queries with filters, a lookup 
 for "which companies / which sectors" questions (a search returns only a few passages, so it can't
 list every company in a sector), or a decline. retrieve.search (hybrid + rerank) finds passages for
 each sub-query; an aggregate plan ranks events.cells() and quotes the top cells' own passages. Then
-Claude answers from the passages, given as documents with citations on, streamed. Under the answer:
+Claude answers from the passages, given as documents with citations on, streamed, and a second call drops the
+draft's sentences that its cited passages don't support (--no-check skips it). Under the answer:
 the cited spans, the tone profile of the cells it draws on with the change from the year before,
 and the cost.
 
@@ -18,6 +19,7 @@ Usage:
 
 import argparse
 import math
+import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from functools import cache
@@ -37,7 +39,8 @@ from sec_filings_tone.tone import FILES
 MODEL = "claude-haiku-5-5"
 EFFORT = "low"
 TIMEOUT = 120  # seconds per call
-PLAN_TOKENS, ANSWER_TOKENS = 8000, 8000  # thinking counts toward both
+PLAN_TOKENS, ANSWER_TOKENS, VERIFY_TOKENS = 8000, 8000, 4000  # thinking counts toward all three
+VERIFY, VERIFY_EFFORT = True, "medium"  # check the draft's sentences against the cited passages (verify); ~$0.002 more
 MAX_QUERIES = 6
 K = 6  # passages kept per sub-query
 MAX_PASSAGES = 24
@@ -91,7 +94,7 @@ A fiscal year (fy) is the year a company's fiscal period ends. NVIDIA's ends in 
 Choose kind:
 - "passages": the answer is in the text of particular filings. Write one sub-query per company, fiscal year and aspect: comparing 2 companies in 2 years is 4 sub-queries. At most 6. Each query is standalone search text in the filings' own words; rewrite follow-ups from the conversation ("what about AMD?" after a question on NVIDIA's FY2024 supply chain becomes "supply chain risks" with ticker AMD and fy 2024). Put every company and year the question names into the filters: tickers from the company list, fy, form, item, sector, or a filing-date range. Leave a filter empty when the question doesn't limit it. For a group of companies narrower than a sector ("regional banks", "airlines"), list their tickers from the sub-industry column. A question about change between years needs a sub-query for each year compared, including a year from earlier in the conversation. Set topic when the sub-query is about one of the topics below.
 - "aggregate": the question asks which or how many companies or sectors did something, across a sector or the whole index ("which Energy companies ...", "which sectors ..."). A search returns only a few passages, so these are answered from a table of tone scores: one row per company, 10-K and topic. Fill aggregate: topic (one of the topics below; if none fits, use "passages" with a sector filter instead), sectors (empty for all), fy (each year compared; for "after 2022", 2022 and the years after it), item ("1A" for risk factors, "7" for MD&A, empty for both), the dimension asked about, lowest_first (true for "most negative", "least ..."), by_change (true when the question asks what changed or was added between the first and the last year) and unit.
-- "decline": the filings can't answer it: predictions, stock prices or returns, investment advice, companies outside the list, years outside the data, or anything else not in these filings. Write message: one or two sentences saying what you can't do and what the filings do cover. Also decline when the company or year is ambiguous, and ask in message which one the user means.
+- "decline": the filings can't answer it: predictions, stock prices or returns, investment advice, companies outside the list, years outside the data, or anything else not in these filings. Write message: one or two sentences saying what you can't do and what the filings do cover. Also decline when the company or year is ambiguous, and ask in message which one the user means. Don't decline a question about a listed company because it names something outside the list (a company it bought, sold, spun off or invested in, a subsidiary or a deal) or asks for one figure or date: search that company's filings.
 
 Tone dimensions, scored by Claude Haiku 5.5 for each company, 10-K and topic:
 - polarity: does the topic help or hurt the company (-2 to +2)
@@ -104,15 +107,18 @@ Tone dimensions, scored by Claude Haiku 5.5 for each company, 10-K and topic:
 
 ANSWER_SYSTEM = """You answer an analyst's questions about S&P 500 companies' SEC filings (10-K risk factors and MD&A, 10-Q MD&A), using the passages you are given.
 - Use only the given passages and, when given, the table of tone cells. Don't add outside knowledge of the companies or events.
-- Cite the passages for every claim about what a filing says.
-- Say plainly what the passages don't cover. If they don't answer the question, say so instead of guessing.
+- Every sentence about what a filing says cites the passage that says it, the short answer included. Leave out what you can't cite, such as what another year's filing "also" says when you don't cite that filing's passage.
+- Say what the passages say, not your reading of them: no characterizations, rankings or conclusions they don't state ("mainly", "the clearest example", "a shift from X to Y"), and don't join separate facts into a cause or link the text doesn't give.
+- Don't write about what the filings or passages leave out ("the filing doesn't quantify X"): the passages are a few search results, not the whole filing. If they don't answer part of the question, end with one line: "Not in the passages found: <that part>." If they answer none of it, say only that.
 - Don't compute numbers that aren't in the text (sums, growth rates); quote amounts as written.
 - No investment advice, price targets or predictions.
-- Name the company, form and fiscal year when you report what a filing says. Mention a company's fiscal-year convention when it matters: NVIDIA's fiscal year ends in late January, so its FY2024 is mostly calendar 2023.
+- Name the company, form and fiscal year when you report what a filing says. When a company's fiscal year doesn't end in December and it matters, give the period end from the passage title (NVIDIA's FY2024 ended January 28, 2024).
 - Write in your own words, in the third person ("NVIDIA said that ..."); the citations show the exact text.
-- Be concise: the short answer first, then the details, in a few short paragraphs or bullets."""
+- Be concise: open with the direct answer in one or two sentences built from the cited facts themselves, with their citations, not a summary in your own terms; then the details, in a few short paragraphs or bullets."""
 
-CELLS_NOTE = """The table below comes from model-scored cells: for each company's 10-K and topic, Claude Haiku 5.5 scored the 3 passages a search ranked highest on the topic, and a cell's value is the mean over the passages it judged on topic ({version}). The scale of {dimension}: {scale}. Answer the "which" part from this table, and say that the list comes from model-scored cells and which version. Use the passages for examples and details. Don't say that companies outside the table did or didn't do something."""
+CELLS_NOTE = """The table below comes from model-scored tone cells; its header says how they were scored, the scale and the counts. Answer the "which" part from this table, and say that the list comes from model-scored cells and which version. Use the passages for examples and details. Don't say that companies outside the table did or didn't do something."""
+SCORED = ("scored by Claude Haiku 5.5: a company's cell is the mean over the 3 passages a search ranked highest "
+          "on the topic in its 10-K, of those the model judged on topic")
 SCALES = {"polarity": "-2 (the topic hurts the company) to +2 (it helps)",
           "magnitude": "0 (no described effect) to 3 (a large effect)",
           "realization": "0 hypothetical, 1 under way, 2 happened",
@@ -365,7 +371,9 @@ def profile_md(pr: pd.DataFrame) -> str:
 
 
 def title(r) -> str:
-    when = f"FY{r.fy}" if r.form == "10-K" else f"quarter ending {r.report_date}"
+    """A passage's label for the answer model, the judge and the Sources list. It carries the period end, so a
+    fiscal-year end the answer states can be checked against it."""
+    when = f"FY{r.fy} (year ended {r.report_date})" if r.form == "10-K" else f"quarter ending {r.report_date}"
     return f"{r.ticker} {r.form} {when}, {ITEM_NAMES[r.item]}"
 
 
@@ -406,12 +414,64 @@ def stream(blocks: list, history: list[dict], cap: Cap, model: str, effort: str)
         yield text + "\n\n*(The answer was cut off at the length limit.)*", cites
 
 
+class Verdict(BaseModel):
+    sentence: str = Field(description="The sentence, copied exactly from the answer with its [n] markers")
+    evidence: str = Field(description="The words of a cited passage, its title or the table that state it; empty if none do")
+    supported: bool
+
+
+class Verdicts(BaseModel):
+    sentences: list[Verdict]
+
+
+VERIFY_SYSTEM = """You check an answer about SEC filings against the passages it cites. You get the answer (its [n] markers number the cited spans), the cited spans, the full passages they come from with their titles and, for questions about many companies, the table of tone cells it was given.
+
+Go through the answer one sentence at a time, the short answer included; skip headings and a last line that starts "Not in the passages found". For each sentence, find the words in the cited passages, their titles or the table that state what it says, copy them as evidence, and set supported. Paraphrase is fine: the evidence has to state the same facts, not the same words. The [n] markers point to the spans that usually hold the evidence, but anything in the cited passages counts.
+
+A sentence is unsupported when nothing in them states it: an amount, date, company or year that isn't there, a description or conclusion the passages don't state, a statement about what a filing or the passages don't say, or a claim about a filing none of the cited passages comes from."""
+
+
+def drop(text: str, sentences: list[str]) -> tuple[str, list[str]]:
+    """text without the given sentences (those found in it word for word), tidied: no doubled spaces, emptied
+    bullets or runs of blank lines. Also returns the sentences removed."""
+    gone = [s.strip() for s in sentences if s.strip() and s.strip() in text]
+    for s in gone:
+        text = text.replace(s, "")
+    text = re.sub(r"(?m)[ \t]+$", "", re.sub(r"[ \t]{2,}", " ", text))
+    text = re.sub(r"(?m)^[ \t]*(?:[-*]|\d+\.)[ \t]*(?:\*\*[^*\n]*\*\*:?)?[ \t]*\n", "", text + "\n")  # emptied bullets
+    return re.sub(r"\n{3,}", "\n\n", text).strip(), gone
+
+
+def verify(out: dict, cap: Cap, model: str) -> tuple[str, list[str]]:
+    """The answer without the sentences a second call finds unsupported by its cited passages (and cell table),
+    and the sentences dropped. It sees what the judge sees: the cited passages only, not every passage given."""
+    docs = list(out["docs"].itertuples())
+    cited = sorted({d for d, _ in out["citations"]})
+    spans = "\n".join(f"[{n}] {title(docs[d])}: “{s}”" for n, (d, s) in enumerate(out["citations"], 1))
+    passages = "\n\n".join(f'<passage title="{title(docs[d])}">\n{docs[d].text}\n</passage>' for d in cited)
+    cells = f"\n\n<cell_table>\n{out['cells']}\n</cell_table>" if out["cells"] else ""
+    text = (f"<answer>\n{out['text']}\n</answer>\n\n<cited_spans>\n{spans}\n</cited_spans>\n\n"
+            f"<cited_passages>\n{passages}\n</cited_passages>{cells}")
+    cap.check(call_usd(model, 40_000, VERIFY_TOKENS))
+    resp = client().messages.parse(model=model, max_tokens=VERIFY_TOKENS, output_config={"effort": VERIFY_EFFORT},
+                                   system=VERIFY_SYSTEM, messages=[{"role": "user", "content": text}],
+                                   output_format=Verdicts)
+    cap.charge(usd(model, resp.usage))
+    if resp.parsed_output is None:  # no verdict: keep the answer as it is
+        return out["text"], []
+    return drop(out["text"], [v.sentence for v in resp.parsed_output.sentences if not v.supported])
+
+
 def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     parts = []
     if out["citations"]:
         docs = list(out["docs"].itertuples())
         parts.append("**Sources**\n\n" + "\n".join(
             f"{i}. {title(docs[d])}: “{' '.join(span.split())[:300]}”" for i, (d, span) in enumerate(out["citations"], 1)))
+    if out.get("dropped"):
+        n = len(out["dropped"])
+        parts.append(f"<sub>{n} sentence{'s' if n > 1 else ''} removed from the draft: a check found "
+                     f"{'them' if n > 1 else 'it'} unsupported by the cited passages.</sub>")
     if out["cells"]:
         parts.append(out["cells"])
     if out["profile"] is not None and len(out["profile"]):
@@ -421,15 +481,17 @@ def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     return FOOTER + "\n\n".join(parts)
 
 
-def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = MODEL, effort: str = EFFORT):
-    """Yields the reply as markdown, longer each time: the answer as it streams, then with the footer.
-    Returns a dict with the plan, the passages given to the model, the citations, the text and the cost.
+def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = MODEL, effort: str = EFFORT,
+           check_answer: bool = VERIFY):
+    """Yields the reply as markdown: the answer as it streams, then (check_answer) without the sentences verify()
+    drops, then with the footer. Returns a dict with the plan, the passages given to the model, the citations, the
+    draft, the text, the sentences dropped and the cost.
     history: earlier {"role", "content"} turns; anything after FOOTER in them is dropped."""
     cap = cap if cap is not None else Cap()
     history = [{"role": m["role"], "content": str(m["content"]).split(FOOTER)[0]} for m in history]
     start = cap.spent()
     out = {"question": question, "plan": None, "plan_usage": None, "docs": pd.DataFrame(), "citations": [],
-           "cells": "", "profile": None, "text": ""}
+           "cells": "", "profile": None, "text": "", "draft": "", "dropped": []}
     try:
         p, out["plan_usage"] = plan(question, history, cap, model, effort)
         out["plan"] = p
@@ -444,10 +506,10 @@ def answer(question: str, history: list[dict] = (), cap: Cap | None = None, mode
             version = ("word-checked: passages count only if they name the topic" if p.aggregate.topic in events.TOPIC_WORDS
                        else "the model's own on-topic judgment, not word-checked")
             if len(table):
-                out["cells"] = (f"**Tone cells**, {p.aggregate.topic}, {p.aggregate.dimension} "
-                                f"({version}; {counts})\n\n{md(table)}")
-                notes = [CELLS_NOTE.format(version=version, dimension=p.aggregate.dimension,
-                                           scale=SCALES[p.aggregate.dimension]) + f"\n{counts}\n\n{md(table)}"]
+                out["cells"] = (f"**Tone cells**, {', '.join(p.aggregate.sectors) or 'all sectors'}, "
+                                f"{p.aggregate.topic}, {p.aggregate.dimension}: "
+                                f"{SCALES[p.aggregate.dimension]} ({SCORED}; {version}; {counts})\n\n{md(table)}")
+                notes = [f"{CELLS_NOTE}\n\n{out['cells']}"]
         out["docs"] = docs
         if p.kind == "decline":
             out["text"] = p.message
@@ -460,6 +522,10 @@ def answer(question: str, history: list[dict] = (), cap: Cap | None = None, mode
             for text, cites in stream(blocks, history, cap, model, effort):
                 out["text"], out["citations"] = text, cites
                 yield text
+            out["draft"] = out["text"]
+            if check_answer and out["citations"]:
+                out["text"], out["dropped"] = verify(out, cap, model)
+                yield out["text"]
             keys = [(r.ticker, r.fy, r.topic) for r in out["docs"].itertuples() if r.form == "10-K" and r.topic]
             out["profile"] = profile(profile_cells(), list(dict.fromkeys(keys))[:8])
     except CapReached as e:
@@ -495,6 +561,7 @@ def main() -> None:
     ap.add_argument("--effort", default=EFFORT, choices=["low", "medium", "high"])
     ap.add_argument("--budget", type=float, default=0.10, help="USD for the whole run")
     ap.add_argument("--plan-only", action="store_true", help="print each plan; no search or answer")
+    ap.add_argument("--no-check", action="store_true", help="keep the draft: don't check it against the cited passages")
     a = ap.parse_args()
     cap, history = Cap(a.budget), []
     for q in a.questions:
@@ -506,7 +573,7 @@ def main() -> None:
                   f"{u.cache_creation_input_tokens} cache write, {u.output_tokens} out; session ${cap.spent():.4f}")
             reply = "(plan only, no answer)"
         else:
-            gen, reply = answer(q, history, cap, a.model, a.effort), ""
+            gen, reply = answer(q, history, cap, a.model, a.effort, not a.no_check), ""
             while True:
                 try:
                     new = next(gen)

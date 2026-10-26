@@ -592,6 +592,67 @@ What the numbers mean:
 on the eval set: planner rules for sub-industries ("regional banks") and for change between years,
 third-person answers, each dimension's scale in the cell note, and ties ranked by specificity.
 
+### Update 2026-10-26: making answers better grounded (written before the rerun)
+
+**What the 104 unsupported claims are.** To see what to fix, every claim the judge listed in the published
+run was put in one category (`eval/qa_claim_categories.csv`; sorted by Claude in one pass, not checked by the
+owner, so treat the boundaries as rough):
+
+| Category | Claims | Answers | What it is |
+|---|---|---|---|
+| Interpretation | 28 | 23 | a paraphrase, framing or inference the judge calls loose ("mainly", "the clearest example"), mostly mild |
+| Context the judge didn't see | 24 | 20 | true facts the answer model had and the judge didn't: period-end dates and fiscal-year conventions from each passage's context field, the scoring model and method from the cell note, sectors |
+| Absence | 16 | 14 | statements about what the filings or passages don't say, or that a search found nothing |
+| Wrong declines | 12 | 7 | the 7 answerable questions the planner declined, whose messages make claims |
+| Uncited | 11 | 9 | a claim taken from a passage the model was given but didn't cite, so the judge (who sees only cited passages) can't check it |
+| Real errors | 7 | 7 | e.g. "the deal was a provider of AI infrastructure", counts given as "overall" that are one sector's, a wrong quarter |
+| Citation marker | 5 | 5 | supported by a cited passage, but the sentence has no marker or the wrong span |
+| Judge error | 1 | 1 | the judge's own note says it is supported |
+
+No claim is a wrong fiscal year in an answer, so fiscal years are left to the planner (not taken from
+`data/filings.csv`). Without the first four categories, 26 of the 64 answers would still be flagged; without
+interpretation as well, 7. So the 5% bar needs the interpretations to go, and many of them are judgment calls.
+
+**What changed** (`answer.py`; the judge, its prompt and the questions are unchanged):
+
+1. Answer rules: every sentence about a filing cites its passage, the opening included, and what can't be cited is
+   left out; say what the passages say, not a reading of them; no statements about what the filings or passages
+   leave out, except one last line "Not in the passages found: ..."; the opening is built from the cited facts.
+2. A check (`answer.verify`, on by default, `--no-check` skips it): a second Claude Haiku 5.5 call (effort medium)
+   gets the draft, the cited spans, the cited passages and the cell table (what the judge gets, minus the question
+   and reference), quotes the evidence for each sentence and marks it supported or not; unsupported sentences are
+   removed and the footer says how many. About $0.002 and a few seconds an answer.
+3. Each passage's title carries its period end ("NVDA 10-K FY2024 (year ended 2024-01-28), ..."), so a stated
+   fiscal-year end can be checked against the Sources list (and by the judge, which gets the titles). The cell table's
+   header names the sectors, the scale and how the cells were scored, and the answer model gets that same header.
+4. Planner rule: a question about a listed company that names something outside the list (a company it bought or
+   invested in, a subsidiary, a deal) or asks for one figure is searched, not declined.
+
+Items 2 and 3 partly change what the judge sees (the titles and the cell header it is shown), not how it grades;
+item 3 shows the user and the judge facts the answer model already had.
+
+**Tuning, on development questions only.** `eval/qa_dev.jsonl`: 12 questions not in the eval set (8 written for
+this, 2 of the app's examples, 2 out of scope), no reference answers. Three rounds ($0.24 with their judging): the
+first version of the check (list the unsupported sentences, effort low) removed well-cited sentences, so it now
+quotes evidence per sentence at effort medium; the opening and the cell header were changed after round two. The
+judge flagged 7 and then 5 of the 10 judged development answers, too few to tell apart.
+
+**How much the judge varies by itself.** The judge regraded 15 published answers, picked at random (seed 0;
+`qa_judge_rejudge.jsonl`, $0.097): groundedness identical on 11 of 15 and within one point on all, accuracy on 12,
+completeness on 14; the unsupported-claim flag the same on 13 of 15 (one flipped each way). Mean groundedness
+3.93 both times.
+
+**The run, fixed before it.** The 69 questions once with this version: answers in `qa_answers_v2.jsonl`, cost in
+`qa_runs_v2.jsonl`, grades in `qa_judge_v2.jsonl` (same judge, prompt and Batch API), and the drafts of the
+answers the check changed graded as well (`qa_judge_v2draft.jsonl`), to separate the check from the other
+changes. Measured against the same four bars (planner tickers and fiscal years ≥ 90%, groundedness ≥ 4, at most 5%
+of answers with an unsupported claim, out-of-scope declined ≥ 80%). The comparison with the published run is
+paired over the same questions, with 95% bootstrap intervals (10,000 resamples of questions) for each difference.
+The planner's own run-to-run change (28 of 69 identical plans between two runs of the same code) means planner
+metrics can't be put down to these changes, the decline rule included. Expected beforehand: fewer answers with an
+unsupported claim and higher groundedness, fewer in-scope declines; the 5% bar still missed (the development
+answers were flagged half the time); accuracy and completeness may drop where the check removes sentences.
+
 ## How to reproduce
 
 ```bash
