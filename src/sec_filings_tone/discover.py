@@ -12,7 +12,7 @@ the design below was written down and committed before any clustering was run.
 - Labels, free: each cluster's 12 most distinctive words (bm25s tokens, English stop words and pure
   numbers removed), by the log-odds z-score of the cluster's word counts against the rest of the corpus
   with an informative Dirichlet prior (Monroe et al. 2008; prior = corpus frequencies, 1,000 pseudo-tokens);
-  plus the 3 chunks nearest the centroid.
+  plus the 3 chunks nearest the centroid (from 3 different companies: changed 2026-10-26, see below).
 - Covered: a cluster's best cosine between its centroid and the 13 topic query vectors (tone.QUERIES).
   Threshold, from the project's own retrieval: for each topic, the cosine between its query and the
   centroid of the Item 1A passages it retrieved and the scorer kept as on topic (FY2019-FY2025); the
@@ -28,12 +28,22 @@ the design below was written down and committed before any clustering was run.
 - Optional names: Claude Haiku names the top 15 uncovered clusters by growth from their top words and
   3 central chunks, capped at $0.10 (Anthropic). Names are labels only; nothing is computed from them.
 
+Added 2026-10-26 after seeing the first results: the threshold leaves only 13 clusters uncovered, mostly
+governance boilerplate, while clusters plainly outside the 13 topics (litigation, patents, acquisitions)
+clear it by a hair and the topic retrieval seldom picks their chunks. So a second flag is kept beside the
+first: `rarely_retrieved`, fewer than half as many of the cluster's chunks retrieved as in the corpus
+overall (the cut at half is a post-hoc choice). Names and the chart cover the clusters either flag
+marks; the pre-registered `covered` column is unchanged. Also changed then: the example chunks come from 3
+different companies, since one cluster's 3 nearest were one company's risk factor in 3 years, and Haiku
+named the cluster after it.
+
 Usage:
     uv run python -m sec_filings_tone.discover                    # clusters, tables, chart; free, a few minutes
     uv run python -m sec_filings_tone.discover --name --budget 0.1   # also Haiku names for the top 15
 """
 
 import argparse
+from textwrap import shorten
 
 import bm25s
 import numpy as np
@@ -151,7 +161,8 @@ def name_clusters(t: pd.DataFrame, meta: pd.DataFrame, cap: Cap) -> dict[int, st
         resp = client.messages.create(model=MODEL, max_tokens=1024, output_config={"effort": "low"},
                                       system=NAME_PROMPT, messages=[{"role": "user", "content": msg}])
         cap.charge(call_usd(MODEL, resp.usage.input_tokens, resp.usage.output_tokens))
-        names[r.cluster] = next((b.text.strip() for b in resp.content if b.type == "text"), "")
+        text_out = next((b.text.strip() for b in resp.content if b.type == "text"), "")
+        names[r.cluster] = text_out.splitlines()[-1].strip() if text_out else ""  # once it explained first: keep the name
         print(f"  {r.cluster:2}: {names[r.cluster]}  (${cap.spent():.4f} so far)")
     return names
 
@@ -163,16 +174,18 @@ def chart(t: pd.DataFrame, drift: float, path) -> None:
     from sec_filings_tone.charts import AXIS, GRID, INK, MUTED, SERIES, SURFACE, header
 
     plt.rcParams.update({"font.family": ["Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"], "font.size": 9})
-    t = t.iloc[::-1]
-    fig, ax = plt.subplots(figsize=(11, 0.42 * len(t) + 2.4), facecolor=SURFACE)
+    t = t.iloc[::-1].reset_index(drop=True)
+    fig, ax = plt.subplots(figsize=(11, 0.42 * len(t) + 2.6), facecolor=SURFACE)
     ax.set_facecolor(SURFACE)
+    for color, (lab, g) in zip(SERIES, [("Below the topic-match threshold (pre-registered)", t[~t.covered]),
+                                        ("Above it, but rarely retrieved by the 13 topics (post hoc)", t[t.covered])]):
+        ax.hlines(g.index, g.lo, g.hi, color=color, lw=2, alpha=0.35)
+        ax.plot(g.change, g.index, "o", color=color, ms=8, mec=SURFACE, mew=1.5, label=lab)
     y = np.arange(len(t))
-    ax.hlines(y, t.lo, t.hi, color=SERIES[0], lw=2, alpha=0.35)
-    ax.plot(t.change, y, "o", color=SERIES[0], ms=8, mec=SURFACE, mew=1.5)
     ax.axvline(0, color=AXIS, lw=1, zorder=0)
     ax.axvline(drift, color=MUTED, lw=1, ls="--", zorder=0)
     ax.text(drift, len(t) - 0.4, " median cluster", color=MUTED, fontsize=8, va="bottom")
-    ax.set_yticks(y, [f"{lab}  ({a:.0%} → {b:.0%})" for lab, a, b in
+    ax.set_yticks(y, [f"{shorten(lab, 60, placeholder=" …")}  ({a:.0%} → {b:.0%})" for lab, a, b in
                       zip(t.label, t[f"share_{FIRST_FY}"], t[f"share_{LAST_FY}"])], color=INK)
     ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v * 100:+.0f} pts"))
     ax.grid(axis="x", color=GRID, lw=0.8)
@@ -183,11 +196,14 @@ def chart(t: pd.DataFrame, drift: float, path) -> None:
     header(fig, "Risk themes the 13 topics miss, fastest growing first",
            f"Change from FY{FIRST_FY} to FY{LAST_FY} in the share of companies with a risk-factor passage in each cluster; "
            "in brackets the share in each year",
-           f"S&P 500 10-K Item 1A chunks, k-means on their embeddings (k = {K}), clusters whose centroid matches no topic "
-           "query as well as the loosest topic matches its own passages. Exploratory: found by looking, not a pre-registered "
-           "test. Bars: 95% bootstrap intervals over companies. Dashed: the median change over all clusters "
-           "(filings got longer, so most shares rose). Labels: Claude Haiku names, or top words.")
-    fig.tight_layout(rect=(0, 0.07, 1, 0.92))
+           f"S&P 500 10-K Item 1A chunks, FY{FIRST_FY}-FY{LAST_FY}, k-means on their embeddings (k = {K}). Threshold: a "
+           "cluster's centroid matches no topic query as well as the loosest topic matches its own scored passages. Rarely "
+           "retrieved: under half the corpus-wide share of its chunks among the 13 topics' passages. Exploratory: found by "
+           "looking, not a pre-registered test. Bars: 95% bootstrap intervals over companies. Dashed: the median change over "
+           "all clusters (filings got longer, so most shares rose). Labels: Claude Haiku names.")
+    fig.legend(*ax.get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.925), ncol=2,
+               frameon=False, labelcolor=INK, fontsize=9)
+    fig.tight_layout(rect=(0, 0.08, 1, 0.88))
     fig.savefig(path, dpi=200, facecolor=SURFACE)
     plt.close(fig)
     print(f"wrote {path}")
@@ -212,48 +228,51 @@ def main() -> None:
     print(f"threshold {thr:.3f} (lowest of the topics' own-passage cosines):\n{ref.round(3).to_string()}")
     sims = cent @ q.T
     share, t = growth(meta, labels, K)
-    s = x @ cent.T
-    s[labels[:, None] != np.arange(K)] = -np.inf
-    near = np.argsort(-s, axis=0)[:N_EXAMPLES].T  # each cluster's member chunks nearest its centroid
-    del s
+    # each cluster's member chunks nearest its centroid, one per company (2026-10-26, after one cluster's three
+    # were the same company's risk factor in three years)
+    order = np.argsort(-np.einsum("ij,ij->i", x, cent[labels]))
+    near = (meta[["ticker", "chunk_id"]].iloc[order].assign(cluster=labels[order]).drop_duplicates(["cluster", "ticker"])
+            .groupby("cluster").head(N_EXAMPLES).groupby("cluster").chunk_id.agg(";".join))
     in_ret = meta.chunk_id.isin(retrieved).to_numpy()
     t = t.assign(cluster=range(K), chunks=np.bincount(labels, minlength=K),
                  best_topic=np.array(list(TOPICS))[sims.argmax(1)], best_cos=sims.max(1), covered=sims.max(1) >= thr,
                  retrieved=[in_ret[labels == c].mean() for c in range(K)],
                  words=[" ".join(w) for w in top_words(meta.text.tolist(), labels, K)],
-                 examples=[";".join(meta.chunk_id.iloc[n]) for n in near])
+                 examples=near.reindex(range(K)).to_numpy())
 
-    # stability: the seed-1 cluster closest to each seed-0 cluster, and its growth
+    t["rarely_retrieved"] = t.retrieved < in_ret.mean() / 2  # post hoc, 2026-10-26 (module docstring)
+    t["flagged"] = ~t.covered | t.rarely_retrieved
+
+    # stability: the seed-1 cluster closest to each seed-0 cluster, its growth and its rank among seed 1's flagged
     l1, c1 = runs[SEEDS[1]]
     _, t1 = growth(meta, l1, K)
     m = cent @ c1.T
+    t1["flagged"] = ((c1 @ q.T).max(1) < thr) | (np.array([in_ret[l1 == c].mean() for c in range(K)]) < in_ret.mean() / 2)
+    rank1 = t1[t1.flagged].change.rank(ascending=False, method="first")
     t = t.assign(match_cos=m.max(1), match_change=t1.change.to_numpy()[m.argmax(1)],
-                 match_covered=(c1 @ q.T).max(1)[m.argmax(1)] >= thr)
-    unc1 = t1.assign(covered=(c1 @ q.T).max(1) >= thr).query("not covered").sort_values("change", ascending=False)
-    t["match_rank"] = [unc1.index.get_loc(j) + 1 if j in unc1.index else np.nan for j in m.argmax(1)]
+                 match_flagged=t1.flagged.to_numpy()[m.argmax(1)], match_rank=rank1.reindex(m.argmax(1)).to_numpy())
 
     t["name"] = ""
-    top = t[~t.covered].sort_values("change", ascending=False)
+    t = t.sort_values(["flagged", "change"], ascending=[False, False])
+    top = t[t.flagged].head(N_NAMED)
     if a.name:
         cap = Cap(a.budget)
-        names = name_clusters(top.head(N_NAMED), meta, cap)
+        names = name_clusters(top, meta, cap)
         t["name"] = t.cluster.map(names).fillna("")
         print(f"naming spent ${cap.spent():.4f} (Anthropic)")
     t["label"] = np.where(t.name != "", t.name, t.words.str.split().str[:4].str.join(" "))
-    t = t.sort_values(["covered", "change"], ascending=[True, False])
     t.to_csv(TABLE, index=False)
     print(f"wrote {TABLE} and {CLUSTERS}")
 
     drift = t.change.median()
-    print(f"\n{(~t.covered).sum()} of {K} clusters uncovered; median change over all clusters {drift:+.3f}; "
-          f"corpus-wide retrieved share {in_ret.mean():.3f}")
-    cols = ["cluster", "chunks", "best_topic", "best_cos", "retrieved", f"share_{FIRST_FY}", f"share_{LAST_FY}",
+    print(f"\n{(~t.covered).sum()} of {K} clusters below the threshold, {t.flagged.sum()} flagged by either rule; median "
+          f"change over all clusters {drift:+.3f}; corpus-wide retrieved share {in_ret.mean():.3f}")
+    cols = ["cluster", "chunks", "best_topic", "best_cos", "covered", "retrieved", f"share_{FIRST_FY}", f"share_{LAST_FY}",
             "change", "lo", "hi", "match_cos", "match_rank", "label"]
     with pd.option_context("display.width", 250, "display.max_colwidth", 60, "display.float_format", "{:.3f}".format):
-        print(t[~t.covered].head(20)[cols].to_string(index=False))
-        print(t[t.covered].sort_values("best_cos").head(5)[cols].to_string(index=False))
+        print(t[t.flagged][cols].to_string(index=False))
 
-    top = t[~t.covered].head(N_NAMED)
+    top = t[t.flagged].head(N_NAMED)
     path = FIGURES / "discovered_topics.png"
     chart(top, drift, path)
     long = share[top.cluster].rename_axis(columns="cluster").stack().rename("share").reset_index()

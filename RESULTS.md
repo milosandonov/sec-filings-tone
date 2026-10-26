@@ -844,6 +844,80 @@ and marked.
 - **Verification:** the top 3 clusters' growth recomputed with separate code; 5 random chunks of
   each of the top 5 clusters read by hand, with a verdict on whether the label fits.
 
+**Changed after seeing the first results (2026-10-26), with both versions kept:**
+
+- The pre-registered threshold (0.423, set by Tariffs; the other topics' own passages sit at
+  0.44–0.60) leaves only 13 of 80 clusters uncovered, mostly governance and securities boilerplate.
+  Clusters plainly outside the 13 topics clear it by a hair: litigation (0.425), intellectual property
+  (0.425), insurance underwriting (0.427). The retrieval check shows the same thing from the other
+  side. Across the corpus, 48% of chunks are among some topic's scored passages; for intellectual
+  property it is 15%, for acquisitions 16%. So a second flag was added: **rarely retrieved**, under
+  half the corpus-wide share (the cut at half is post hoc). The table keeps the pre-registered
+  `covered` column. The chart and names cover the 24 clusters that either rule flags.
+- Each cluster's example chunks now come from 3 different companies. For one cluster, the 3 chunks
+  nearest the centroid were the same Tyson risk factor in 3 years (about debt). Haiku named the
+  cluster after them, but 5 random members are all about goodwill impairment.
+
+**Results** (`data/tone/discovered_topics.csv`, one row per cluster; `figures/discovered_topics.png`):
+
+| Cluster (Haiku name) | Flag | Companies FY2019 → FY2025 | Change | Seed-1 match (cosine, change) |
+|---|---|---|---|---|
+| Risk-factor introductions and summaries | threshold | 25% → 55% | +29.5 pts [+24.9, +34.2] | 0.998, +28.4 |
+| Acquisition integration | retrieval | 46% → 53% | +7.1 [+2.2, +11.8] | 1.000, +8.6 |
+| Exclusive forum (Delaware) provisions | threshold | 6% → 12% | +6.9 [+4.5, +9.7] | 0.947, +3.9 |
+| Protecting intellectual property | retrieval | 33% → 38% | +4.9 [+1.3, +8.6] | 1.000, +4.7 |
+| Goodwill and intangible impairment | retrieval | 21% → 23% | +2.6 [−1.3, +6.5] | 1.000, +1.5 |
+| Alternative asset manager funds | retrieval | 4% → 6% | +1.7 [+0.2, +3.4] | 0.988, +1.9 |
+| Crypto regulation and compliance | threshold | 0.6% → 2.4% | +1.7 [+0.6, +3.0] | 1.000, +1.5 |
+
+465 companies filed risk factors in both years. Over all 80 clusters the median change is +1.3
+points; 59 rose, 27 with an interval above zero. That is the drift from longer filings to compare
+against.
+
+- **The 13 topics already hold the big growers.** The fastest-growing clusters overall are AI
+  (+44.5 pts), cybersecurity (+31.2), ESG and sustainability (+29.7), physical climate risk (+19.1)
+  and talent (+15.9). All of them match a topic query well (0.49–0.66) and are mostly retrieved
+  (61–94%).
+- **What they miss and grew is mostly form, not new risk.** The one large mover is the opening of
+  Item 1A: introductory caveats and, from FY2020, a risk-factor summary. The SEC's 2020 amendments
+  to Regulation S-K Item 105 require that summary when the section runs over 15 pages. Chunks with a
+  "summary" heading in Item 1A went from 2 companies in FY2019 to 47 in FY2020 and 76 in FY2025,
+  which fits that rule; the rule as the cause is my reading, not a test. Exclusive-forum bylaws
+  doubled, from 6% to 12% of companies.
+- **Substantive themes outside the topics grew modestly:** acquisition integration and IP protection
+  by about 5–7 points, each a few points above the drift. Crypto is the clearest new theme, though
+  small: 3 companies in FY2019, 11 in FY2025. Litigation (+12.7 pts [+7.7, +17.8]) is borderline on
+  both rules (cosine 0.425, 29% retrieved), so neither rule flags it.
+- **Not found at this resolution:** themes that only a handful of companies raise. Checked after the
+  results by word count, not used to pick anything: Item 1A chunks naming GLP-1 come from 1 company
+  in FY2022 and 10 in FY2025, split across the medical-products and packaged-food clusters. Chunks
+  naming stablecoins come from 5 companies in FY2023 and 26 in FY2025, mostly in the crypto cluster.
+  With k = 80, a cluster averages ~1,150 chunks, so a theme raised by 10–26 companies is absorbed
+  into a broader one.
+
+**Verification.** Recomputed with separate code from the saved cluster labels (plain Python sets,
+another bootstrap seed), the top 3 changes match to the digit: +29.5, +7.1, +6.9 points, with
+intervals within 0.3 points. Centroids rebuilt from the saved labels reassign every chunk to its own
+cluster (seed 0: 100%, so the run converged; seed 1: 99.9%, stopped at 100 rounds). The top 4
+clusters are stable across seeds (matched centroids at cosine 0.947–1.000, ranked 1–4 in the
+seed-1 run). The exclusive-forum cluster grows less in seed 1 (+3.9 against +6.9). Of 5 random chunks
+read from each of the top 5:
+
+- introductions: 5 of 5 fit;
+- acquisitions: 5 of 5;
+- exclusive forum: 5 of 5, though in 3 of them the forum clause is a later risk factor in the chunk;
+- intellectual property: 5 of 5 (in one, IP is the chunk's second risk factor, after data quality);
+- impairment: 5 of 5.
+
+**Caveats.** Chunks are ~3,000 characters and often span 2–3 risk factors, so a chunk's cluster
+reflects one of them. Several clusters are boilerplate (governance, stock price, forward-looking
+statements), not risks. "Share of companies with a chunk in the cluster" rises with filing length,
+which is why the drift is reported. The coverage threshold and the retrieval cut are judgment calls:
+the first was fixed in advance, the second was not. k-means splits by wording as well as theme:
+there are two cybersecurity clusters and two tax clusters. Fiscal-year labels follow the rest of the
+project, where 9% of 10-Ks cover mostly the year before. Haiku names cost $0.0074 in total over three
+runs and a smoke test (Anthropic); the names are labels only.
+
 ## Limitations
 
 Added 2026-10-17 after an external review: the first six points below.
