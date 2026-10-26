@@ -211,7 +211,7 @@ def passages(qs: list[SubQuery], cap: Cap) -> list[pd.DataFrame]:
     """Each sub-query's reranked top K, tagged with its topic. Searches run in parallel."""
     cap.check(len(qs) * call_usd(retrieve.RERANK_MODEL, retrieve.CANDIDATES * 800, 8000))  # upper bound per rerank
     with ThreadPoolExecutor(len(qs)) as ex:
-        return list(ex.map(lambda q: retrieve.search(q.query, K, True, **filters(q))["rerank"].assign(topic=q.topic), qs))
+        return list(ex.map(lambda q: retrieve.search(q.query, K, True, exact=True, **filters(q))["rerank"].assign(topic=q.topic), qs))
 
 
 def merge(lists: list[pd.DataFrame], n: int = MAX_PASSAGES) -> pd.DataFrame:
@@ -483,9 +483,9 @@ def run(question: str, history: list[dict] = (), cap: Cap | None = None, **kw) -
 
 
 def warm() -> None:
-    """Load what every question needs (chunks, the BM25 index, Chroma, the cells), so the first answer
+    """Load what every question needs (chunks, the BM25 index, the stored vectors, the cells), so the first answer
     doesn't wait for it."""
-    retrieve.chunks(), retrieve.bm25_index(), retrieve.collection(), profile_cells(), scored(False), companies()
+    retrieve.chunks(), retrieve.bm25_index(), retrieve.stored_vectors(), profile_cells(), scored(False), companies()
 
 
 def main() -> None:

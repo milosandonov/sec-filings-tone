@@ -225,7 +225,10 @@ to the cited spans listed under it:
 
 **Eval** (69 questions in `eval/qa_tests.jsonl`, bars fixed in advance; details in
 [eval/FINDINGS.md](eval/FINDINGS.md) section 9). Answers cost $0.0039 a question on average and
-take a median 21 seconds, most of it Chroma's filtered search. It meets one of four bars:
+took a median 21 seconds in that run, most of it Chroma's filtered search. Since 2026-10-26 the app
+searches the stored vectors exactly instead: on the eval's 82 sub-queries it gives the reranker the same
+candidates as Chroma (all 81 that match any chunk), and a search takes a median 0.11 seconds instead of 3.9.
+The end-to-end time hasn't been measured again. It meets one of four bars:
 
 | Metric | Result | Bar |
 |---|---|---|
@@ -260,7 +263,7 @@ several hours of FinBERT. The final frozen data version (1.0.0) will also go to 
 ## Setup
 
 Requires Python 3.13 or newer and [uv](https://docs.astral.sh/uv/). Run `uv sync` (add `--extra finbert`
-for the FinBERT baselines, `--extra app` for the chat app, or `--all-extras`), then create a
+for the FinBERT baselines, `--extra app` for the chat app and the explorer, or `--all-extras`), then create a
 `.env` file in the project root. The SEC rejects requests without a User-Agent.
 
 ```
@@ -304,10 +307,11 @@ uv run python -m sec_filings_tone.charts             # writes figures/
 # Phase 10: Q&A with cited passages (paid, cents a question; $0.50 cap per session by default)
 uv run python -m sec_filings_tone.answer "What charge did NVIDIA record for H20 exports to China?"
 uv run python -m sec_filings_tone.app                # local chat window at http://127.0.0.1:7860
+uv run python -m sec_filings_tone.explore            # free: heatmaps of the cells, click through to passages, http://127.0.0.1:7861
 uv run python eval/qa_eval.py answers --budget 0.70   # the Q&A eval (paid), then: judge --budget 1.25, report
 
 # Offline tests, no API calls
-for f in tests/test_*.py; do uv run python $f; done
+uv run pytest
 ```
 
 Results are written to `data/tone/`, which is not in git. The 10-Q commands are in RESULTS.md,

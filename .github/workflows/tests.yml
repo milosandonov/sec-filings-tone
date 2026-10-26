@@ -9,4 +9,4 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked
-      - run: for f in tests/test_*.py; do uv run python $f; done
+      - run: uv run pytest

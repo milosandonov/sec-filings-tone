@@ -26,3 +26,5 @@ eval/qa_judge_gpt-*.jsonl
 eval/qa_judge_divergences.md
 eval/qa_hand_grades.csv
 eval/qa_batch*.json
+# personal to-do list from the 2026-10-26 external review; not committed
+FUTURE_IMPROVEMENTS.md

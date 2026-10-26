@@ -575,6 +575,12 @@ What the numbers mean:
   top 10 has an MRR of 0.910, but its filters were supplied, and here the planner sets them.
 - **Speed.** Most of the 21 seconds is Chroma's filtered vector search (4–19 seconds a query on the
   full collection, timed 2026-10-18); planning takes about 2 seconds and each rerank 1–4.
+  **Update 2026-10-26:** `answer.py` now passes `exact=True`, which `retrieve.search` already
+  supported: exact cosine over the stored vectors (`vectors.npy`). On the 82 sub-queries the planner wrote
+  in this eval, the reranker's 20 candidates are the same set as Chroma's for all 81 that match any chunk
+  (the vector top 20 differs in 3), and a search takes a median 0.11 s (max 5.1) against
+  3.9 s (max 36.8) for Chroma. The judged results above are from the Chroma run and weren't redone, since the
+  reranker sees the same candidates; the end-to-end time hasn't been measured again.
 
 **Smoke tests (before the eval, on the analyst questions, $0.164):** 12 answers at effort low
 ($0.078) and at medium ($0.079) cost and took the same; low stays the default. Tuning made then, not
