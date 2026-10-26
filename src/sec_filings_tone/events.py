@@ -87,7 +87,9 @@ def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None =
     `discussed`, and the mean of each dimension (and each baseline, once computed for every chunk)
     over the on-topic passages, using only passages from `items`, and only passages (pid) in `keep`, if given.
     A 10-K analysis of MD&A alone takes AI's cells from section(): its top 3 searched within MD&A (PLAN.md
-    Phase 7, 2026-10-18), not the MD&A part of the whole 10-K's top 3."""
+    Phase 7, 2026-10-18), not the MD&A part of the whole 10-K's top 3.
+    form "new" (diff.py, 2026-10-26): the tone of each cell's top 3 among new chunks, on the 10-K cells' grid, so
+    "before" and "after" are the same 10-Ks as in the 10-K tests and a cell with no new on-topic passage isn't discussed."""
     passages, scores, _, baselines = FILES[form]
     p = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
     bases = [baselines]
@@ -101,9 +103,11 @@ def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None =
         b = pd.concat([pd.read_parquet(f, columns=["chunk_id", *BASELINE_FOR]) for f in bases]).drop_duplicates("chunk_id")
         if set(p.chunk_id) <= set(b.chunk_id):  # partial baselines would compare different companies
             p, cols = p.merge(b, on="chunk_id"), cols + list(BASELINE_FOR)
-    key = [*KEY[form], "topic"]
+    key = [*KEY["10-Q" if form == "10-Q" else "10-K"], "topic"]
     grid = p.groupby([*key, "sector"], as_index=False)[[x for x in ("fy", "filing_date", "report_date")
                                                         if x not in key]].first()
+    if form == "new":
+        grid = cells(items)[grid.columns]
     on = p[~p.off_topic & (p["item"].isin(items) if items else True) & (p.pid.isin(keep) if keep is not None else True)]
     grid = grid.merge(on.groupby(key)[cols].mean().reset_index(), on=key, how="left")
     return grid.assign(discussed=grid[DIMS[0]].notna().astype(float))
@@ -208,6 +212,20 @@ def breaks(c: pd.DataFrame, e) -> pd.DataFrame:
     return out.assign(ticker=x.ticker, sector=x.sector_b).groupby(["ticker", "sector"], as_index=False)[MEASURES].mean()
 
 
+def break_rows(c: pd.DataFrame, e) -> list[dict]:
+    """The break check for event e on cells c: each dimension with an expected direction, on the affected companies."""
+    b = breaks(c, e)
+    b = b[b.ticker.map(affected(e, c.drop_duplicates("ticker").set_index("ticker").sector))]
+    rows = []
+    for m in [d for d in DIMS if getattr(e, d)]:
+        if not e.after and (v := b[m].dropna()).size:
+            est, lo, hi = did(v, v[:0])
+            sign = "+" if lo > 0 else "-" if hi < 0 else "0"
+            rows.append({"event": e.event, "measure": m, "expected": getattr(e, m), "break": est, "lo": lo,
+                         "hi": hi, "n": v.size, "ok": sign == getattr(e, m)})
+    return rows
+
+
 def robust() -> None:
     """A4: the event study, the break check, and the tests on each 10-K section alone; model only and
     word-checked."""
@@ -223,14 +241,7 @@ def robust() -> None:
                     if (v := y[m].dropna()).size:
                         rows.append({"event": e.event, "affected": g, "k": k, "measure": m, "n": v.size,
                                      **dict(zip(["mean", "lo", "hi"], did(v, v[:0])))})
-            b = breaks(c, e)
-            b = b[b.ticker.map(hit)]
-            for m in [d for d in DIMS if getattr(e, d)]:
-                if not e.after and (v := b[m].dropna()).size:
-                    est, lo, hi = did(v, v[:0])
-                    sign = "+" if lo > 0 else "-" if hi < 0 else "0"
-                    brk.append({"event": e.event, "measure": m, "expected": getattr(e, m), "break": est, "lo": lo,
-                                "hi": hi, "n": v.size, "ok": sign == getattr(e, m)})
+            brk += break_rows(c, e)
         pd.DataFrame(rows).to_csv(OUT / f"event_study{suffix}.csv", index=False)
         brk = pd.DataFrame(brk)
         brk.to_csv(OUT / f"event_breaks{suffix}.csv", index=False)

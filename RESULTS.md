@@ -767,6 +767,63 @@ MD&A text is slightly more positive than copied text (+0.13 n.s. before the fisc
   on-topic passages are new and a company needs one in both 10-Ks.
 - **Not done:** the planned "what changed" summary per filing, an LLM call; it fits the Q&A layer.
 
+### The event tests on new text only (2026-10-26, exploratory)
+
+**Why, and why it is exploratory.** The planned event tests (section 3) detect 0 of 11 expected
+changes. One explanation, a guess not yet tested: a cell's 3 passages come from the whole 10-K, and
+most of a 10-K is copied from the year before, so a reaction would be averaged with unchanged text.
+The rerun above, on the scored passages that happen to be new, kept too few companies to tell. This
+section retrieves passages for that purpose instead. It is a new test run, decided on 2026-10-26
+after the planned run found nothing, so **any pass here is exploratory, not confirmatory**. This plan
+was written and committed before any of these passages were scored.
+
+**The cells** (`diff.py retrieve`, `data/tone/n_passages.parquet`). For each cell the tests below
+use, its top 3 among the 10-K's *new* chunks only (carryover share at most 0.2, as above), ranked
+exactly as a Phase 9 cell (hybrid: the stored vectors and query vectors, BM25 over the whole corpus,
+top 20 of each fused with RRF; `tone.within` with a chunk filter). As a check, the same code with no
+filter reproduces every passage of `passages.parquet` for each of the 7 topics. The cells: each event's
+"before" and "after" 10-K per company on the event's topics (the fiscal-year rule of section 3), for
+both the affected and the comparison companies, and for the break check the 10-K a year before
+"before": 7,444 cells. AI is searched within MD&A, since its test reads MD&A (section 3); the other
+topics within the whole 10-K, which for new text means Item 1A and Item 7, the only items carryover
+is measured on. Of the 7,444 cells, 6,389 have at least one new chunk: 18,746 passages. A cell whose
+10-K has no new chunk, or no new passage the model calls on topic, counts as not discussing the topic
+in new text, and the company drops out of that dimension's test.
+
+**Who can be in each test.** Carryover exists only for a 10-K whose company has the year before's
+10-K, so no FY2019 10-K has new-text cells. COVID's "before" 10-K is FY2019 for 446 of its 468
+companies, so at most 20 (whose fiscal year ended in early 2020) stay, and its break check, which
+needs the 10-K before that, can't run. Companies with new chunks in both 10-Ks, an upper bound before
+the on-topic flag: COVID 20 of 468, export controls 465 of 481 (17 of 19 chipmakers), rate hikes 468
+of 481 (101 of 104 affected), SVB 73 of 75, AI 458 of 478 (84 of 88 affected), tariffs 474 of 494
+(190 of 201 affected). The results will give each test's companies beside the original test's.
+
+**The scoring.** The production prompt, unchanged (`tone.score_cells`: Claude Haiku 5.5, the same
+system prompt, schema and user prompt, whose hashes match `data/release/provenance.json`; Batch API).
+2,703 passages were already scored for the same cell (2,007 in `scores.parquet`, 696 in the MD&A AI
+cells' `s_scores.parquet`), so their scores are copied; 16,043 are scored, estimated at $2.41 (at
+$0.00015 a passage; the code's cap uses $0.0002, $3.21). Cap: $6.
+
+**The tests, fixed now.** The same events, topics, items, expected directions and decision rule as
+[`events.csv`](events.csv) and section 3, with the fiscal-year rule for "before" and "after":
+- **The planned test, 11 tests:** the change where the event hit minus the change elsewhere, passing
+  if its 95% bootstrap interval (over companies) is on the expected side of zero, that is one-sided
+  at 2.5%: export controls (polarity down; magnitude, realization, specificity up), rate hikes
+  (magnitude, realization, specificity up), AI boom in MD&A (polarity, specificity up), tariffs
+  (realization, uncertainty up). Chance alone would pass about 0.3 of 11 (11 × 0.025), more if the
+  versions are counted together.
+- **The break check, at most 11 tests** (13 in section 3, less COVID's 2): the change before → after
+  minus the change in the year before, on the affected companies, same rule; about 0.3 by chance.
+- **Before-after where the event hit, 15** (with COVID and SVB), reported as in section 3 but not a
+  test of the event, since it picks up drift.
+- **Both versions:** model only, and word-checked (AI, China and tariff passages count only if they
+  name the topic, `events.TOPIC_WORDS`), as for every other event result.
+- **What would support the dilution guess:** passes, or differences clearly larger than section 3's
+  on the same events. With fewer companies per test, a failure here can't rule the guess out.
+
+Code: `diff.py retrieve`, `diff.py score`, `diff.py events`; results in `data/tone/n_events*.csv` and
+`n_event_breaks*.csv`.
+
 ## 9. Do companies in the same sector move together? (research question 4)
 
 **Method** ([`comove.py`](src/sec_filings_tone/comove.py), fixed in PLAN.md before computing): for
