@@ -12,8 +12,6 @@ from pathlib import Path
 
 # USD per 1M input and output tokens (claude.com pricing, checked 2026-10-12)
 PRICES = {"claude-haiku-5-5": (0.10, 0.50), "claude-sonnet-5-5": (2.00, 10.00), "claude-opus-5-5": (4.00, 20.00)}
-
-
 ROOT = Path(__file__).parents[2]
 RUNS = ROOT / "data" / "runs.jsonl"  # one JSON line per paid run; local, git-ignored
 
@@ -81,7 +79,7 @@ def run_log(models: list[str], usage=dict, outputs=(), path: Path = RUNS, **fiel
     spec = getattr(main, "__spec__", None)  # python -m: the module; a script: its path
     sha, dirty = git_state()
     rec, mine, start = {"started": now(), "command": [spec.name if spec else sys.argv[0], *sys.argv[1:]],
-                        "commit": sha, "dirty": dirty, "models": models, **fields}, {}, time.time()
+                        "commit": sha, "dirty": dirty, "models": list(dict.fromkeys(models)), **fields}, {}, time.time()
     status, error = "failed", None
     try:
         yield mine

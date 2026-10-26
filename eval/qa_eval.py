@@ -395,7 +395,7 @@ if __name__ == "__main__":
 
         def usage():
             new = [j for j in load(path) if j["id"] not in before]
-            return {"usd": {provider: sum(j["usd"] for j in new)}, "rows": len(new),
+            return {"usd": {provider: sum((j["usd"] for j in new), 0.0)}, "rows": len(new),
                     "batches_collected": sorted({j["batch"] for j in new}),
                     "batch_pending": json.loads(pending.read_text())["id"] if pending.exists() else None}
         return usage
