@@ -35,6 +35,7 @@ CARRYOVER = OUT / "carryover.parquet"  # one row per 10-K chunk of a company wit
 RATIO = 0.9
 NEW, CARRIED = 0.2, 0.8  # a passage is new at or below NEW, carried over at or above CARRIED
 ITEMS = {"1A": "Risk factors", "7": "MD&A"}
+N_CELLS = OUT / "n_cells.parquet"  # the cells `retrieve` searched (needed()), with or without a new chunk
 
 
 def matcher(prev: list[str]):
@@ -181,14 +182,22 @@ def needed() -> pd.DataFrame:
 def retrieve_new() -> None:
     need = needed()
     print(need.groupby("topic", dropna=False).size().to_string(), f"\n{len(need):,} cells needed", flush=True)
+    if (n := need.groupby("topic")["item"].nunique(dropna=False))[n > 1].any():  # sections() ranks a topic within one item
+        raise SystemExit(f"events.csv reads {list(n[n > 1].index)} from more than one item; nothing retrieved")
     new = set(pd.read_parquet(CARRYOVER, columns=["chunk_id", "share"]).query(f"share <= {NEW}").chunk_id)
     items = {t: i if isinstance(i, str) else None for t, i in zip(need.topic, need["item"])}  # pandas may turn None into NaN
     sections("new", items, new, need)
+    need.to_parquet(N_CELLS, index=False)
 
 
 def new_events() -> None:
     """The planned event tests and the break check on the new-text cells, model only and word-checked, with each
-    test's companies beside the 10-K test's."""
+    test's companies beside the 10-K test's. Every cell the tests use must have been retrieved (N_CELLS): cells("new")
+    counts a cell with no passage as not discussed, so a cell never retrieved would count as that silently."""
+    missing = needed().merge(pd.read_parquet(N_CELLS), how="left", indicator=True).query("_merge == 'left_only'")
+    if len(missing):
+        raise SystemExit(f"{len(missing):,} cells the tests use weren't retrieved (events.csv changed?), e.g. "
+                         f"{missing.iloc[0, :4].to_dict()}; run `diff.py retrieve` again (move the n_ files first)")
     ev = events()
     for suffix, keep in [("", None), ("_named", named("new"))]:
         print(f"\n=== new-text cells{suffix or ' (model only)'}")

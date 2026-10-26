@@ -828,8 +828,8 @@ Code: `diff.py retrieve`, `diff.py score`, `diff.py events`; results in `data/to
 planned tests passes in each version, about what chance alone gives (0.3 per version), and a
 different test in each.** The break check passes 1 of 11 in both versions (the same test), again
 about chance. No expected change passes both the planned test and the break check. So new text
-doesn't rescue the event tests. With far fewer companies per test, it can't rule the dilution guess
-out either.
+doesn't rescue the event tests. With far fewer, self-selected companies per test and intervals 2–4
+times wider, it neither supports nor rules out the guess that copied text hides a reaction.
 
 - **Scoring:** all 18,746 passages, none failed: 16,043 scored for **$1.77** (Anthropic Batch API,
   $0.00011 a passage; a 3-passage smoke test included) and 2,703 copied. No OpenAI spend.
@@ -857,10 +857,11 @@ out either.
 | Tariffs 2025 | realization | up | +0.33 [−0.10, +0.72] ✗ | **+0.50** [+0.04, +0.94] ✓ | +0.00 n.s. |
 | | uncertainty | up | +0.01 [−0.40, +0.40] ✗ | −0.07 [−0.45, +0.29] ✗ | +0.06 n.s. |
 
-- **The two passes are fragile.** Export-control magnitude rests on 7 chipmakers (lower bound +0.016
-  to +0.041 over 5 seeds of 10,000 resamples; Welch one-sided p = 0.038) and disappears when
-  word-checked (4 chipmakers). Tariff realization passes only word-checked (lower bound +0.044 to
-  +0.059; p = 0.018; model only +0.33, p = 0.063). Where the tariffs hit, new tariff text became much
+- **The two passes are fragile.** Export-control magnitude rests on 7 chipmakers and disappears when
+  word-checked (4 chipmakers). Tariff realization passes only word-checked. Added after the results
+  (2026-10-26), not in the plan: over 5 seeds of 10,000 resamples the lower bounds are +0.016 to
+  +0.041 (export controls) and +0.044 to +0.059 (tariffs), and Welch's one-sided p is 0.038 and 0.018
+  (tariffs model only, 0.063). Where the tariffs hit, new tariff text became much
   more realized (+0.80 [+0.43, +1.17], 27 companies), more than elsewhere (+0.29).
 - **The break check: 1 of 11 in both versions:** rate-hike magnitude +0.43 [+0.14, +0.72] on 76
   companies (all text: +0.09 n.s. on 101). Its planned difference fails (+0.15 n.s.), since the

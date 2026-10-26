@@ -89,7 +89,8 @@ def cells(items: list[str] | None = None, form: str = "10-K", keep: set | None =
     A 10-K analysis of MD&A alone takes AI's cells from section(): its top 3 searched within MD&A (PLAN.md
     Phase 7, 2026-10-18), not the MD&A part of the whole 10-K's top 3.
     form "new" (diff.py, 2026-10-26): the tone of each cell's top 3 among new chunks, on the 10-K cells' grid, so
-    "before" and "after" are the same 10-Ks as in the 10-K tests and a cell with no new on-topic passage isn't discussed."""
+    "before" and "after" are the same 10-Ks as in the 10-K tests and a cell with no new on-topic passage isn't discussed;
+    so a cell never retrieved would count as not discussed too: diff.new_events checks every cell it needs was retrieved."""
     passages, scores, _, baselines = FILES[form]
     p = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
     bases = [baselines]
