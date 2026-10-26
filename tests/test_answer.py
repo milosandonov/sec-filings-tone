@@ -132,17 +132,25 @@ def test_reply_and_footer():
     out = {"docs": docs, "citations": [(1, "Export  controls\nmay hurt."), (0, "H20")], "cells": "", "profile": None, "usd": 0.002}
     f = A.footer(out, A.Cap(0.5), "claude-haiku-5-5", "low")
     assert "1. NVDA 10-K FY2025 (year ended 2025-01-26), Item 1A Risk Factors: “Export controls may hurt.”" in f
-    assert "2. NVDA 10-Q" in f and "removed" not in f
-    assert "2 sentences removed" in A.footer(out | {"dropped": ["a", "b"]}, A.Cap(0.5), "claude-haiku-5-5", "low")
+    assert "2. NVDA 10-Q" in f
     assert f.startswith(A.FOOTER) and "$0.0020" in f and "of $0.50" in f
     assert A.md(pd.DataFrame({"a": [1], "b": ["x"]})) == "| a | b |\n|---|---|\n| 1 | x |"
 
 
-def test_drop():
-    # the check's unsupported sentences come out of the answer; ones not found word for word are ignored
-    text = ("**Short answer:** NVIDIA took a charge.[1] It was large.\n\n"
-            "- **Costs:** The filing doesn't say more.\n- Sales fell.[2] Mainly in China.\n\nNot in the passages found: Q3.")
-    new, gone = A.drop(text, ["It was large.", "The filing doesn't say more.", "Mainly in China.", "Not in the answer."])
-    assert gone == ["It was large.", "The filing doesn't say more.", "Mainly in China."]
-    assert new == "**Short answer:** NVIDIA took a charge.[1]\n\n- Sales fell.[2]\n\nNot in the passages found: Q3."
-    assert A.drop(text, []) == (text, [])
+
+def test_plan_invalid_output(monkeypatch):
+    # a truncated or invalid plan becomes a decline, charged at the upper bound, instead of an exception
+    try:
+        A.Plan.model_validate({})
+    except A.ValidationError as e:
+        err = e
+
+    class Messages:
+        def parse(self, **kw):
+            raise err
+
+    monkeypatch.setattr(A, "client", lambda: type("C", (), {"messages": Messages()})())
+    monkeypatch.setattr(A, "planner_system", lambda: "rules")
+    cap = A.Cap(1.0)
+    p, usage = A.plan("What did NVIDIA say?", [], cap)
+    assert p.kind == "decline" and "incomplete" in p.message and usage is None and cap.spent() > 0

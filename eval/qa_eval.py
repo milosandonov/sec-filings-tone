@@ -5,7 +5,7 @@ Usage:
     uv run python eval/qa_eval.py judge --budget 1.00     # paid: Claude Sonnet 5.5 grades them, Batch API
     uv run python eval/qa_eval.py report                  # free: every metric, against the pass bars
     uv run python eval/qa_eval.py answers --name _v2      # a new run, in qa_answers_v2.jsonl (judge, report the same)
-    uv run python eval/qa_eval.py judge --name _v2 --judge-name _v2draft --draft  # its drafts, before answer.verify
+    uv run python eval/qa_eval.py judge --name _v2 --judge-name _v2draft --draft  # drafts saved before a (dropped) check
     uv run python eval/qa_eval.py judge --judge-name _rejudge --sample 15  # regrade 15 published answers: judge noise
     uv run python eval/qa_eval.py diff --name _v2         # free: paired differences from the published run
     uv run python eval/qa_eval.py answers --tests eval/qa_dev.jsonl --name _dev  # the dev questions
@@ -66,29 +66,27 @@ def load(path: Path) -> list[dict]:
     return [json.loads(x) for x in path.read_text().splitlines() if x.strip()] if path.exists() else []
 
 
-def run_row(row: dict, cap: Cap, model: str, effort: str, check: bool = answer.VERIFY) -> dict:
-    """The row's turns asked in order as one conversation; the last turn's plan, passages, citations and answer
-    (and its draft and dropped sentences, from answer.verify)."""
+def run_row(row: dict, cap: Cap, model: str, effort: str) -> dict:
+    """The row's turns asked in order as one conversation; the last turn's plan, passages, citations and answer."""
     history, t = [], time.time()
     for q in row["turns"]:
-        r = answer.run(q, history, cap, model=model, effort=effort, check_answer=check)
+        r = answer.run(q, history, cap, model=model, effort=effort)
         history += [{"role": "user", "content": q}, {"role": "assistant", "content": r["reply"]}]
     docs = r["docs"]
     return {"id": row["id"], "plan": r["plan"].model_dump() if r["plan"] else None, "text": r["text"],
-            "draft": r["draft"], "dropped": r["dropped"],
             "citations": r["citations"], "cells": r["cells"], "secs": round(time.time() - t, 1),
             "docs": [{"chunk_id": d.chunk_id, "title": answer.title(d)} for d in docs.itertuples()] if len(docs) else [],
             "stopped": r["text"].startswith(("Stopped:", "The API call failed")), "model": model, "effort": effort}
 
 
-def answers(budget: float, model: str, effort: str, check: bool) -> None:
+def answers(budget: float, model: str, effort: str) -> None:
     done = {a["id"] for a in load(ANSWERS) if not a["stopped"]}
     todo = [r for r in load(TESTS) if r["id"] not in done]
     print(f"{len(todo)} rows to answer ({len(done)} already saved); about ${0.007 * sum(len(r['turns']) for r in todo):.2f}")
     answer.warm()
     cap, kept = Cap(budget), [a for a in load(ANSWERS) if not a["stopped"]]
     with ThreadPoolExecutor(WORKERS) as ex:
-        for out in ex.map(lambda r: run_row(r, cap, model, effort, check), todo):
+        for out in ex.map(lambda r: run_row(r, cap, model, effort), todo):
             kept.append(out)
             ANSWERS.write_text("".join(json.dumps(a) + "\n" for a in kept))  # saved as it goes, so a rerun resumes
             print(f"{out['id']}: {out['plan']['kind'] if out['plan'] else '-'}, {len(out['docs'])} passages, "
@@ -96,12 +94,13 @@ def answers(budget: float, model: str, effort: str, check: bool) -> None:
     # rows run in parallel, so only the run's total is a true cost (a row's share of the session total isn't)
     with RUNS.open("a") as f:
         f.write(json.dumps({"date": time.strftime("%Y-%m-%d"), "rows": len(todo), "usd": cap.spent(), "model": model,
-                            "effort": effort, "check": check}) + "\n")
+                            "effort": effort}) + "\n")
     print(f"spent ${cap.spent():.3f}")
 
 
 def judge_prompt(row: dict, a: dict, draft: bool = False) -> str:
-    """draft: grade the answer before answer.verify dropped sentences (same citations and passages)."""
+    """draft: grade the saved draft instead (qa_answers_v2.jsonl: the answer before a sentence check, since
+    removed, dropped sentences; same citations and passages)."""
     texts = retrieve.chunks().text
     turns = "\n".join(f"Turn {i}: {q}" for i, q in enumerate(row["turns"], 1))
     cited = "\n".join(f"[{n}] {a['docs'][d]['title']}: “{span}”" for n, (d, span) in enumerate(a["citations"], 1))
@@ -115,7 +114,7 @@ def judge_prompt(row: dict, a: dict, draft: bool = False) -> str:
 
 def judge(budget: float, sample: int = 0, draft: bool = False) -> None:
     """sample: grade only a random `sample` of the answers (seed 0), e.g. to regrade them and measure the judge's
-    own noise. draft: grade the drafts of the answers verify changed."""
+    own noise. draft: grade the saved drafts of the answers the check changed (qa_answers_v2.jsonl only)."""
     client = anthropic.Anthropic()
     rows = {r["id"]: r for r in load(TESTS)}
     graded = {j["id"] for j in load(JUDGED)}
@@ -238,27 +237,19 @@ def report() -> None:
         print(f"\nwrote {HAND}: 10 answers to grade by hand, to check the judge")
 
 
-def diff(base: str, draft_judged: Path | None = None, n_boot: int = 10_000) -> None:
-    """Each metric for the run named `base` (answers and judge files) and the current one, on the questions both
-    have, with a 95% bootstrap interval (resampling questions) for the paired difference. draft_judged: the
-    current run's drafts (judge --draft) stand in as the base, for the answers verify changed; the rest keep
-    the current run's grades, so the difference is verify's effect alone."""
-    a, b = records(HERE / f"qa_answers{base}.jsonl", HERE / f"qa_judge{base}.jsonl"), records(ANSWERS, JUDGED)
-    if draft_judged:
-        a = b.copy()
-        for j in load(draft_judged):
-            m = a.id == j["id"]
-            for k in SCORES:
-                a.loc[m, k] = j[k]
-            a.loc[m, "unsupported"], a.loc[m, "claims"] = bool(j["unsupported_claims"]), len(j["unsupported_claims"])
+def diff(base: str, base_judge: str | None = None, n_boot: int = 10_000) -> None:
+    """Each metric for the run named `base` (its answers, and judge file base_judge or its own) and the current
+    one, on the questions both have, with a 95% bootstrap interval (resampling questions) for the paired difference."""
+    bj = base if base_judge is None else base_judge
+    a, b = records(HERE / f"qa_answers{base}.jsonl", HERE / f"qa_judge{bj}.jsonl"), records(ANSWERS, JUDGED)
     a, b = a.set_index("id"), b.set_index("id")
     passage = b.type.isin(["single", "conversation", "multi_part"])
     metrics = {"ticker_ok": passage, "fy_ok": passage, "form_ok": passage, "kind_ok": None,
                "mrr": passage, "coverage": passage, "accuracy": None, "completeness": None, "groundedness": None,
                "unsupported": None, "claims": None, "secs": None}
     rng = np.random.default_rng(0)
-    old = "draft" if draft_judged else base or "published"
-    print(f"| Metric | n | {old} | {ANSWERS.stem.removeprefix('qa_answers') or 'published'} | new − old [95% CI] |\n|---|---|---|---|---|")
+    print(f"| Metric | n | {bj or 'published'} | {JUDGED.stem.removeprefix('qa_judge') or 'published'} | new − old [95% CI] |"
+          "\n|---|---|---|---|---|")
     for m, keep in metrics.items():
         if m not in a or m not in b:
             continue
@@ -377,22 +368,21 @@ if __name__ == "__main__":
     ap.add_argument("--budget", type=float, default=0.70)
     ap.add_argument("--model", default=answer.MODEL, help="answers: the answer model; judge-gpt and compare: the OpenAI judge")
     ap.add_argument("--effort", default=answer.EFFORT)
-    ap.add_argument("--no-check", action="store_true", help="answers: skip answer.verify")
     ap.add_argument("--test", action="store_true", help="judge-gpt: one direct request, no batch")
     ap.add_argument("--tests", type=Path, default=TESTS, help="the questions (e.g. eval/qa_dev.jsonl)")
     ap.add_argument("--name", default="", help="run name: writes qa_answers{name}.jsonl, qa_judge{name}.jsonl, "
                     "qa_runs{name}.jsonl instead of the published files (e.g. _v2)")
     ap.add_argument("--judge-name", help="judge, report, diff: the judge file's name, if not --name's")
     ap.add_argument("--sample", type=int, default=0, help="judge: only a random N of the answers (seed 0)")
-    ap.add_argument("--draft", action="store_true", help="judge: grade the drafts of the answers verify changed")
+    ap.add_argument("--draft", action="store_true", help="judge: grade the saved drafts the check changed (_v2 only)")
     ap.add_argument("--base", default="", help="diff: the run to compare with (default the published one)")
-    ap.add_argument("--vs-draft", help="diff: compare with the drafts' grades in qa_judge{VS_DRAFT}.jsonl instead")
+    ap.add_argument("--base-judge", help="diff: the base run's judge file name, if not --base's")
     a = ap.parse_args()
     jn = a.name if a.judge_name is None else a.judge_name
     TESTS, ANSWERS, RUNS = a.tests, HERE / f"qa_answers{a.name}.jsonl", HERE / f"qa_runs{a.name}.jsonl"
     JUDGED, BATCH = HERE / f"qa_judge{jn}.jsonl", HERE / f"qa_batch{jn}.json"
     gpt = a.model if a.model in GPT_PRICES else GPT_JUDGE
-    {"answers": lambda: answers(a.budget, a.model, a.effort, not a.no_check),
+    {"answers": lambda: answers(a.budget, a.model, a.effort),
      "judge": lambda: judge(a.budget, a.sample, a.draft), "report": report,
-     "diff": lambda: diff(a.base, HERE / f"qa_judge{a.vs_draft}.jsonl" if a.vs_draft else None),
+     "diff": lambda: diff(a.base, a.base_judge),
      "judge-gpt": lambda: judge_gpt(gpt, a.budget, a.test), "compare": lambda: compare(gpt)}[a.step]()

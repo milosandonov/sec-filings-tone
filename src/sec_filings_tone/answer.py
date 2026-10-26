@@ -5,8 +5,7 @@ conversation so far into one of three plans: sub-queries with filters, a lookup 
 for "which companies / which sectors" questions (a search returns only a few passages, so it can't
 list every company in a sector), or a decline. retrieve.search (hybrid + rerank) finds passages for
 each sub-query; an aggregate plan ranks events.cells() and quotes the top cells' own passages. Then
-Claude answers from the passages, given as documents with citations on, streamed, and a second call drops the
-draft's sentences that its cited passages don't support (--no-check skips it). Under the answer:
+Claude answers from the passages, given as documents with citations on, streamed. Under the answer:
 the cited spans, the tone profile of the cells it draws on with the change from the year before,
 and the cost.
 
@@ -19,7 +18,6 @@ Usage:
 
 import argparse
 import math
-import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from functools import cache
@@ -28,7 +26,7 @@ from typing import Literal
 import anthropic
 import openai
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from sec_filings_tone import events, retrieve
 from sec_filings_tone.budget import PRICES, Cap, CapReached, call_usd
@@ -39,8 +37,7 @@ from sec_filings_tone.tone import FILES
 MODEL = "claude-haiku-5-5"
 EFFORT = "low"
 TIMEOUT = 120  # seconds per call
-PLAN_TOKENS, ANSWER_TOKENS, VERIFY_TOKENS = 8000, 8000, 4000  # thinking counts toward all three
-VERIFY, VERIFY_EFFORT = True, "medium"  # check the draft's sentences against the cited passages (verify); ~$0.002 more
+PLAN_TOKENS, ANSWER_TOKENS = 8000, 8000  # thinking counts toward both
 MAX_QUERIES = 6
 K = 6  # passages kept per sub-query
 MAX_PASSAGES = 24
@@ -197,10 +194,14 @@ def plan(question: str, history: list[dict], cap: Cap, model: str = MODEL, effor
     cap.check(call_usd(model, 25_000, PLAN_TOKENS))  # upper bound: the 15,740-token system prompt and history, full output
     convo = "\n\n".join(f"{m['role'].title()}: {m['content'][:1500]}" for m in history)
     text = (f"<conversation>\n{convo}\n</conversation>\n\n" if convo else "") + f"Question: {question}"
-    resp = client().messages.parse(
-        model=model, max_tokens=PLAN_TOKENS, output_config={"effort": effort},
-        system=[{"type": "text", "text": planner_system(), "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": text}], output_format=Plan)
+    try:
+        resp = client().messages.parse(
+            model=model, max_tokens=PLAN_TOKENS, output_config={"effort": effort},
+            system=[{"type": "text", "text": planner_system(), "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": text}], output_format=Plan)
+    except ValidationError:  # truncated or invalid output; its usage is lost, so the cap is charged the upper bound
+        cap.charge(call_usd(model, 25_000, PLAN_TOKENS))
+        return decline("I couldn't plan an answer (the plan came back incomplete). Try rephrasing the question."), None
     cap.charge(usd(model, resp.usage))
     if resp.parsed_output is None:
         return decline(f"I couldn't plan an answer (stop reason: {resp.stop_reason}). Try rephrasing the question."), resp.usage
@@ -414,64 +415,12 @@ def stream(blocks: list, history: list[dict], cap: Cap, model: str, effort: str)
         yield text + "\n\n*(The answer was cut off at the length limit.)*", cites
 
 
-class Verdict(BaseModel):
-    sentence: str = Field(description="The sentence, copied exactly from the answer with its [n] markers")
-    evidence: str = Field(description="The words of a cited passage, its title or the table that state it; empty if none do")
-    supported: bool
-
-
-class Verdicts(BaseModel):
-    sentences: list[Verdict]
-
-
-VERIFY_SYSTEM = """You check an answer about SEC filings against the passages it cites. You get the answer (its [n] markers number the cited spans), the cited spans, the full passages they come from with their titles and, for questions about many companies, the table of tone cells it was given.
-
-Go through the answer one sentence at a time, the short answer included; skip headings and a last line that starts "Not in the passages found". For each sentence, find the words in the cited passages, their titles or the table that state what it says, copy them as evidence, and set supported. Paraphrase is fine: the evidence has to state the same facts, not the same words. The [n] markers point to the spans that usually hold the evidence, but anything in the cited passages counts.
-
-A sentence is unsupported when nothing in them states it: an amount, date, company or year that isn't there, a description or conclusion the passages don't state, a statement about what a filing or the passages don't say, or a claim about a filing none of the cited passages comes from."""
-
-
-def drop(text: str, sentences: list[str]) -> tuple[str, list[str]]:
-    """text without the given sentences (those found in it word for word), tidied: no doubled spaces, emptied
-    bullets or runs of blank lines. Also returns the sentences removed."""
-    gone = [s.strip() for s in sentences if s.strip() and s.strip() in text]
-    for s in gone:
-        text = text.replace(s, "")
-    text = re.sub(r"(?m)[ \t]+$", "", re.sub(r"[ \t]{2,}", " ", text))
-    text = re.sub(r"(?m)^[ \t]*(?:[-*]|\d+\.)[ \t]*(?:\*\*[^*\n]*\*\*:?)?[ \t]*\n", "", text + "\n")  # emptied bullets
-    return re.sub(r"\n{3,}", "\n\n", text).strip(), gone
-
-
-def verify(out: dict, cap: Cap, model: str) -> tuple[str, list[str]]:
-    """The answer without the sentences a second call finds unsupported by its cited passages (and cell table),
-    and the sentences dropped. It sees what the judge sees: the cited passages only, not every passage given."""
-    docs = list(out["docs"].itertuples())
-    cited = sorted({d for d, _ in out["citations"]})
-    spans = "\n".join(f"[{n}] {title(docs[d])}: “{s}”" for n, (d, s) in enumerate(out["citations"], 1))
-    passages = "\n\n".join(f'<passage title="{title(docs[d])}">\n{docs[d].text}\n</passage>' for d in cited)
-    cells = f"\n\n<cell_table>\n{out['cells']}\n</cell_table>" if out["cells"] else ""
-    text = (f"<answer>\n{out['text']}\n</answer>\n\n<cited_spans>\n{spans}\n</cited_spans>\n\n"
-            f"<cited_passages>\n{passages}\n</cited_passages>{cells}")
-    cap.check(call_usd(model, 40_000, VERIFY_TOKENS))
-    resp = client().messages.parse(model=model, max_tokens=VERIFY_TOKENS, output_config={"effort": VERIFY_EFFORT},
-                                   system=VERIFY_SYSTEM, messages=[{"role": "user", "content": text}],
-                                   output_format=Verdicts)
-    cap.charge(usd(model, resp.usage))
-    if resp.parsed_output is None:  # no verdict: keep the answer as it is
-        return out["text"], []
-    return drop(out["text"], [v.sentence for v in resp.parsed_output.sentences if not v.supported])
-
-
 def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     parts = []
     if out["citations"]:
         docs = list(out["docs"].itertuples())
         parts.append("**Sources**\n\n" + "\n".join(
             f"{i}. {title(docs[d])}: “{' '.join(span.split())[:300]}”" for i, (d, span) in enumerate(out["citations"], 1)))
-    if out.get("dropped"):
-        n = len(out["dropped"])
-        parts.append(f"<sub>{n} sentence{'s' if n > 1 else ''} removed from the draft: a check found "
-                     f"{'them' if n > 1 else 'it'} unsupported by the cited passages.</sub>")
     if out["cells"]:
         parts.append(out["cells"])
     if out["profile"] is not None and len(out["profile"]):
@@ -481,17 +430,15 @@ def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     return FOOTER + "\n\n".join(parts)
 
 
-def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = MODEL, effort: str = EFFORT,
-           check_answer: bool = VERIFY):
-    """Yields the reply as markdown: the answer as it streams, then (check_answer) without the sentences verify()
-    drops, then with the footer. Returns a dict with the plan, the passages given to the model, the citations, the
-    draft, the text, the sentences dropped and the cost.
+def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = MODEL, effort: str = EFFORT):
+    """Yields the reply as markdown, longer each time: the answer as it streams, then with the footer.
+    Returns a dict with the plan, the passages given to the model, the citations, the text and the cost.
     history: earlier {"role", "content"} turns; anything after FOOTER in them is dropped."""
     cap = cap if cap is not None else Cap()
     history = [{"role": m["role"], "content": str(m["content"]).split(FOOTER)[0]} for m in history]
     start = cap.spent()
     out = {"question": question, "plan": None, "plan_usage": None, "docs": pd.DataFrame(), "citations": [],
-           "cells": "", "profile": None, "text": "", "draft": "", "dropped": []}
+           "cells": "", "profile": None, "text": ""}
     try:
         p, out["plan_usage"] = plan(question, history, cap, model, effort)
         out["plan"] = p
@@ -522,10 +469,6 @@ def answer(question: str, history: list[dict] = (), cap: Cap | None = None, mode
             for text, cites in stream(blocks, history, cap, model, effort):
                 out["text"], out["citations"] = text, cites
                 yield text
-            out["draft"] = out["text"]
-            if check_answer and out["citations"]:
-                out["text"], out["dropped"] = verify(out, cap, model)
-                yield out["text"]
             keys = [(r.ticker, r.fy, r.topic) for r in out["docs"].itertuples() if r.form == "10-K" and r.topic]
             out["profile"] = profile(profile_cells(), list(dict.fromkeys(keys))[:8])
     except CapReached as e:
@@ -561,7 +504,6 @@ def main() -> None:
     ap.add_argument("--effort", default=EFFORT, choices=["low", "medium", "high"])
     ap.add_argument("--budget", type=float, default=0.10, help="USD for the whole run")
     ap.add_argument("--plan-only", action="store_true", help="print each plan; no search or answer")
-    ap.add_argument("--no-check", action="store_true", help="keep the draft: don't check it against the cited passages")
     a = ap.parse_args()
     cap, history = Cap(a.budget), []
     for q in a.questions:
@@ -569,11 +511,12 @@ def main() -> None:
         if a.plan_only:
             p, u = plan(q, history, cap, a.model, a.effort)
             print(p.model_dump_json(indent=1, exclude_defaults=True))
-            print(f"tokens: {u.input_tokens} in, {u.cache_read_input_tokens} cache read, "
-                  f"{u.cache_creation_input_tokens} cache write, {u.output_tokens} out; session ${cap.spent():.4f}")
+            if u:
+                print(f"tokens: {u.input_tokens} in, {u.cache_read_input_tokens} cache read, "
+                      f"{u.cache_creation_input_tokens} cache write, {u.output_tokens} out; session ${cap.spent():.4f}")
             reply = "(plan only, no answer)"
         else:
-            gen, reply = answer(q, history, cap, a.model, a.effort, not a.no_check), ""
+            gen, reply = answer(q, history, cap, a.model, a.effort), ""
             while True:
                 try:
                     new = next(gen)
