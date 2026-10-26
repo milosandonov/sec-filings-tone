@@ -808,6 +808,125 @@ direction was expected", which a one-sided test contradicts).
   weak sector effect from noisy cells. The run-to-run check (section 2) puts the scorer's share of the
   variance of these yearly changes at 19–46% by dimension; the rest is passage selection and real change.
 
+## 10. Exploratory: risk themes the 13 topics miss (2026-10-26)
+
+**What this is:** the 13 topics were chosen in advance, so the scoring can't see a risk that none of
+them names. This section looks for such themes in the risk factors and asks which grew most from
+FY2019 to FY2025. It is exploratory: the themes are found by looking, not tested against a
+hypothesis. The design below was written down and committed before any clustering was run
+([`discover.py`](src/sec_filings_tone/discover.py)); anything changed after seeing results is dated
+and marked.
+
+**Design (fixed 2026-10-26, before results):**
+
+- **Corpus:** every 10-K Item 1A chunk of FY2019–FY2025 (92,120 chunks; 466–496 companies a year),
+  with the embedding already stored for search. FY2026 is left out (partial). Nothing is embedded.
+- **Clusters:** spherical k-means (cosine) on the chunk vectors, k = 80, k-means++ start, seed 0,
+  until no chunk moves (at most 100 rounds). k = 80 means ~1,150 chunks a cluster on average: fine
+  enough to split the 13 topics' ground into narrower themes, coarse enough that a cluster reaches
+  many companies a year. Stability: the same run with seed 1; each seed-0 cluster is matched to the
+  seed-1 cluster with the closest centroid, and the top clusters' matches and growth are reported.
+- **Labels, free:** each cluster's 12 most distinctive words (log-odds z-score of its word counts
+  against the rest of the corpus, informative Dirichlet prior; Monroe et al. 2008) and the 3 chunks
+  nearest its centroid. Optional: Claude Haiku names the top 15 from those, capped at $0.10.
+- **Covered or not:** a cluster's best cosine between its centroid and the 13 topic query vectors.
+  The threshold comes from the project's own retrieval: for each topic, the cosine between its query
+  and the centroid of the Item 1A passages it retrieved and the scorer kept as on topic; the lowest
+  of the 13. A cluster below it matches every topic less well than the loosest topic matches its own
+  scored passages. Taking the lowest errs toward calling clusters covered. As a check that the
+  threshold isn't doing all the work, each cluster's share of chunks that the 13-topic retrieval
+  picked is reported next to the corpus-wide share. (Wording made precise 2026-10-26 after review:
+  "picked" means retrieved for some topic and kept as on topic by the scorer, as the code always did.
+  Counting every retrieved passage, on topic or not, would cover 53.5% of chunks, not 48%.)
+- **Growth:** per cluster and fiscal year, the share of companies with at least one chunk in the
+  cluster (companies, not chunks, so long filings don't dominate). The FY2019 → FY2025 change is over
+  the companies with risk factors in both years, with a 95% bootstrap interval over companies. Filings
+  got longer (22.5 → 29.6 Item 1A chunks a company), so most shares will rise; the median change over
+  all 80 clusters is reported as that drift. Uncovered clusters are ranked by change.
+- **Verification:** the top 3 clusters' growth recomputed with separate code; 5 random chunks of
+  each of the top 5 clusters read by hand, with a verdict on whether the label fits.
+
+**Changed after seeing the first results (2026-10-26), with both versions kept:**
+
+- The pre-registered threshold (0.423, set by Tariffs; the other topics' own passages sit at
+  0.44–0.60) leaves only 13 of 80 clusters uncovered, mostly governance and securities boilerplate.
+  Clusters plainly outside the 13 topics clear it by a hair: litigation (0.425), intellectual property
+  (0.425), insurance underwriting (0.427). The retrieval check shows the same thing from the other
+  side. Across the corpus, 48% of chunks are among the passages some topic retrieved and the scorer
+  kept as on topic; for intellectual
+  property it is 15%, for acquisitions 16%. So a second flag was added: **rarely retrieved**, under
+  half the corpus-wide share (the cut at half is post hoc). The table keeps the pre-registered
+  `covered` column. The chart and names cover the 24 clusters that either rule flags.
+- Each cluster's example chunks now come from 3 different companies. For one cluster, the 3 chunks
+  nearest the centroid were the same Tyson risk factor in 3 years (about debt). Haiku named the
+  cluster after them, but 5 random members are all about goodwill impairment.
+
+**Results** (`data/tone/discovered_topics.csv`, one row per cluster; `figures/discovered_topics.png`):
+
+| Cluster (Haiku's name, exact) | Flag | Companies FY2019 → FY2025 | Change | Seed-1 match (cosine, change) |
+|---|---|---|---|---|
+| mixed: generic risk factor introductions and forward-looking statement cautions | threshold | 25% → 55% | +29.5 pts [+24.9, +34.2] | 0.998, +28.4 |
+| Acquisition integration risks | retrieval | 46% → 53% | +7.1 [+2.2, +11.8] | 1.000, +8.6 |
+| Exclusive forum selection provisions | threshold | 6% → 12% | +6.9 [+4.5, +9.7] | 0.947, +3.9 |
+| Protecting and enforcing intellectual property rights | retrieval | 33% → 38% | +4.9 [+1.3, +8.6] | 1.000, +4.7 |
+| Goodwill and intangible asset impairment risk | retrieval | 21% → 23% | +2.6 [−1.3, +6.5] | 1.000, +1.5 |
+| Alternative asset manager fund investment risks | retrieval | 4% → 6% | +1.7 [+0.2, +3.4] | 0.988, +1.9 |
+| Crypto regulatory compliance risk | threshold | 0.6% → 2.4% | +1.7 [+0.6, +3.0] | 1.000, +1.5 |
+
+465 companies filed risk factors in both years; every share in this section, the chart and
+`figures/discovered_topics.csv` is over those companies, so the two years' shares subtract to the
+change. (The yearly shares in the figure's CSV first used every company filing that year; fixed
+2026-10-26 after review. No number in the table moved.) Over all 80 clusters the median change is
++1.3 points; 59 rose, 27 with an interval above zero. That is the drift from longer filings to
+compare against.
+
+- **The 13 topics already hold the big growers.** The fastest-growing clusters overall are AI
+  (+44.5 pts), cybersecurity (+31.2), ESG and sustainability (+29.7), physical climate risk (+19.1)
+  and talent (+15.9). All of them match a topic query well (0.49–0.66) and are mostly retrieved
+  (61–94%). The AI cluster goes from 0.4% to 44.9% of companies, far below the 8% → 93% of risk
+  factors naming AI in section 7. The two measure different things: the cluster counts companies
+  with a chunk whose main theme is AI. The word-checked figure counts companies whose top AI passages
+  name AI at all, even in passing.
+- **What they miss and grew is mostly form, not new risk.** The one large mover is the opening of
+  Item 1A: introductory caveats and, from FY2020, a risk-factor summary. The SEC's 2020 amendments
+  to Regulation S-K Item 105 require that summary when the section runs over 15 pages. Chunks with a
+  "summary" heading in Item 1A went from 2 companies in FY2019 to 47 in FY2020 and 76 in FY2025,
+  which fits that rule; the rule as the cause is my reading, not a test. Exclusive-forum bylaws
+  doubled, from 6% to 12% of companies.
+- **Substantive themes outside the topics grew modestly:** acquisition integration and IP protection
+  by about 5–7 points, each a few points above the drift. Crypto is the clearest new theme, though
+  small: 3 companies in FY2019, 11 in FY2025. Litigation (+12.7 pts [+7.7, +17.8]) is borderline on
+  both rules (cosine 0.425, 29% retrieved), so neither rule flags it.
+- **Not found at this resolution:** themes that only a handful of companies raise. Checked after the
+  results by word count, not used to pick anything: Item 1A chunks naming GLP-1 come from 1 company
+  in FY2022 and 10 in FY2025, split across the medical-products and packaged-food clusters. Chunks
+  naming stablecoins come from 5 companies in FY2023 and 26 in FY2025, mostly in the crypto cluster.
+  With k = 80, a cluster averages ~1,150 chunks, so a theme raised by 10–26 companies is absorbed
+  into a broader one.
+
+**Verification.** Recomputed with separate code from the saved cluster labels (plain Python sets,
+another bootstrap seed), the top 3 changes match to the digit: +29.5, +7.1, +6.9 points, with
+intervals within 0.3 points. Centroids rebuilt from the saved labels reassign every chunk to its own
+cluster (seed 0: 100%, so the run converged; seed 1: 99.9%, stopped at 100 rounds). The top 4
+clusters are stable across seeds (matched centroids at cosine 0.947–1.000, ranked 1–4 in the
+seed-1 run). The exclusive-forum cluster grows less in seed 1 (+3.9 against +6.9). Of 5 random chunks
+read from each of the top 5:
+
+- introductions: 5 of 5 fit;
+- acquisitions: 5 of 5;
+- exclusive forum: 5 of 5, though in 3 of them the forum clause is a later risk factor in the chunk;
+- intellectual property: 5 of 5 (in one, IP is the chunk's second risk factor, after data quality);
+- impairment: 5 of 5.
+
+**Caveats.** Chunks are ~3,000 characters and often span 2–3 risk factors, so a chunk's cluster
+reflects one of them. Several clusters are boilerplate (governance, stock price, forward-looking
+statements), not risks. "Share of companies with a chunk in the cluster" rises with filing length,
+which is why the drift is reported. The coverage threshold and the retrieval cut are judgment calls:
+the first was fixed in advance, the second was not. k-means splits by wording as well as theme:
+there are two cybersecurity clusters and two tax clusters. Fiscal-year labels follow the rest of the
+project, where 9% of 10-Ks cover mostly the year before. Haiku names cost $0.0074 in total over three
+runs and a smoke test (Anthropic); the names are labels only.
+
 ## Limitations
 
 Added 2026-10-17 after an external review: the first six points below.
@@ -889,6 +1008,7 @@ uv run python -m sec_filings_tone.diff carryover     # Phase 8 (section 8), ~2 m
 uv run python -m sec_filings_tone.diff report        # also the event tests on new text
 uv run python -m sec_filings_tone.comove             # co-movement (section 9), ~1 minute
 uv run python -m sec_filings_tone.charts             # figures/ (sections 7 and 8)
+uv run python -m sec_filings_tone.discover --name --budget 0.1   # section 10, a few minutes; Haiku names ~$0.01
 # quarterly 10-Qs (section 6, parked): the same commands with --quarterly
 uv run python -m sec_filings_tone.tone retrieve --quarterly
 uv run python -m sec_filings_tone.tone score --quarterly --budget 3
