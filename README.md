@@ -77,12 +77,23 @@ event rule.
   AI polarity and specificity rose in IT and Communication Services MD&A, but nearly as much
   elsewhere: differences +0.11 and +0.09, n.s., on 38 companies against 40. A follow-up on
   Financials' 10-Qs ($1.45) detected neither SVB nor the rate hikes in its planned tests (0 of 5).
+- **New text only (exploratory, 2026-10-26).** Most of a 10-K is copied from the year before, which
+  could hide a reaction. Rerun on each cell's top 3 among passages not copied from the year before
+  ($1.77), the event tests pass 1 of 11 in each version, about what chance gives. With fewer,
+  self-selected companies and intervals 2–4 times wider, it neither supports nor rules out the idea
+  that copied text hides a reaction (RESULTS.md, section 8).
 - **What the data describes.** AI went from 8% to 93% of risk-factor sections (word-checked, FY2019 →
   FY2025). In FY2025, 80% of risk factors and 62% of MD&A were copied from the year before. New text
   is more realized than copied text but not more specific (slightly less in risk factors, within
   topic and year). So specificity measures concreteness, not novelty. Same-sector companies move
   together only negligibly (correlations higher by +0.003 to +0.007). Nearly all of a company's
   year-to-year change is its own, or noise.
+- **Topics the 13 miss (exploratory, 2026-10-26).** Clustering every risk-factor chunk of FY2019–FY2025
+  (k-means on the stored embeddings, k = 80) shows the fastest-growing themes (AI, cybersecurity, ESG,
+  climate, talent) are already topics. What the topics miss and grew is mostly form: risk-factor
+  summaries went from 25% to 55% of companies, and exclusive-forum clauses grew too. Acquisition, IP and
+  crypto risks grew modestly. GLP-1 drugs and stablecoins are too rare for a cluster of their own
+  (RESULTS.md, section 10; `figures/discovered_topics.png`).
 
 ![AI tone in S&P 500 10-Ks by fiscal year, risk factors and MD&A, word-checked](figures/lines_ai_named.png)
 
@@ -229,19 +240,33 @@ took a median 21 seconds in that run, most of it Chroma's filtered search. Since
 searches the stored vectors exactly instead: on the eval's 82 sub-queries it gives the reranker the same
 candidates as Chroma (all 81 that match any chunk), and a search takes a median 0.11 seconds instead of 3.9.
 Asked the 69 eval questions again with it (answers only, $0.27, 2026-10-26), the median answer took
-11 seconds instead of 21. It meets one of four bars:
+11 seconds instead of 21.
 
-| Metric | Result | Bar |
-|---|---|---|
-| Out-of-scope questions declined | 5 of 5 | ≥ 80%: met |
-| Planner tickers / fiscal years right | 83% / 54% | ≥ 90%: missed |
-| Judge groundedness (Claude Sonnet 5.5, 1–5) | 3.89 | ≥ 4: missed |
-| Answers with a claim the judge calls unsupported | 78% | ≤ 5%: missed |
-| Cited spans found in their passage | 417 of 417 | |
-| Judge accuracy / completeness (1–5) | 4.09 / 4.08 | |
+The first run met one of four bars. A rerun on 2026-10-26 had stricter answer rules (every sentence
+cites a passage; no claims about what the filings leave out), period ends in the source titles and a
+planner fix for wrongly declined questions. The changes were designed from the first run's own failures,
+so the gain is in-sample. Both runs are kept:
 
-The planner declined 7 answerable questions that name a company outside the index or ask for one
-figure. The fiscal-year bar is partly a test artefact: the expected filters come from the retrieval
+| Metric | First run (2026-10-18) | Rerun (2026-10-26) | Bar |
+|---|---|---|---|
+| Out-of-scope questions declined | 5 of 5 | 5 of 5 | ≥ 80%: met |
+| Planner tickers / fiscal years right | 83% / 54% | 92% / 47% | ≥ 90% |
+| Judge groundedness (Claude Sonnet 5.5, 1–5) | 3.89 | 4.48 | ≥ 4: met in the rerun |
+| Answers with a claim the judge calls unsupported | 78% | 38% | ≤ 5%: missed |
+| Answerable questions wrongly declined | 7 of 64 | 1 of 64 | |
+| Cited spans found in their passage | 417 of 417 | 388 of 388 | |
+| Judge accuracy / completeness (1–5) | 4.09 / 4.08 | 4.67 / 4.39 | |
+
+Paired over the same 64 judged questions, the unsupported share fell by 41 points [−55, −27] and
+groundedness rose by 0.59 [+0.38, +0.81]. The planner gives different plans from run to run (the same plan
+on only 28 of 69 questions in two runs), so its row isn't attributed to the changes. The judge seeing the
+new titles explains about 1.6 of the 41 points [0.3, 5.3] (re-judging 10 first-run answers with them). A
+sentence-by-sentence check was tried and removed: with and without it the scores can't be told apart.
+What's left of the unsupported claims is mostly interpretations the judge calls loose, plus a few real
+errors (eval/FINDINGS.md section 9).
+
+In the first run the planner declined 7 answerable questions that name a company outside the index or ask
+for one figure. The fiscal-year bar is partly a test artefact: the expected filters come from the retrieval
 eval, and many questions don't name the year. Many claims the judge calls unsupported are statements
 about what the passages don't say, or facts the answer model had and the judge didn't. No person
 has graded the answers, and the reference answers haven't been reviewed.
@@ -310,6 +335,13 @@ uv run python -m sec_filings_tone.answer "What charge did NVIDIA record for H20 
 uv run python -m sec_filings_tone.app                # local chat window at http://127.0.0.1:7860
 uv run python -m sec_filings_tone.explore            # free: heatmaps of the cells, click through to passages, http://127.0.0.1:7861
 uv run python eval/qa_eval.py answers --budget 0.70   # the Q&A eval (paid), then: judge --budget 1.25, report
+                                                      # (the 2026-10-26 rerun: eval/FINDINGS.md, "How to reproduce")
+
+# Exploratory (2026-10-26): event tests on new text only, and topic discovery
+uv run python -m sec_filings_tone.diff retrieve        # new-text cells' passages; free
+uv run python -m sec_filings_tone.diff score --budget 2   # paid (about $1.77); --budget 0 shows count and cost
+uv run python -m sec_filings_tone.diff events          # event tests and break check on them
+uv run python -m sec_filings_tone.discover             # clusters, tables, chart; free (--name --budget 0.1: Haiku names)
 
 # Offline tests, no API calls
 uv run pytest
