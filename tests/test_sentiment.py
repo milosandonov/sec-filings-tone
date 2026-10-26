@@ -5,10 +5,9 @@ import json
 import pandas as pd
 import pytest
 
-from sec_filings_tone.ingest import CHUNKS
-from sec_filings_tone.sentiment import (DIMENSIONS, GOLD_PAIRS, GUIDELINES, LM_PATH, PRACTICE, kappa, kappa_ci,
-                                        label_spearman, labels, lm, proxies, schema, sentences, sheet,
-                                        spearman_gap_ci, system_prompt, user_prompt)
+from sec_filings_tone.config import CHUNKS, GUIDELINES, LM_PATH, PRACTICE
+from sec_filings_tone.sentiment import (DIMENSIONS, GOLD_PAIRS, kappa, kappa_ci, label_spearman, labels, lm, proxies, schema,
+                                        sentences, sheet, spearman_gap_ci, system_prompt, user_prompt)
 
 
 def test_schema():

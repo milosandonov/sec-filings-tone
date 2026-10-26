@@ -25,17 +25,15 @@ from difflib import SequenceMatcher
 
 import pandas as pd
 
-from sec_filings_tone.events import (DIMS, EVENTS, before_cells, break_rows, cells, did, named, report as event_report,
-                                     section)
-from sec_filings_tone.ingest import CHUNKS
+from sec_filings_tone.config import (BASELINES, CARRYOVER, CHUNKS, EVENTS, FILES, LAST_FY, N_CELLS, OUT, PASSAGES,
+                                     SCORES)
+from sec_filings_tone.events import DIMS, before_cells, break_rows, cells, did, named, report as event_report, section
 from sec_filings_tone.sentiment import sentences, spearman_ci
-from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES, score_cells, scoring_log, sections
+from sec_filings_tone.tone import score_cells, scoring_log, sections
 
-CARRYOVER = OUT / "carryover.parquet"  # one row per 10-K chunk of a company with the year before's 10-K
 RATIO = 0.9
 NEW, CARRIED = 0.2, 0.8  # a passage is new at or below NEW, carried over at or above CARRIED
 ITEMS = {"1A": "Risk factors", "7": "MD&A"}
-N_CELLS = OUT / "n_cells.parquet"  # the cells `retrieve` searched (needed()), with or without a new chunk
 
 
 def matcher(prev: list[str]):
@@ -93,7 +91,7 @@ def carryover() -> None:
 
 def filings() -> pd.DataFrame:
     """Carryover share per 10-K item, FY2020-FY2025 (FY2026: only companies whose fiscal year doesn't end in December had filed)."""
-    c = pd.read_parquet(CARRYOVER).query("fy <= 2025")
+    c = pd.read_parquet(CARRYOVER).query(f"fy <= {LAST_FY}")
     f = c.groupby(["ticker", "sector", "fy", "item"], as_index=False)[["chars", "carried"]].sum()
     return f.assign(share=f.carried / f.chars)
 

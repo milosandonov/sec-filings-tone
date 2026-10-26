@@ -28,12 +28,12 @@ from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
 from matplotlib.patches import Rectangle  # noqa: E402
 from matplotlib.ticker import PercentFormatter  # noqa: E402
 
-from sec_filings_tone.diff import CARRYOVER, ITEMS, filings  # noqa: E402
-from sec_filings_tone.events import DIMS, EVENTS, TOPIC_WORDS, cells, did, named  # noqa: E402
+from sec_filings_tone.config import CARRYOVER, EVENTS, FIGURES, FILES, LAST_FY, OUT  # noqa: E402
+from sec_filings_tone.diff import ITEMS, filings  # noqa: E402
+from sec_filings_tone.events import DIMS, TOPIC_WORDS, cells, did, named  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
-from sec_filings_tone.tone import FILES, LAST_FY, OUT, S_TOPICS  # noqa: E402
+from sec_filings_tone.tone import S_TOPICS  # noqa: E402
 
-FIGURES = Path(__file__).parents[2] / "figures"
 LINES = ["AI", "Tariffs", "Interest rates"]
 SECTIONS = {"Risk factors (Item 1A)": ["1A"], "MD&A (Item 7)": ["7"]}
 MIN_N = 5  # heatmap cells with fewer companies discussing the topic are hatched instead

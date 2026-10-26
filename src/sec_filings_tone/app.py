@@ -11,9 +11,9 @@ import argparse
 
 import gradio as gr
 
-from sec_filings_tone import answer, retrieve
+from sec_filings_tone import answer
 from sec_filings_tone.budget import Cap, run_log
-from sec_filings_tone.ingest import EMBED_MODEL
+from sec_filings_tone.config import ANSWER_MODEL, EMBED_MODEL, RERANK_MODEL
 
 EXAMPLES = [
     "How did NVIDIA describe the financial impact of the US license requirement for H20 exports to China, and when did it learn of it?",
@@ -31,7 +31,7 @@ EXAMPLES = [
 
 HEADER = (f"Ask about the 10-K risk factors and MD&A (FY2019–FY2025) and 10-Q MD&A of the current S&P 500 companies. "
           f"Answers come from the filings only, cite the passages they use, and show the precomputed tone profile. "
-          f"Model: {answer.MODEL}. Follow-up questions use the conversation so far.")
+          f"Model: {ANSWER_MODEL}. Follow-up questions use the conversation so far.")
 
 
 def text(content) -> str:
@@ -42,7 +42,7 @@ def text(content) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=float, default=0.50, help="USD per chat session")
-    ap.add_argument("--model", default=answer.MODEL)
+    ap.add_argument("--model", default=ANSWER_MODEL)
     ap.add_argument("--effort", default=answer.EFFORT, choices=["low", "medium", "high"])
     a = ap.parse_args()
     # browser session -> its cap. Reranking spend is counted process-wide (retrieve.usage), so with
@@ -62,7 +62,7 @@ def main() -> None:
     print("loading chunks, the BM25 index and the tone cells ...", flush=True)
     answer.warm()
     # one record per app run, written when the server stops (Ctrl-C): Gradio has no reliable end-of-session event
-    with run_log([a.model, retrieve.RERANK_MODEL, EMBED_MODEL], usage, effort=a.effort, budget_per_session=a.budget):
+    with run_log([a.model, RERANK_MODEL, EMBED_MODEL], usage, effort=a.effort, budget_per_session=a.budget):
         gr.ChatInterface(chat, title="SEC Filings Tone: ask the filings", description=HEADER, examples=EXAMPLES,
                          cache_examples=False, analytics_enabled=False).launch(server_name="127.0.0.1", share=False)
 

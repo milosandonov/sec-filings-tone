@@ -34,11 +34,10 @@ from pydantic import Field, create_model
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import Cap, CapReached, call_usd, rerank_call_usd, run_log
-from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
+from sec_filings_tone.config import (ADJUDICATION, CANDIDATES, CHUNKS, FINBERT, GOLD, GUIDELINES, LM_PATH, LM_URL, MODEL, PRACTICE,
+                                     RERANK_MODEL, SENTIMENT)
+from sec_filings_tone.ingest import ITEM_NAMES
 
-GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
-OUT = CHUNKS.parent / "sentiment"
-MODEL = "claude-haiku-5-5"  # cheapest; the pilot shows whether a bigger model is needed
 TIMEOUT = 60  # seconds per call
 SELECTION = "reranked"  # how pilot passages are picked; in the file names, so results from different pickers don't mix
 
@@ -66,9 +65,6 @@ TOPICS = {  # topic -> search query used to find passages about it
     "Energy transition and climate": "climate change, emissions regulation, renewable energy and clean energy incentives",
 }
 # Phase 9 scores every topic for every company, except deposits and liquidity, for Financials only
-PRACTICE = Path(__file__).parents[2] / "labels" / "practice.csv"  # never sampled, so it stays a clean test
-GOLD = Path(__file__).parents[2] / "labels" / "gold_profiles.csv"
-ADJUDICATION = Path(__file__).parents[2] / "labels" / "gold_adjudication.csv"
 
 EXAMPLES = """\
 Short examples where the dimensions disagree (scores in the order polarity, magnitude, realization,
@@ -159,12 +155,7 @@ def proxies(text: str) -> dict:
 
 # ---------- baselines (local, free) ----------
 
-# Loughran-McDonald Master Dictionary 1993-2025, linked from sraf.nd.edu/loughranmcdonald-master-dictionary.
-# Free for academic use; kept out of git.
-LM_URL = "https://drive.google.com/uc?export=download&id=1iq2RUf8qGFEAk1g8wQntP3habOnR3fXF"
-LM_PATH = CHUNKS.parent / "lm" / "Loughran-McDonald_MasterDictionary_1993-2025.csv"
 LM_CATEGORIES = ["negative", "positive", "uncertainty", "litigious", "strong_modal", "weak_modal", "constraining"]
-FINBERT = "ProsusAI/finbert"
 
 
 @cache
@@ -241,14 +232,14 @@ def spearman_gap_ci(h: pd.Series, a: pd.Series, b: pd.Series, n_boot: int = 2000
 
 def baselines(n: int, model: str) -> None:
     """Score the pilot passages with FinBERT and LM, and compare with the LLM's first combined run."""
-    items = pd.read_parquet(OUT / f"pilot_sample_{n}_{SELECTION}.parquet")
-    path = OUT / f"pilot_baselines_{n}_{SELECTION}.parquet"
+    items = pd.read_parquet(SENTIMENT / f"pilot_sample_{n}_{SELECTION}.parquet")
+    path = SENTIMENT / f"pilot_baselines_{n}_{SELECTION}.parquet"
     if not path.exists():
         b = pd.concat([finbert(items.text.tolist()), pd.DataFrame([lm(t) for t in items.text])], axis=1)
         b.insert(0, "pid", items.pid.values)
         b.to_parquet(path, index=False)
     b = pd.read_parquet(path).set_index("pid")
-    s = pd.read_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
+    s = pd.read_parquet(SENTIMENT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
     r1 = s[(s["mode"] == "combined") & (s.run == 1)].set_index("pid")
     r1 = r1[r1.off_topic.eq(False)]  # errors have no off_topic and drop out too
     x = b.loc[r1.index].join(r1[list(DIMENSIONS)].astype(float))
@@ -285,7 +276,7 @@ def sample(n: int, cap: Cap, seed: int = 0) -> pd.DataFrame:
         ticker = rng.choice(sorted(df.ticker.unique()))
         form = rng.choice(["10-K", "10-Q"])
         fy = rng.choice(sorted(df[(df.ticker == ticker) & (df.form == form)].fy.unique()))
-        cap.check(rerank_call_usd(retrieve.CANDIDATES * 800))
+        cap.check(rerank_call_usd(CANDIDATES * 800))
         hits = retrieve.search(TOPICS[topic], k=1, rerank=True, ticker=ticker, form=form, fy=int(fy))["rerank"]
         if len(hits) and (cid := hits.chunk_id.iloc[0]) not in seen | skip:
             seen.add(cid)
@@ -294,8 +285,8 @@ def sample(n: int, cap: Cap, seed: int = 0) -> pd.DataFrame:
 
 
 def pilot(n: int, cap: Cap, model: str) -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"pilot_sample_{n}_{SELECTION}.parquet"
+    SENTIMENT.mkdir(parents=True, exist_ok=True)
+    path = SENTIMENT / f"pilot_sample_{n}_{SELECTION}.parquet"
     items = pd.read_parquet(path) if path.exists() else sample(n, cap)
     items.to_parquet(path, index=False)
     dims = list(DIMENSIONS)
@@ -325,7 +316,7 @@ def pilot(n: int, cap: Cap, model: str) -> None:
                     print(f"  {k}/{len(jobs)} calls, ${cap.spent():.2f}", flush=True)
     except CapReached as e:
         print(f"stopped: {e}")
-    pd.DataFrame(rows).to_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet", index=False)
+    pd.DataFrame(rows).to_parquet(SENTIMENT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet", index=False)
     print(f"spent ${cap.spent():.2f}; saved {len(rows)} results")
     report(n, model)
 
@@ -402,7 +393,7 @@ def labels(path: Path, final: pd.DataFrame | None = None) -> pd.DataFrame:
 def gold_scores(cap: Cap, model: str) -> pd.DataFrame:
     """The scorer's profile of every labeled item (practice and gold sheets): one combined call each,
     as Phase 9 scores. Saved, so the report reruns for free; delete the file to rescore."""
-    path = OUT / f"gold_scores_{model}.parquet"
+    path = SENTIMENT / f"gold_scores_{model}.parquet"
     if path.exists():
         return pd.read_parquet(path)
     items = pd.concat([pd.read_csv(p, usecols=["item_id", "topic", "chunk_id"]) for p in (PRACTICE, GOLD)])
@@ -422,7 +413,7 @@ def gold_scores(cap: Cap, model: str) -> pd.DataFrame:
     print(f"scored {len(out)} items with {model}: ${cap.spent():.3f}")
     if "error" in out and out.error.notna().any():
         raise SystemExit(f"{out.error.notna().sum()} calls failed, nothing saved:\n{out.error.dropna().to_string()}")
-    OUT.mkdir(parents=True, exist_ok=True)
+    SENTIMENT.mkdir(parents=True, exist_ok=True)
     out.to_parquet(path, index=False)
     return out
 
@@ -523,12 +514,12 @@ def gold_baselines(model: str) -> None:
     Local and free: it stops if the LLM's scores aren't saved, never rescoring. Item sets: (a) the gold
     items both the person and the LLM call on topic, as behind gold-report's kappas; (b) every item the
     person calls on topic. Blind labels first; the adjudicated ones lean toward the LLM by construction."""
-    scores = OUT / f"gold_scores_{model}.parquet"
+    scores = SENTIMENT / f"gold_scores_{model}.parquet"
     if not scores.exists():
         raise SystemExit(f"{scores} not found; gold-report makes it (paid)")
     llm = pd.read_parquet(scores).set_index("item_id")
     llm["off_topic"] = llm.off_topic.astype(bool)
-    path = OUT / "gold_baselines.parquet"
+    path = SENTIMENT / "gold_baselines.parquet"
     if not path.exists():
         items = pd.concat([pd.read_csv(p, usecols=["item_id", "chunk_id"]) for p in (PRACTICE, GOLD)])
         text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", items.chunk_id.tolist())]
@@ -572,8 +563,8 @@ def kappa(a, b, labels) -> float:
 
 
 def report(n: int, model: str) -> None:
-    items = pd.read_parquet(OUT / f"pilot_sample_{n}_{SELECTION}.parquet")
-    s = pd.read_parquet(OUT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
+    items = pd.read_parquet(SENTIMENT / f"pilot_sample_{n}_{SELECTION}.parquet")
+    s = pd.read_parquet(SENTIMENT / f"pilot_scores_{n}_{SELECTION}_{model}.parquet")
     dims = list(DIMENSIONS)
     errors = s["error"].notna().sum() if "error" in s else 0
     comb = s[(s["mode"] == "combined") & s.get("error", pd.Series(index=s.index)).isna()]
@@ -628,8 +619,8 @@ def main() -> None:
         return {"usd": {"anthropic": cap.spent()}}
 
     if a.command == "pilot":  # its three call modes send different schemas, so no prompt hashes
-        with run_log([a.model, retrieve.RERANK_MODEL], usage, [OUT / f"pilot_sample_{n}_{SELECTION}.parquet",
-                                                               OUT / f"pilot_scores_{n}_{SELECTION}_{a.model}.parquet"]):
+        with run_log([a.model, RERANK_MODEL], usage, [SENTIMENT / f"pilot_sample_{n}_{SELECTION}.parquet",
+                                                      SENTIMENT / f"pilot_scores_{n}_{SELECTION}_{a.model}.parquet"]):
             pilot(n, cap, a.model)
     elif a.command == "baselines":
         baselines(n, a.model)
@@ -638,7 +629,7 @@ def main() -> None:
     elif a.command == "gold-report":
         from sec_filings_tone.tone import scorer_hashes  # tone imports this module
 
-        with run_log([a.model], usage, [OUT / f"gold_scores_{a.model}.parquet", ADJUDICATION], scorer=scorer_hashes()):
+        with run_log([a.model], usage, [SENTIMENT / f"gold_scores_{a.model}.parquet", ADJUDICATION], scorer=scorer_hashes()):
             gold_report(cap, a.model, a.adjudicated)
     elif a.command == "gold-baselines":
         gold_baselines(a.model)

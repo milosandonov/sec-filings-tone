@@ -10,10 +10,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-# USD per 1M input and output tokens (claude.com pricing, checked 2026-10-12)
-PRICES = {"claude-haiku-5-5": (0.10, 0.50), "claude-sonnet-5-5": (2.00, 10.00), "claude-opus-5-5": (4.00, 20.00)}
-ROOT = Path(__file__).parents[2]
-RUNS = ROOT / "data" / "runs.jsonl"  # one JSON line per paid run; local, git-ignored
+from sec_filings_tone.config import PRICES, ROOT, RUNS
 
 
 class CapReached(RuntimeError):

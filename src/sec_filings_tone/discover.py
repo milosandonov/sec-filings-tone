@@ -52,16 +52,14 @@ from scipy import sparse
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import Cap, call_usd, run_log
-from sec_filings_tone.sentiment import MODEL, TOPICS
-from sec_filings_tone.tone import FILES, LAST_FY, OUT, QUERIES
+from sec_filings_tone.config import (DISCOVERED_CLUSTERS, DISCOVERED_TOPICS, FIGURES, FILES, FIRST_FY, LAST_FY, MODEL,
+                                     QUERIES)
+from sec_filings_tone.sentiment import TOPICS
 
-FIRST_FY = 2019
 K, SEEDS = 80, (0, 1)
 N_WORDS, N_EXAMPLES, N_NAMED = 12, 3, 15
 PRIOR = 1000  # pseudo-tokens in the log-odds prior
 N_BOOT = 2000
-TABLE = OUT / "discovered_topics.csv"  # one row per cluster
-CLUSTERS = OUT / "discovered_clusters.parquet"  # chunk_id -> cluster, per seed
 
 NAME_PROMPT = """These passages come from the risk factors (Item 1A) of S&P 500 10-K filings and were grouped
 together by a clustering algorithm. Below are the group's most distinctive words and the passages nearest its
@@ -217,13 +215,11 @@ def main() -> None:
     p.add_argument("--name", action="store_true", help=f"name the top {N_NAMED} uncovered clusters with Claude Haiku")
     p.add_argument("--budget", type=float, default=0.10, help="USD cap for --name (Anthropic)")
     a = p.parse_args()
-    from sec_filings_tone.charts import FIGURES
-
     chart_path = FIGURES / "discovered_topics.png"
     if not a.name:
         return run(None, chart_path)
     cap = Cap(a.budget)
-    outputs = [TABLE, CLUSTERS, chart_path, chart_path.with_suffix(".csv")]
+    outputs = [DISCOVERED_TOPICS, DISCOVERED_CLUSTERS, chart_path, chart_path.with_suffix(".csv")]
     with run_log([MODEL], lambda: {"usd": {"anthropic": cap.spent()}}, outputs):
         run(cap, chart_path)
 
@@ -234,7 +230,7 @@ def run(cap: Cap | None, path) -> None:
     print(f"{len(meta):,} Item 1A chunks, FY{FIRST_FY}-FY{LAST_FY}, {meta.ticker.nunique()} companies")
     runs = {s: kmeans(x, K, s) for s in SEEDS}
     labels, cent = runs[SEEDS[0]]
-    pd.DataFrame({"chunk_id": meta.chunk_id, **{f"cluster_seed{s}": r[0] for s, r in runs.items()}}).to_parquet(CLUSTERS)
+    pd.DataFrame({"chunk_id": meta.chunk_id, **{f"cluster_seed{s}": r[0] for s, r in runs.items()}}).to_parquet(DISCOVERED_CLUSTERS)
 
     q = np.load(QUERIES).astype(np.float32)
     q /= np.linalg.norm(q, axis=1, keepdims=True)
@@ -273,12 +269,12 @@ def run(cap: Cap | None, path) -> None:
         names = name_clusters(top, meta, cap)
         t["name"] = t.cluster.map(names).fillna("")
         print(f"naming spent ${cap.spent():.4f} (Anthropic)")
-    elif TABLE.exists():  # keep the saved names of clusters whose example chunks haven't changed: no new calls
-        old = pd.read_csv(TABLE, keep_default_na=False).set_index("examples").name
+    elif DISCOVERED_TOPICS.exists():  # keep the saved names of clusters whose example chunks haven't changed: no new calls
+        old = pd.read_csv(DISCOVERED_TOPICS, keep_default_na=False).set_index("examples").name
         t["name"] = t.examples.map(old).fillna("")
     t["label"] = np.where(t.name != "", t.name, t.words.str.split().str[:4].str.join(" "))
-    t.to_csv(TABLE, index=False)
-    print(f"wrote {TABLE} and {CLUSTERS}")
+    t.to_csv(DISCOVERED_TOPICS, index=False)
+    print(f"wrote {DISCOVERED_TOPICS} and {DISCOVERED_CLUSTERS}")
 
     drift = t.change.median()
     print(f"\n{(~t.covered).sum()} of {K} clusters below the threshold, {t.flagged.sum()} flagged by either rule; median "

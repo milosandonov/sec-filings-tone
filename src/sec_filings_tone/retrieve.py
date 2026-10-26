@@ -19,17 +19,15 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from sec_filings_tone.budget import Cap, run_log
-from sec_filings_tone.ingest import CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, VECTOR_DB, embed_text
+from sec_filings_tone.config import (BM25_DIR, CANDIDATES, CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, RERANK_MODEL, RRF_K,
+                                     VECTOR_DB)
+from sec_filings_tone.ingest import embed_text
 
 load_dotenv()
 
-RERANK_MODEL = "claude-haiku-5-5"
 RERANK_TIMEOUT = 60  # seconds per call, so a stuck request fails instead of hanging (the SDK retries twice)
-CANDIDATES = 20  # each search's top n; the fused top n goes to the reranker
-RRF_K = 60
 FILTERS = ("ticker", "sector", "form", "item", "fy")
 STAGES = ("vector", "bm25", "hybrid", "rerank")
-BM25_DIR = CHUNKS.parent / "bm25"  # saved BM25 indexes, one folder per chunk count
 
 RERANK_PROMPT = """You rerank passages from SEC filings (10-K and 10-Q) by relevance to a question.
 The passages arrive roughly in order from a search; you may be able to improve on that order.

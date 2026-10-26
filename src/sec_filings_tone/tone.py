@@ -40,31 +40,12 @@ from anthropic.types.messages.batch_create_params import Request
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import call_usd, run_log
-from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS
-from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
+from sec_filings_tone.config import (BATCH_BYTES, BATCH_REQUESTS, CANDIDATES, CHUNKS, COMPANIES, EMBED_DIMS, EVENTS, FILES, KEY,
+                                     MODEL, OUT, PASSAGES, QUERIES, SCORES, USD_PER_REQUEST, VECTOR_ORDER, VECTORS, K)
+from sec_filings_tone.sentiment import DIMENSIONS, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
 
-OUT = CHUNKS.parent / "tone"
-PASSAGES = OUT / "passages.parquet"
-VECTORS = OUT / "vectors.npy"  # every chunk's stored embedding, unit length, in chunks() order (2.8 GB)
-VECTOR_ORDER = OUT / "vectors_order.sha256"  # hash of the chunk ids in VECTORS' row order
-SCORES = OUT / "scores.parquet"  # one row per scored passage, keyed by its row number in PASSAGES (pid)
-STATE = OUT / "batches.json"  # submitted batches not yet collected
-BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per distinct chunk
-# form -> passages, scores, batch state, baselines; the 10-Q cells (B5) get their own q_ files
-FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
-         "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),
-         "rerun": (*(OUT / f"rerun_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # B6: a sample scored again
-         "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # masked check: event-test passages, no company or year
-         "section": tuple(OUT / f"s_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),  # S_TOPICS within S_ITEM (sections)
-         "new": tuple(OUT / f"n_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}  # the event tests' cells on new text only (diff.py)
-KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
-QUERIES = OUT / "queries.npy"  # the query vectors passages.parquet was ranked with, in TOPICS order
-K = 3
-LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
-BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
-USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
 # the masked check leaves these out: their fiscal-year labels are being fixed (2026-10-17)
 MASK_SKIP = ["AVY", "CDNS", "DPZ", "ILMN", "JNJ", "LDOS", "LHX", "RVTY", "SNA", "SWK", "TDY", "TRMB", "TXT"]
 
@@ -86,7 +67,7 @@ def top(c: pd.DataFrame, df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, form:
     rows = []
     for r in c.to_dict("records"):
         idx = groups[(form, *[r[x] for x in KEY[form]])]
-        n = min(retrieve.CANDIDATES, len(idx))
+        n = min(CANDIDATES, len(idx))
         v = idx[np.argsort(-vs[idx], kind="stable")[:n]]
         b = idx[np.argsort(-bs[idx], kind="stable")[:n]]
         fused = retrieve.rrf(list(ids[v]), list(ids[b[bs[b] > 0]]))  # BM25 drops chunks with no query word
@@ -391,8 +372,6 @@ def leaks(p: pd.DataFrame) -> pd.DataFrame:
     """Per passage of `p`, whether its own text gives away what the masked header hides: its company (the
     ticker, if two letters or more, or the name in data/companies.csv without Inc., Group and the like,
     as written there or in capitals), a year from 2019 to 2026, COVID, or another word dated to the period."""
-    from sec_filings_tone.events import COMPANIES
-
     text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]
                            ).set_index("chunk_id").text.loc[p.chunk_id].reset_index(drop=True)
     name = pd.read_csv(COMPANIES).set_index("ticker").name.str.replace(
@@ -413,8 +392,6 @@ def masked(budget: float, n: int = 340, seed: int = 0) -> None:
     (masked_sample, drawn once and kept, so a stopped run resumes) are scored again with masked_prompt
     and compared with their original scores (masked_report). The sample, how often its text names the
     company or the period anyway, and the cost are printed first; with --budget 0 nothing is sent."""
-    from sec_filings_tone.events import EVENTS
-
     passages = FILES["masked"][0]
     if not passages.exists():
         p = pd.read_parquet(PASSAGES).reset_index(names="orig_pid").merge(
@@ -436,7 +413,7 @@ def masked_report() -> None:
     B6's second run against the first (the noise floor: the hint matters only if masking agrees clearly
     less). Then each event's change where it hit, and its difference from the others, with each scoring,
     on the companies whose change exists with both."""
-    from sec_filings_tone.events import EVENTS, affected, changes, did
+    from sec_filings_tone.events import affected, changes, did
     from sec_filings_tone.sentiment import kappa_ci
 
     dims, first = list(DIMENSIONS), pd.read_parquet(SCORES).rename(columns={"pid": "orig_pid"})

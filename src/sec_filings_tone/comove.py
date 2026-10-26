@@ -14,12 +14,11 @@ Usage:
 import numpy as np
 import pandas as pd
 
+from sec_filings_tone.config import COMOVE_RESULTS, LAST_FY
 from sec_filings_tone.events import DIMS, cells, named
-from sec_filings_tone.tone import LAST_FY, OUT
 
 MIN_SHARED = 10
 PERMUTATIONS = 2000
-RESULTS = OUT / "comove.csv"
 
 
 def changes(c: pd.DataFrame, m: str, demean: bool = True) -> pd.DataFrame:
@@ -71,12 +70,12 @@ def report() -> None:
                 rows[-1] |= {f"sector:{g}": x for g, x in by.items()}
         print(f"{name}: done", flush=True)
     out = pd.DataFrame(rows)
-    out.to_csv(RESULTS, index=False)
+    out.to_csv(COMOVE_RESULTS, index=False)
     pd.set_option("display.width", 200)
     print(out[["version", "dimension", "same", "different", "difference", "p", "pairs", "same_pairs"]].round(4).to_string(index=False))
     sec = out[out.version == "primary"].set_index("dimension").filter(like="sector:").T
     print("\nmean same-sector pair correlation, primary version:\n" + sec.rename(index=lambda x: x[7:]).round(3).to_string())
-    print(f"\nwrote {RESULTS}")
+    print(f"\nwrote {COMOVE_RESULTS}")
 
 
 if __name__ == "__main__":

@@ -35,7 +35,8 @@ import pandas as pd
 
 from eval import TESTS, Cap, CapReached, contains, score
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import PRICES, rerank_call_usd, run_log
+from sec_filings_tone.budget import rerank_call_usd, run_log
+from sec_filings_tone.config import CANDIDATES, PRICES, RERANK_MODEL
 from sec_filings_tone.ingest import build_chunks, embed_text, n_tokens
 
 PILOT = ["AMAT", "AMD", "AVGO", "INTC", "KLAC", "LRCX", "MU", "NVDA", "QCOM", "TXN"]
@@ -79,7 +80,7 @@ EXP = Path(__file__).parents[1] / "data" / "experiment"
 MAIN_DIMS = 1024  # what Chroma stores; variants are compared here
 DEPTH = 50  # ranks saved per stage, so recall@k is computable up to 50
 RERANK_REPEATS = 2  # the reranker isn't deterministic; two runs show how much it moves
-RERANK_PRICE = PRICES[retrieve.RERANK_MODEL][0]  # USD per 1M input tokens
+RERANK_PRICE = PRICES[RERANK_MODEL][0]  # USD per 1M input tokens
 TOKEN_BUDGETS = (2000, 5000)  # keyword coverage within this much ranked text, fair across chunk sizes
 API_TIMEOUT = 60  # seconds per request, so a stuck call fails instead of hanging
 CAP = Cap()  # main() sets the run's budget and time limit; every paid call checks it first
@@ -218,12 +219,12 @@ def rank(name: str, df: pd.DataFrame, E: np.ndarray, Q: np.ndarray, tests: list[
             top = np.argsort(-sims)[:n]
             vec_ids = df.chunk_id.iloc[top].tolist()
             # production fuses each search's top CANDIDATES (retrieve.search)
-            fused = retrieve.rrf(vec_ids[:retrieve.CANDIDATES], bm_ids[:retrieve.CANDIDATES])
+            fused = retrieve.rrf(vec_ids[:CANDIDATES], bm_ids[:CANDIDATES])
             add(dims, ti, "vector", vec_ids, sims[top])
             add(dims, ti, "bm25", bm_ids, bm_scores)
             add(dims, ti, "hybrid", list(fused), list(fused.values()))
             if dims == MAIN_DIMS and rerank:
-                cands = retrieve.rows(list(fused)[:retrieve.CANDIDATES], list(fused.values())[:retrieve.CANDIDATES])
+                cands = retrieve.rows(list(fused)[:CANDIDATES], list(fused.values())[:CANDIDATES])
                 jobs += [(ti, rep, t["question"], cands) for rep in range(RERANK_REPEATS)]
     def rerank(job):
         CAP.check(rerank_call_usd(job[3].n_tokens.sum() + 1000))  # + prompt and headers
@@ -365,7 +366,7 @@ def main() -> None:
     paid = sorted({config(n)["model"] for n in a.variants} - {m for m, v in MODELS.items() if v.get("local")})
     # embeddings are charged to CAP (OpenAI), reranking is counted in retrieve.usage (Anthropic)
     with nullcontext() if a.score_only else run_log(
-            paid + ([] if a.no_rerank else [retrieve.RERANK_MODEL]),
+            paid + ([] if a.no_rerank else [RERANK_MODEL]),
             lambda: {"usd": {"openai": CAP.other, "anthropic": CAP.spent() - CAP.other}},
             [out / f"runs_{n}.parquet" for n in a.variants]):
         try:

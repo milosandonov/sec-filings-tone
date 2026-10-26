@@ -22,8 +22,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from sec_filings_tone import retrieve
 from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd, run_log
+from sec_filings_tone.config import CANDIDATES, EMBED_MODEL, RERANK_MODEL
 from sec_filings_tone.retrieve import STAGES, chunks, search, subset
 
 TESTS = Path(__file__).parent / "tests.jsonl"
@@ -69,7 +69,7 @@ def main() -> None:
     cap = Cap(a.budget, a.max_minutes)
     if a.no_rerank:  # free but for the query embeddings
         return evaluate(a, cap)
-    with run_log([retrieve.RERANK_MODEL, retrieve.EMBED_MODEL], lambda: {"usd": {"anthropic": cap.spent()}}):
+    with run_log([RERANK_MODEL, EMBED_MODEL], lambda: {"usd": {"anthropic": cap.spent()}}):
         evaluate(a, cap)
 
 
@@ -89,7 +89,7 @@ def evaluate(a: argparse.Namespace, cap: Cap) -> None:
     rows = []
     for i, t in enumerate(tests):
         try:
-            cap.check(rerank_call_usd(retrieve.CANDIDATES * 800) if not a.no_rerank else 0)
+            cap.check(rerank_call_usd(CANDIDATES * 800) if not a.no_rerank else 0)
         except CapReached as e:
             raise SystemExit(f"stopped before test {i}: {e}")
         metrics, _ = run(t, not a.no_rerank)
