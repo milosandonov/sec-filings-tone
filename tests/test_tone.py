@@ -1,5 +1,7 @@
 """Run: uv run pytest tests/test_tone.py  (offline: synthetic chunks)"""
 
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -103,3 +105,45 @@ def test_vectors_order(monkeypatch, tmp_path):
             tone.VECTOR_ORDER.unlink()
         with pytest.raises(SystemExit, match="doesn't follow"):  # vectors in another order must stop the run
             tone.vectors()
+
+
+@pytest.fixture
+def scratch_files(tmp_path, monkeypatch):
+    """A FILES entry of scratch files: two passages, the first already scored."""
+    files = tuple(tmp_path / f for f in ("passages.parquet", "scores.parquet", "batches.json")) + (None,)
+    monkeypatch.setitem(tone.FILES, "test", files)
+    pd.DataFrame({"ticker": ["A", "A"], "fy": [2024, 2024], "topic": ["AI", "AI"], "chunk_id": ["c0", "c1"]}
+                 ).to_parquet(files[0])
+    pd.DataFrame({"pid": [0], "usd": [0.001], "batch": ["b0"]}).to_parquet(files[1])
+    return files
+
+
+def test_scoring_log_counts_this_runs_scores(scratch_files, tmp_path, monkeypatch):
+    from sec_filings_tone import budget
+
+    monkeypatch.setattr(budget, "RUNS", tmp_path / "runs.jsonl")
+    monkeypatch.setattr(budget, "git_state", lambda: ("abc", False))
+    _, scores, saved, _ = scratch_files
+    with pytest.raises(KeyboardInterrupt):
+        with tone.scoring_log("test"):
+            # one paid score from batch b1, one copied (usd 0, its original batch b0), b2 still running
+            pd.DataFrame({"pid": [0, 1, 2], "usd": [0.001, 0.002, 0.0], "batch": ["b0", "b1", "b0"]}).to_parquet(scores)
+            saved.write_text('["b2"]')
+            raise KeyboardInterrupt
+    [r] = [json.loads(x) for x in (tmp_path / "runs.jsonl").read_text().splitlines()]
+    assert (r["status"], r["usd"], r["rows"], r["copied"]) == ("interrupted", {"anthropic": 0.002}, 2, 1)
+    assert (r["batches_collected"], r["batches_pending"], r["files"]) == (["b1"], ["b2"], "test")
+    assert r["scorer"]["prompt_key"] == tone.scorer_hashes()["prompt_key"]
+
+
+def test_score_cells_with_nothing_left_to_score(scratch_files, monkeypatch, capsys):
+    # every passage scored: no chunk read (pyarrow rejects an empty "in" filter), no request, nothing written
+    _, scores, saved, _ = scratch_files
+    pd.DataFrame({"pid": [0, 1], "usd": [0.001, 0.001], "batch": ["b0", "b0"]}).to_parquet(scores)
+    before = scores.read_bytes()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "offline")
+    monkeypatch.setattr(tone, "SCORES", scores.parent / "missing.parquet")  # nothing to copy from
+    monkeypatch.setattr(tone, "CHUNKS", scores.parent / "missing_chunks.parquet")
+    tone.score_cells(0.0, form="test")
+    assert scores.read_bytes() == before and not saved.exists()
+    assert "0 passages to score" in capsys.readouterr().out

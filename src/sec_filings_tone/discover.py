@@ -219,17 +219,17 @@ def main() -> None:
     a = p.parse_args()
     from sec_filings_tone.charts import FIGURES
 
+    chart_path = FIGURES / "discovered_topics.png"
     if not a.name:
-        return run(None)
+        return run(None, chart_path)
     cap = Cap(a.budget)
-    with run_log([MODEL], lambda: {"usd": {"anthropic": cap.spent()}}, [TABLE, CLUSTERS, FIGURES / "discovered_topics.png"]):
-        run(cap)
+    outputs = [TABLE, CLUSTERS, chart_path, chart_path.with_suffix(".csv")]
+    with run_log([MODEL], lambda: {"usd": {"anthropic": cap.spent()}}, outputs):
+        run(cap, chart_path)
 
 
-def run(cap: Cap | None) -> None:
-    """Everything main() prints and writes; with a cap, Haiku names the top clusters within it."""
-    from sec_filings_tone.charts import FIGURES
-
+def run(cap: Cap | None, path) -> None:
+    """Everything main() prints and writes, the chart to `path`; with a cap, Haiku names the top clusters within it."""
     meta, x = corpus()
     print(f"{len(meta):,} Item 1A chunks, FY{FIRST_FY}-FY{LAST_FY}, {meta.ticker.nunique()} companies")
     runs = {s: kmeans(x, K, s) for s in SEEDS}
@@ -289,7 +289,6 @@ def run(cap: Cap | None) -> None:
         print(t[t.flagged][cols].to_string(index=False))
 
     top = t[t.flagged].head(N_NAMED)
-    path = FIGURES / "discovered_topics.png"
     chart(top, drift, path)
     long = share[top.cluster].rename_axis(columns="cluster").stack().rename("share").reset_index()
     long.merge(top[["cluster", "label", "change", "lo", "hi"]], on="cluster").to_csv(path.with_suffix(".csv"), index=False)

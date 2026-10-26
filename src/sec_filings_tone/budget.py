@@ -69,9 +69,9 @@ def now() -> str:
 
 
 @contextmanager
-def run_log(models: list[str], usage=dict, outputs=(), path: Path = RUNS, **fields):
-    """Appends one JSON line for a paid run to `path` when the block ends, also when it raises: UTC start
-    and end, the command, the git commit, `models`, `fields` (e.g. prompt hashes), what `usage()` returns at
+def run_log(models: list[str], usage=dict, outputs=(), path: Path | None = None, **fields):
+    """Appends one JSON line for a paid run to `path` (default RUNS) when the block ends, also when it raises:
+    UTC start and end, the command, the git commit, `models`, `fields` (e.g. prompt hashes), what `usage()` returns at
     the end (USD per provider from the run's own accounting, counts, batch ids), the `outputs` changed during
     the run, and the status: ok, stopped (a cap, or SystemExit with a message), interrupted or failed.
     The block may set keys on the yielded dict; they override usage()'s ("status" only if nothing raised)."""
@@ -102,6 +102,7 @@ def run_log(models: list[str], usage=dict, outputs=(), path: Path = RUNS, **fiel
             used = {"usage_error": f"{type(e).__name__}: {e}"}
         rec |= {"finished": now(), "status": status, "error": error, **used, **mine,
                 "outputs": [str(p) for p in map(Path, outputs) if p.exists() and p.stat().st_mtime >= start]}
-        with Path(path).open("a") as f:
+        path = Path(path or RUNS)
+        with path.open("a") as f:
             f.write(json.dumps(rec, default=str) + "\n")
         print(f"run record: {path}", flush=True)

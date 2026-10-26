@@ -14,7 +14,8 @@ def log(tmp_path, monkeypatch):
     monkeypatch.setattr(budget, "git_state", lambda: ("abc123", True))
     monkeypatch.setattr("sys.argv", ["tone.py", "score", "--budget", "0.2"])
     monkeypatch.setattr(sys.modules["__main__"], "__spec__", None, raising=False)  # as when run as a script
-    return tmp_path / "runs.jsonl"
+    monkeypatch.setattr(budget, "RUNS", tmp_path / "runs.jsonl")  # never the real data/runs.jsonl
+    return budget.RUNS
 
 
 def records(path):
@@ -26,7 +27,7 @@ def test_record_of_a_finished_run(log, tmp_path):
     untouched.write_text("written before the run")
     spent = {"usd": 0.0}
     with run_log(["claude-haiku-5-5"], lambda: {"usd": {"anthropic": spent["usd"]}, "rows": 3}, [out, untouched],
-                 path=log, scorer={"prompt_key": "6f6deef21feb"}) as rec:
+                 scorer={"prompt_key": "6f6deef21feb"}) as rec:
         spent["usd"] = 0.0123  # usage() is read when the block ends, not when it starts
         out.write_text("x")
         rec["batches_collected"] = ["msgbatch_1"]
@@ -44,9 +45,9 @@ def test_record_of_a_finished_run(log, tmp_path):
                                          (KeyboardInterrupt(), "interrupted"), (SystemExit(0), "ok")])
 def test_a_run_that_raises_is_still_recorded(log, exc, status):
     with pytest.raises(type(exc)):
-        with run_log(["claude-haiku-5-5"], lambda: {"usd": {"anthropic": 0.0}}, path=log):
+        with run_log(["claude-haiku-5-5"], lambda: {"usd": {"anthropic": 0.0}}):
             raise exc
-    with run_log(["m"], path=log) as rec:  # a second run appends; the block can mark it stopped itself
+    with run_log(["m"]) as rec:  # a second run appends; the block can mark it stopped itself
         rec["status"] = "stopped"
     first, second = records(log)
     assert first["status"] == status and first["usd"] == {"anthropic": 0.0}
@@ -57,7 +58,7 @@ def test_a_run_that_raises_is_still_recorded(log, exc, status):
 
 def test_a_broken_usage_does_not_lose_the_record(log):
     with pytest.raises(ValueError):
-        with run_log(["m"], lambda: 1 / 0, path=log):
+        with run_log(["m"], lambda: 1 / 0):
             raise ValueError("boom")
     [r] = records(log)
     assert r["status"] == "failed" and r["error"] == "ValueError: boom" and "ZeroDivisionError" in r["usage_error"]

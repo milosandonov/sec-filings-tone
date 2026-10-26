@@ -81,7 +81,8 @@ def run_row(row: dict, cap: Cap, model: str, effort: str) -> dict:
             "stopped": r["text"].startswith(("Stopped:", "The API call failed")), "model": model, "effort": effort}
 
 
-def answers(cap: Cap, model: str, effort: str) -> None:
+def answers(cap: Cap, model: str, effort: str, rec: dict | None = None) -> None:
+    """Every row not yet answered; rec (the run log's) gets how many stopped, and status "stopped" if any did."""
     done = {a["id"] for a in load(ANSWERS) if not a["stopped"]}
     todo = [r for r in load(TESTS) if r["id"] not in done]
     print(f"{len(todo)} rows to answer ({len(done)} already saved); about ${0.007 * sum(len(r['turns']) for r in todo):.2f}")
@@ -93,6 +94,10 @@ def answers(cap: Cap, model: str, effort: str) -> None:
             ANSWERS.write_text("".join(json.dumps(a) + "\n" for a in kept))  # saved as it goes, so a rerun resumes
             print(f"{out['id']}: {out['plan']['kind'] if out['plan'] else '-'}, {len(out['docs'])} passages, "
                   f"{len(out['citations'])} citations, {out['secs']}s{' STOPPED' if out['stopped'] else ''}", flush=True)
+    if rec is not None:
+        rec["stopped"] = sum(a["stopped"] for a in kept)  # kept holds this run's stopped rows only
+        if rec["stopped"]:
+            rec["status"] = "stopped"
     # rows run in parallel, so only the run's total is a true cost (a row's share of the session total isn't)
     with RUNS.open("a") as f:
         f.write(json.dumps({"date": time.strftime("%Y-%m-%d"), "rows": len(todo), "usd": cap.spent(), "model": model,
@@ -114,9 +119,10 @@ def judge_prompt(row: dict, a: dict, draft: bool = False) -> str:
             f"<cited_passages>\n{passages or '(none)'}\n</cited_passages>{cells}\n\nGrade the answer to the last turn.")
 
 
-def judge(budget: float, sample: int = 0, draft: bool = False) -> None:
+def judge(budget: float, sample: int = 0, draft: bool = False, rec: dict | None = None) -> None:
     """sample: grade only a random `sample` of the answers (seed 0), e.g. to regrade them and measure the judge's
-    own noise. draft: grade the saved drafts of the answers the check changed (qa_answers_v2.jsonl only)."""
+    own noise. draft: grade the saved drafts of the answers the check changed (qa_answers_v2.jsonl only).
+    rec (the run log's) gets the batch's cost as printed, ungraded results included."""
     client = anthropic.Anthropic()
     rows = {r["id"]: r for r in load(TESTS)}
     graded = {j["id"] for j in load(JUDGED)}
@@ -155,6 +161,8 @@ def judge(budget: float, sample: int = 0, draft: bool = False) -> None:
             print(f"{res.custom_id}: no grade (stop_reason {m.stop_reason})")
             continue
         out.append({"id": res.custom_id, **g, "usd": cost, "batch": bid})
+    if rec is not None:
+        rec["usd"] = {"anthropic": usd}
     JUDGED.write_text("".join(json.dumps(j) + "\n" for j in out))
     BATCH.unlink()
     print(f"{len(out)} graded, ${usd:.3f}")
@@ -329,6 +337,8 @@ def judge_gpt(model: str, budget: float, test: bool, rec: dict | None = None) ->
             out.append({"id": res["custom_id"], **Grade.model_validate_json(text).model_dump(), "usd": cost, "batch": bid})
         except (TypeError, ValueError):
             print(f"{res['custom_id']}: no grade ({res.get('error') or body.get('status')})")
+    if rec is not None:
+        rec["usd"] = {"openai": usd}
     gpt_judged(model).write_text("".join(json.dumps(j) + "\n" for j in out))
     GPT_BATCH.unlink()
     print(f"{b.status}: {len(out)} graded, ${usd:.3f}")
@@ -406,6 +416,6 @@ if __name__ == "__main__":
            "judge": lambda: run_log([JUDGE_MODEL], collected(JUDGED, BATCH, "anthropic"), [JUDGED]),
            "judge-gpt": lambda: run_log([gpt], collected(gpt_judged(gpt), GPT_BATCH, "openai"), [gpt_judged(gpt)])}
     with log.get(a.step, nullcontext)() as rec:
-        {"answers": lambda: answers(cap, a.model, a.effort), "judge": lambda: judge(a.budget, a.sample, a.draft),
+        {"answers": lambda: answers(cap, a.model, a.effort, rec), "judge": lambda: judge(a.budget, a.sample, a.draft, rec),
          "report": report, "diff": lambda: diff(a.base, a.base_judge),
          "judge-gpt": lambda: judge_gpt(gpt, a.budget, a.test, rec), "compare": lambda: compare(gpt)}[a.step]()

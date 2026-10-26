@@ -248,7 +248,8 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
         if len(copied):  # usd 0: nothing was paid for these
             pd.concat([pd.read_parquet(scores), copied] if scores.exists() else [copied]).to_parquet(scores, index=False)
         # only these chunks' texts, not all 674k
-        rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]).set_index("chunk_id", drop=False)
+        ids = p.chunk_id.unique().tolist()  # pyarrow rejects an empty "in" list
+        rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", ids)]).set_index("chunk_id", drop=False) if ids else None
         system, fmt = system_prompt(), transform_schema(schema(list(DIMENSIONS)))
         batch, size = [], 0
         for r in [*p.itertuples(), None]:  # None flushes the last batch

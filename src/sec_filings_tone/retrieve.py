@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import threading
+from contextlib import nullcontext
 from functools import cache
 
 import bm25s
@@ -17,6 +18,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
+from sec_filings_tone.budget import Cap, run_log
 from sec_filings_tone.ingest import CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, VECTOR_DB, embed_text
 
 load_dotenv()
@@ -200,10 +202,6 @@ def main() -> None:
     p.add_argument("--no-rerank", action="store_true")
     a = p.parse_args()
     import anthropic
-
-    from contextlib import nullcontext
-
-    from sec_filings_tone.budget import Cap, run_log
 
     # reranking goes in the run log (a fresh Cap counts just retrieve.usage); without it, only the query embedding is paid
     log = nullcontext() if a.no_rerank else run_log([RERANK_MODEL, EMBED_MODEL], lambda: {"usd": {"anthropic": Cap().spent()}})
