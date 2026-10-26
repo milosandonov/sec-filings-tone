@@ -1,0 +1,152 @@
+run,id,category,claim
+published,s05,decline,"The filings cover S&P 500 companies' 10-K risk factors and MD&A and their 10-Q MD&A, but Mellanox is not a company in this index"
+published,s05,decline,Mellanox's revenue contribution is not broken out as a separate figure
+published,s45,uncited,"The FY2021 and FY2022 10-Ks gave the same insurance-limit definition and reported uninsured totals, but the passages lack the adjustment language (no FY2021/FY2022 passages were cited)"
+published,s45,marker,The FY2024 and FY2025 10-Ks use the same wording is cited only to FY2024 [4]; FY2025 wording appears in the passage but was not the cited span
+published,a02,context,"The model-scored cells are attributed to ""Claude Haiku 5.5"", which appears in neither the cell table nor the passages."
+published,a02,context,"The statement that the cells ""average the top-ranked passages per company 10-K"" is not supported by the table or passages."
+published,s49,interpretation,"The short answer says the charge 'reduced reported operating profit' and implies reported operating profit was hurt overall, while the filing shows reported operating profit still rose 8%; the framing is somewhat misleading but the later bullets clarify."
+published,s49,interpretation,"The claim that the Total adjustments of 2,535 'includes the Russia-Ukraine charge and purchase accounting impacts' is an inference, though the table supports it."
+published,s20,decline,The filings cover S&P 500 companies' 10-K risk factors and MD&A and their 10-Q MD&A for fiscal 2019 to 2025
+published,s19,uncited,"Intel named TSMC, Samsung, GF, UMC and SMIC as competitors in its FY2023 and FY2024 filings (cited passages are only from the FY2025 10-K)"
+published,s19,absence,The closing statement that passages don't say whether risks changed since the FY2025 filing is a meta-claim not tied to the passages
+published,s17,absence,"The claim that the passages do not quantify any CHIPS Act benefit is a statement about absence that the cited spans cannot directly support, though it appears consistent with them."
+published,s17,interpretation,The 10-K's link between the CHIPS Act and higher capital expenditures is the answer's own inference; the passage places the two sentences next to each other but does not state the connection.
+published,s47,absence,"The opening statement that NEE's filings describe the changes in general terms and do not quantify their effect on the credits, and the closing statement that the filings give no dollar amount for the credit changes, are not supported by the cited passages, which cannot establish what the filings omit."
+published,s47,marker,The statement that the 'same exemption' applies to nuclear and battery storage is supported by the passage but has no citation marker of its own.
+published,c03,absence,"""This is the only Russia figure it gave"" is an assertion about the whole filing, beyond what the cited passages show."
+published,c03,absence,"""Coca-Cola's filings give little quantified detail on Russia for 2022"" is a broad claim not directly supported by the passages."
+published,s07,uncited,"The FY2025 10-K (fiscal year ended 2025-08-28) is said to contain the CAC language, but only the FY2026 10-K passage is cited and no FY2025 text is provided."
+published,s07,context,"The FY2026 10-K is described as being for the fiscal year ended 2026-09-03, which the passage does not support."
+published,s07,interpretation,The answer says Micron's filings describe the CAC decision as a continuing headwind; this is only loosely supported by the FY2023 text.
+published,s04,interpretation,"The $306 million figure covers cryptocurrency-specific products generally, not gaming alone (an interpretation not stated in the passages, though consistent with the GPU business section)"
+published,s04,marker,"Sales of certain high-end Turing GPUs being weaker than expected is stated without a citation marker, though the passage supports it"
+published,s02,context,"The quarter ended April 27, 2025 is not in the cited spans (it appears only in the 10-Q passage title)."
+published,c05,absence,"The closing statement that the FY2023 passages do not restate the dollar forecasts for 2023 from the FY2022 filing is not supported by the cited passages, and the FY2022 filing is never cited."
+published,c05,interpretation,"The Comirnaty 2023 revenue of $11,220 million is given as global, but the table row is ambiguous because the U.S. figure appears in the same line."
+published,a03,context,"Attributes the scoring to ""Claude Haiku 5.5"" judging the top-ranked passages, which is not in the cell table or cited passages"
+published,a03,error,"Says the scores come from the ""FY2023 version"" of the table, which is not stated in the sources"
+published,s30,decline,The filings don't report investment gains or losses on a specific stake like Rivian with that detail.
+published,s40,uncited,The FY2025 and FY2026 10-Ks both describe this charge (only the FY2025 10-K is cited)
+published,s40,uncited,"The FY2024 charge also appears in two 10-Q MD&A passages describing it as recorded in the three months ended December 31, 2023 (no such 10-Q passages are cited)"
+published,s40,interpretation,Fiscal 2019 was the largest write-down is implied but the combined $8.3 billion total is never stated
+published,s43,interpretation,"The answer's closing remark that Prologis's 10-K 'refers to' its own business as industrial is only loosely supported by the cited 'non-industrial properties' phrase, though it is correctly flagged as an inference."
+published,s38,context,"Veeva FY2024 period ""mostly calendar 2023"" is not stated in the cited passages"
+published,s38,interpretation,"The claim that the VEEV passage ""refers to past incidents only in general terms"" is an interpretation; the passage does say breaches ""have resulted"" in losses"
+published,a05,context,"The scores come from ""Claude Haiku 5.5"", which scored the top three passages per 10-K and averaged only on-topic passages; the cell table does not state this."
+published,a05,context,Dollar Tree's fiscal year ended January 2022 and so is mostly calendar 2021; the cited passages do not say this.
+published,a05,context,"The ""happened"" definition of the scale value 2 and the top-three-passages methodology are not in the provided cell table."
+published,s41,context,"The scoring model is named as ""Claude Haiku 5.5"", which does not appear in the cell table or passages."
+published,s27,context,"Because Broadcom's fiscal year ends in early November, this closing falls in its fiscal 2020, not fiscal 2019 (not stated in the cited passages, though consistent with the FY2020 10-K reference and fiscal year end November 1, 2020)."
+published,s27,absence,The search for a 10-Q passage on this topic returned no results (process claim not supported by the passages).
+published,s10,context,The table is model-scored (Claude Haiku 5.5)
+published,s10,error,"Apple is the only company in the provided passages that describes the investigation, presented as the answer to a question about chipmakers"
+published,s24,interpretation,"The Short answer says the deal drove ""most of its embedded growth""; the passages say the increase was ""primarily driven by"" Xilinx, but ""most"" is a paraphrase."
+published,s24,interpretation,"""Acquisition costs sat mainly in All Other"" is an interpretation; the passage also lists stock-based compensation and Pensando-related items in All Other, not only Xilinx costs."
+published,s42,context,"All three fiscal years end December 31, 2022 (not stated in the cited passages)"
+published,s42,interpretation,"The exit ""was not entirely voluntary"" is an interpretation, though it is supported by the decree passage"
+published,s25,error,"The sentence 'The deal was a provider of AI and general-purpose compute infrastructure...' misstates the text, since ZT Systems is the provider, not the deal."
+published,s25,absence,The statement that the filings don't report progress on regulatory reviews or closing beyond their filing dates is not supported by the passages.
+published,s25,interpretation,Funding sufficiency statement is only loosely related to the ZT Systems acquisition and is not tied to the deal in the passage.
+published,s16,uncited,The Q1 2026 10-Q reported the same $630 million figure (no Q1 2026 10-Q passage was cited or provided).
+published,s16,absence,The FY2025 10-K and the 2026 10-Qs do not repeat a total (an absence claim that goes beyond the passages shown).
+published,s00,uncited,"The 10-Q filed for the quarter ended October 29, 2023 describes later licensing changes effective in fiscal 2024, which added products such as the H800, L4, L40, L40S and RTX 4090 (not in the cited passages)"
+published,s00,uncited,"A later 10-Q said it had sold alternative products such as the A800 or H800 (cited passage is the 10-Q for April 2023, so this is supported, but the claim about the October 2023 10-Q is not)"
+published,s33,context,The claim that the $640 million is a medical cost figure from a 'Business Trends section' is a minor characterization not shown in the passages (the passage title is only Item 7 MD&A).
+published,s33,interpretation,The statement that the $9 billion loan principal 'is not described as a cost' is an inference rather than something the passages say.
+published,s06,interpretation,AMD's FY2025 10-K described as 'a narrower hit: a single product line (MI308)' is an interpretive framing; the AMD passage also covers broader Instinct and Versal restrictions
+published,s06,interpretation,"Opening claim that both companies say export controls 'forced inventory write-downs' is loosely supported; NVIDIA's charge relates to H20 and AMD's to MI308, which is fine, but 'cost them sales' is not directly stated in the cited passages for both"
+published,s06,marker,'The AI Diffusion rule was rescinded in May 2025' is cited to a span that only says the forthcoming rule's scope is uncertain; the rescission announcement is in the passage but the cited span [17] doesn't contain it
+published,s35,uncited,"In its Q3 2023 10-Q, Bank of America had estimated the impact at approximately $1.9 billion (only the Q2 10-Q is cited)"
+published,s35,interpretation,The final figure was higher (inference; the passages support $1.9B proposed vs $2.1B final only implicitly)
+published,s14,interpretation,"The opening claim that the October 2022 rules cover 'certain semiconductor testers' in general is drawn only from Teradyne's own disclosure, not a general statement of the rules"
+published,s14,absence,"The statement that the filings do not give a complete itemized list is the system's inference, not from the passages"
+published,s18,interpretation,"The answer says the 10-K reported $2.8 billion in 2024 and then attributes the Q3 breakdown to the 10-Q; this is supported, but the claim that 'The passages present these as distinct from the restructuring charges' is slightly interpretive, though it is consistent with the 10-Q text."
+published,s18,judge,"Citation [2] is attributed to Intel's 'Q3 2024' announcement, which is supported by the 10-Q passage, though the 10-K version is also cited."
+published,s26,uncited,The FY2023 10-K and the February 2024 10-Q say 54.4 million shares — no February 2024 10-Q passage is cited.
+published,s26,error,"The 54.4 million figure is consistent with the $53,398 million fair value — an unsupported assertion, and arguably incorrect since the reference treats 544 million as correct."
+published,s26,context,Broadcom's fiscal year ends around late October or early November — not in cited passages.
+published,s26,interpretation,The merger closed in FY2024 — an inference not stated in the passages.
+published,s26,interpretation,"The $86.3 billion preliminary figure is described as an early estimate, and later filings as settled — an interpretation not in the passages."
+published,s37,decline,The filings cover only the 10-K risk factors and MD&A and the 10-Q MD&A of current S&P 500 companies for fiscal 2019 to 2026
+published,s48,decline,The filings don't give deal prices or purchase amounts for acquisitions like Prologis's deal for Duke Realty.
+published,s48,decline,Duke Realty isn't in the company list.
+published,s48,decline,The filings cover S&P 500 companies' 10-K risk factors and MD&A and 10-Q MD&A for 2019 to mid-2026.
+published,s11,context,"The period-end dates for each 10-K (October 30, 2022; October 29, 2023; October 27, 2024; October 26, 2025) are not stated in the cited passages."
+published,s01,context,"Parenthetical ""mostly calendar 2022"" and ""fiscal year ended January 29, 2023"" are not in the cited passages"
+published,s01,absence,Closing statement that the passages do not give supplier-level detail is a meta claim not drawn from the passages
+published,s12,context,"Applied's fiscal year ends in late October, so fiscal 2020 runs roughly from late 2019 to late 2020 (not stated in the cited passages)"
+published,s12,interpretation,Opening framing that the coronavirus 'mainly' affected Applied through supply-chain disruption and COVID-related labor and freight costs is a characterization not stated in the passages
+published,s21,decline,The filings only cover 10-K risk factors and MD&A plus 10-Q MD&A for S&P 500 companies and don't include news or 8-Ks.
+published,s21,decline,"Mobileye isn't in the S&P 500 list, so the IPO can't be looked up."
+published,c09,interpretation,"The claim that the 'lower tariff costs of about $1.0 billion' and the Novelis temporary costs are separate items is an interpretation, though the passage supports both figures."
+published,c09,absence,"The 'does not break down by country, product, or tariff program' remark is a statement about absence that the passages cannot confirm."
+published,s23,context,"The FY2025 10-K period end date of December 27, 2025 is not in the cited passages."
+published,s23,marker,"The claim that FY2024 'Certain Versal FPGAs remained subject to NAC notification' is supported by the FY2024 passage but not by the cited span [7], which only covers the license sentence."
+published,s09,context,"Fiscal 2025 'ended August 28, 2025' is not stated in the cited passages"
+published,s09,absence,"The closing remark that the passages do not break out HBM revenue is a statement about the excerpts, not a filing claim, and is not itself backed by a cited span"
+published,s32,absence,"The claim that the Q1 10-Q figure of $(3,255) million is ""the only one stated in the identified-items table for that quarter"" goes beyond the cited passages, though the passage does show only that one Upstream figure."
+published,s32,absence,The statement that the 10-K's Upstream table does not break out the Q1 impairment separately is an inference not stated in the passages.
+published,s34,decline,The filings do not cover spending figures for specific storm restoration.
+published,s34,decline,The filings cover S&P 500 companies' risk factors and MD&A for fiscal 2019 to 2025 and their 10-Q MD&A.
+published,s13,absence,"The statement that the passages don't quantify how much of the change in China revenue is attributable to these rules is a negative claim about the filings, not tied to a cited passage, though it is consistent with them."
+published,s13,interpretation,"The description that the October 2023 rules 'followed' the 2022 rules is supported only by the FY2024 passage's chronology, not a cited sentence, and is accurate."
+published,s36,context,"Filing dates (May 2025, August 2025, November 3, 2025) are not in the cited passages"
+published,a04,error,"The counts of 49 of 70 and 60 of 75 are described as 'overall' counts rather than the Information Technology sector figures, contradicting the table header and reference."
+published,a04,context,"The table has no sector labels and the three passages identify Adobe, Akamai and Datadog as Information Technology companies; the passages do not state this."
+published,a04,context,"Cells are described as scored by 'Claude Haiku 5.5' and as averaging on-topic passages, which the provided materials do not support."
+published,a01,error,27 of the 30 Utilities companies shown in the table discussed AI (headline count conflicts with the table's own 27 of 31 figure)
+published,a01,context,The table's note says the list comes from model-scored cells (Claude Haiku 5.5) - the model name is not in the provided table
+published,a01,interpretation,"The CMS passage is about data center demand driven by AI, not AI risk language in the company's own operations; the answer frames it as illustrating AI risk language"
+published,c07,uncited,"The FY2024 10-K is claimed to use similar wording, but only the FY2025 10-K passage is provided; no FY2024 passage supports this."
+published,c07,interpretation,"The answer says the language shifted from a possibility to a historical pattern, an interpretive claim only partly supported by the FY2020-FY2022 passages."
+published,s08,interpretation,The statement that the 10-Q filings show the charges were concentrated in the middle of the year is an interpretation. The 10-Q gives only the Q2 and Q3 amounts.
+published,s08,error,"The answer frames the $401 million and $1.43 billion as the second quarter's charges, when they are the third- and second-quarter figures from the Q3 10-Q. The wording is muddled."
+published,s08,interpretation,"The answer's 'partly offset' framing is its own reading. The 844 is a gross margin benefit from selling previously written-down inventory, not an offset to the provision itself."
+v2,s16,interpretation,"The FY2025 10-K 'described the ITC rate' and the support 'was framed differently in earlier filings' is interpretive framing; the passages show the FY2025 and 10-Q wording simply omits the total, not that it was reframed."
+v2,s16,absence,"Claim that the $7.5-9.5 billion figure 'appears only in the FY2024 10-K' is based on the passages retrieved, not verified across the filings."
+v2,c04,interpretation,"The answer says the FY2023 10-K said Intel ""had expect[ed]"" substantial grants; the passage says ""we expect to receive"", so the tense is a slight misquote."
+v2,c04,judge,"The answer omits the FY2023 mention of German EU Chips Act grants, but this is an omission, not a claim."
+v2,c04,judge,The termination rights and repayment risk appear in the cited passage [9] but the answer does not state them.
+v2,s09,marker,"Citation markers appear misaligned with the passages: the answer cites [4]–[10], but the cited-passage list has only five passages, so those markers cannot be checked against the passages shown. The underlying facts are all present in the passages, so this is a citation-numbering issue rather than unsupported content."
+v2,a05,judge,"The scores come from Claude Haiku 5.5, averaging each company's top three on-topic 10-K passages (stated as method; supported by the cell table, not the cited passages)"
+v2,a05,interpretation,"The Dollar Tree quote is presented as evidence of inflation having hit, but it describes shipping and trucking cost increases rather than inflation explicitly"
+v2,s27,context,"The purchase closed in Broadcom's fiscal year 2020, which ended November 1, 2020, so the November 4, 2019 date falls in that year (inferred from passages' fiscal year references, not explicitly stated as such)"
+v2,c09,interpretation,"The answer states that Ford's 2026 expected tariff cost reduction of about $1.0 billion is separate from the Novelis figures; the passage supports this, but the claim that the $1.5-2.0 billion is 'Novelis-related 2026 figures' is a paraphrase of the passage, not a quoted statement."
+v2,c09,absence,The closing remark 'Not in the passages found: a total 2026 tariff cost estimate for Ford' is a meta-claim that the cited passages do not directly support.
+v2,s03,interpretation,"The answer calls the 10-Q for the quarter ended July 31, 2022 an ""FY2023 10-Q""; this is a labeling detail and is fine, but the claim that the $1.35 billion ""has already recorded"" is supported only by later filings, not the original planned $1.36 billion figure."
+v2,s30,decline,"The filings cover only the 10-K risk factors and MD&A and 10-Q MD&A of S&P 500 companies, so they can't give Amazon's Rivian gains or losses."
+v2,s30,decline,"Offers to search Amazon's 10-K MD&A, implying a capability not shown."
+v2,s43,error,"The answer ties the Public Storage/Life Storage proposal to the question, but it is a rejected proposal rather than an agreement to buy, so it is irrelevant and potentially confusing."
+v2,s43,judge,"The answer does not state that the deal was stock-for-stock, though the passage says so."
+v2,s06,interpretation,"""Both companies say ... both have taken large inventory charges tied to those rules"" is a summary that generalizes; NVIDIA's charge is supported but the framing of the NVIDIA ""blocked"" claim is fine, so only minor overgeneralization"
+v2,s06,judge,"The opening statement that NVIDIA's text appears as a direct quote and AMD's as paraphrase is fine, but the claim that A100/H100 requirements exist is omitted rather than unsupported"
+v2,c07,uncited,"The FY2020 label for the 'may not be able to' wording is supported, but the answer asserts the timing/lag point as appearing across 'the filings' while citing only the FY2024 filing."
+v2,c07,interpretation,The answer says the FY2022 wording is 'the same' as FY2023; this is supported by the passages but is an inference about equivalence.
+v2,s14,error,"The sentence ""Other filings are less specific about equipment:"" followed by a KLA bullet is inconsistent, since KLA is listed among the 'other filings' even though it is the main source."
+v2,s14,interpretation,The statement that the passages name wafer fabrication equipment and semiconductor testers as the equipment requiring licenses is a loose synthesis; the Teradyne passage describes restrictions on testers but not explicitly a license requirement for all testers.
+v2,a01,interpretation,"Attribution of the scoring model as 'Claude Haiku 5.5' is drawn from the table, which is fine, but the claim that CMS Energy's passage is about AI in its risk factors is supported only as data-center demand driver, not AI use"
+v2,s32,error,"The claim that the filing gives two ""different figures"" for the same first-quarter charge is a framing the passages do not support; the $3.0 billion figure is the Sakhalin Upstream impairment, while $3.4 billion is the total after-tax charges, so the two are not necessarily conflicting."
+v2,s40,interpretation,"The filings describe the write-down as relating to ""Shave Care and Gillette-branded businesses"" is loosely framed, not directly quoted in the passages"
+v2,s10,error,"Apple's risk factors repeat this description (Apple is a device maker, not identified as a chipmaker; the answer treats it as a chipmaker discussing the investigation)"
+v2,s10,judge,"The tone table was scored by Claude Haiku 5.5 with details about the mean of three passages, and the claim that it marks Apple, Applied Materials, Arista, AMD, Marvell, NXP, ON, Microchip, ADI and Broadcom as 'yes' is presented as relevant to the question but does not show who discussed the investigation"
+v2,s10,interpretation,The statement that the table measures tariffs generally and not Section 232 is an inference not supported by the passages
+v2,a03,judge,"The scoring model is named as ""Claude Haiku 5.5"" and the answer describes a scale of 0 hypothetical, 1 under way, 2 happened; the table supports this, but the ""top-ranked three passages"" description is only partly shown"
+v2,a03,interpretation,The AJG example is a 2018 hedging loss recognized over time and does not clearly show interest rate effects having happened in FY2023
+v2,a03,interpretation,"CINF's two cited sentences are presented as one ""same section said"" claim, which is fine, but the examples do not demonstrate the realization score"
+v2,s36,error,"The opening sentence attributes the 'could not derive an accurate estimate' statement to a 'March 2025 filing', but the cited passage is the 10-Q for the quarter ended March 31, 2025, filed in May."
+v2,s36,context,"The filing dates (May 2025, August 2025, November 2025, February 2026) are not stated in the passages."
+v2,a02,judge,"The scale and averaging description (company scores as means over the three highest-ranked passages) is from the table caption, not the cited passages, though it is supported by the cell table."
+v2,c06,error,"The answer frames $3.0 billion vs $3.4 billion as a conflicting 'different figure' from a 'separate passage', whereas the passages do not say they conflict; the $3.0B refers to Upstream Sakhalin impairment and the $3.4B is described differently."
+v2,c06,interpretation,"The full-year loss line is presented as a Sakhalin exit cost, but the passage's $(2,185) million Russia expropriation item is not explained as the cost of the exit and the answer does not link it to Sakhalin explicitly."
+v2,a04,error,The sector-level share of companies discussing China is not in the passages found (contradicts the table's own counts)
+v2,a04,context,"The passages are Adobe, Akamai, and Datadog risk factors that mention China-related laws"
+v2,s47,marker,"Span [4] is cited for a requirement on both wind/solar and nuclear/battery facilities, but the quoted span covers only wind and solar; the nuclear/battery foreign entity requirement is in the passage but not in that span."
+v2,s47,judge,"The 'full clean energy tax credits' framing and the 'Later, the FY2025 10-K' sequencing are in the passages, so no further unsupported claims."
+v2,s45,interpretation,"The collateral exclusion is presented as part of how uninsured deposits are measured, but the passage only says total deposit balances exclude that collateral; it does not tie the exclusion to the uninsured measurement."
+v2,s26,error,"Span [1] is labeled as the FY2024 10-K, but the passage is from the FY2025 10-K; the answer misattributes the source of the $30,788 million / 544 million / $53,398 million figures."
+v2,s26,interpretation,"The FY2023 10-K's 54.4 million shares is presented as a share count figure; the link to the split adjustment (10-for-1) is implied rather than stated in the passages, though the reconciliation is reasonable."
+v2,s28,interpretation,"The ""Segment impact"" bullet is labeled as being about the revenue discussion and segment impact, but the $1.8 billion was not allocated to segment results, so the label is slightly misleading, though the quoted content is supported."
+v2,c05,interpretation,"Comirnaty $11,220 is presented as global revenue for 2023, but the passage shows the figure without a clear label, and the answer pairs it with garbled table fragments."
+v2,c05,interpretation,"The 'Worldwide change' bullet reports Paxlovid declines as '(17,506) (11,803) (5,703)' without units or context; the cited passage supports the numbers but the answer says 'worldwide operational declines from Paxlovid' as though they were revenue amounts, and does not clarify them."
+v2,c05,interpretation,"Paxlovid $1,279 is called global revenue, but the table row also shows U.S. $(1,289), which the answer does not explain."
