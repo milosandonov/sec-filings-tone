@@ -808,6 +808,42 @@ direction was expected", which a one-sided test contradicts).
   weak sector effect from noisy cells. The run-to-run check (section 2) puts the scorer's share of the
   variance of these yearly changes at 19–46% by dimension; the rest is passage selection and real change.
 
+## 10. Exploratory: risk themes the 13 topics miss (2026-10-26)
+
+**What this is:** the 13 topics were chosen in advance, so the scoring can't see a risk that none of
+them names. This section looks for such themes in the risk factors and asks which grew most from
+FY2019 to FY2025. It is exploratory: the themes are found by looking, not tested against a
+hypothesis. The design below was written down and committed before any clustering was run
+([`discover.py`](src/sec_filings_tone/discover.py)); anything changed after seeing results is dated
+and marked.
+
+**Design (fixed 2026-10-26, before results):**
+
+- **Corpus:** every 10-K Item 1A chunk of FY2019–FY2025 (92,120 chunks; 466–496 companies a year),
+  with the embedding already stored for search. FY2026 is left out (partial). Nothing is embedded.
+- **Clusters:** spherical k-means (cosine) on the chunk vectors, k = 80, k-means++ start, seed 0,
+  until no chunk moves (at most 100 rounds). k = 80 means ~1,150 chunks a cluster on average: fine
+  enough to split the 13 topics' ground into narrower themes, coarse enough that a cluster reaches
+  many companies a year. Stability: the same run with seed 1; each seed-0 cluster is matched to the
+  seed-1 cluster with the closest centroid, and the top clusters' matches and growth are reported.
+- **Labels, free:** each cluster's 12 most distinctive words (log-odds z-score of its word counts
+  against the rest of the corpus, informative Dirichlet prior; Monroe et al. 2008) and the 3 chunks
+  nearest its centroid. Optional: Claude Haiku names the top 15 from those, capped at $0.10.
+- **Covered or not:** a cluster's best cosine between its centroid and the 13 topic query vectors.
+  The threshold comes from the project's own retrieval: for each topic, the cosine between its query
+  and the centroid of the Item 1A passages it retrieved and the scorer kept as on topic; the lowest
+  of the 13. A cluster below it matches every topic less well than the loosest topic matches its own
+  scored passages. Taking the lowest errs toward calling clusters covered. As a check that the
+  threshold isn't doing all the work, each cluster's share of chunks that the 13-topic retrieval
+  picked is reported next to the corpus-wide share.
+- **Growth:** per cluster and fiscal year, the share of companies with at least one chunk in the
+  cluster (companies, not chunks, so long filings don't dominate). The FY2019 → FY2025 change is over
+  the companies with risk factors in both years, with a 95% bootstrap interval over companies. Filings
+  got longer (22.5 → 29.6 Item 1A chunks a company), so most shares will rise; the median change over
+  all 80 clusters is reported as that drift. Uncovered clusters are ranked by change.
+- **Verification:** the top 3 clusters' growth recomputed with separate code; 5 random chunks of
+  each of the top 5 clusters read by hand, with a verdict on whether the label fits.
+
 ## Limitations
 
 Added 2026-10-17 after an external review: the first six points below.
@@ -889,6 +925,7 @@ uv run python -m sec_filings_tone.diff carryover     # Phase 8 (section 8), ~2 m
 uv run python -m sec_filings_tone.diff report        # also the event tests on new text
 uv run python -m sec_filings_tone.comove             # co-movement (section 9), ~1 minute
 uv run python -m sec_filings_tone.charts             # figures/ (sections 7 and 8)
+uv run python -m sec_filings_tone.discover --name --budget 0.1   # section 10, a few minutes; Haiku names ~$0.01
 # quarterly 10-Qs (section 6, parked): the same commands with --quarterly
 uv run python -m sec_filings_tone.tone retrieve --quarterly
 uv run python -m sec_filings_tone.tone score --quarterly --budget 3
