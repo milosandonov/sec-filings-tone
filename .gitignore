@@ -30,3 +30,5 @@ eval/qa_batch*.json
 FUTURE_IMPROVEMENTS.md
 # the run log: one line per paid run (budget.run_log), local
 data/runs.jsonl
+# agent worktrees
+.claude/

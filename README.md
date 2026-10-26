@@ -347,7 +347,9 @@ uv run python -m sec_filings_tone.discover             # clusters, tables, chart
 uv run pytest
 ```
 
-Results are written to `data/tone/`, which is not in git. The 10-Q commands are in RESULTS.md,
+Every paid command appends one JSON line to `data/runs.jsonl` (local, not in git): the command, commit,
+models, prompt hashes, USD per provider, counts, batch ids, outputs and status, also for stopped or failed
+runs. Results are written to `data/tone/`, which is not in git. The 10-Q commands are in RESULTS.md,
 "Reproduce".
 
 ## Limitations
