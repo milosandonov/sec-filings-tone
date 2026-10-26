@@ -44,6 +44,9 @@ def test_section_cells():
     s = pd.DataFrame(within(k, vs, bs, "AI", "7"))
     # one cell, A's, ranked within its MD&A: RRF of the vector order (a7-1, a7-0, a7-2) and BM25's (a7-0, a7-2; a7-1 has no query word)
     assert s.chunk_id.tolist() == ["a7-0", "a7-2", "a7-1"] and set(s.ticker) == {"A"} and s["rank"].tolist() == [1, 2, 3], s
+    # new-text cells: only the kept chunks are ranked, and a 10-K with none kept (B's) has no cell
+    n = pd.DataFrame(within(k, vs, bs, "AI", None, keep={"a1-2", "a7-1", "a7-2"}))
+    assert n.chunk_id.tolist() == ["a1-2", "a7-2", "a7-1"] and set(n.ticker) == {"A"}, n
 
 
 def test_masked_prompt():

@@ -5,9 +5,17 @@ A sentence of a 10-K's Item 1A or Item 7 is carried over if its difflib ratio wi
 the same item in the company's 10-K for the year before is at least RATIO. A passage's carryover
 share is the share of its characters in carried-over sentences; a filing's, over all its chunks.
 
+New-text cells (2026-10-26, exploratory; RESULTS.md section 8): for the cells the event tests and the
+break check use, each cell's top 3 among the 10-K's new chunks only (carryover share <= NEW), ranked as
+tone.sections ranks them (AI within MD&A, as its test reads it), scored with the production prompt, in the
+n_ files. Passages already scored for the same cell copy their score (tone.score_cells).
+
 Usage:
     uv run python -m sec_filings_tone.diff carryover   # every 10-K chunk's carryover share, minutes
     uv run python -m sec_filings_tone.diff report      # carryover by sector and year, and the tests
+    uv run python -m sec_filings_tone.diff retrieve    # the new-text cells' passages; free
+    uv run python -m sec_filings_tone.diff score --budget 0     # count and cost only; then with a budget
+    uv run python -m sec_filings_tone.diff events      # event tests and break check on them, both versions
 """
 
 import argparse
@@ -17,15 +25,17 @@ from difflib import SequenceMatcher
 
 import pandas as pd
 
-from sec_filings_tone.events import DIMS, EVENTS, did, named, report as event_report, section
+from sec_filings_tone.events import (DIMS, EVENTS, before_cells, break_rows, cells, did, named, report as event_report,
+                                     section)
 from sec_filings_tone.ingest import CHUNKS
 from sec_filings_tone.sentiment import sentences, spearman_ci
-from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES
+from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES, score_cells, sections
 
 CARRYOVER = OUT / "carryover.parquet"  # one row per 10-K chunk of a company with the year before's 10-K
 RATIO = 0.9
 NEW, CARRIED = 0.2, 0.8  # a passage is new at or below NEW, carried over at or above CARRIED
 ITEMS = {"1A": "Risk factors", "7": "MD&A"}
+N_CELLS = OUT / "n_cells.parquet"  # the cells `retrieve` searched (needed()), with or without a new chunk
 
 
 def matcher(prev: list[str]):
@@ -148,10 +158,69 @@ def report() -> None:
         event_report(EVENTS, "10-K", out, keep=k)
 
 
+def events() -> pd.DataFrame:
+    return pd.read_csv(EVENTS, dtype=str, keep_default_na=False)
+
+
+def needed() -> pd.DataFrame:
+    """The cells (ticker, fy, topic, item; item None: the whole 10-K) the event tests and the break check use: per
+    event, each company's "before" and "after" 10-K on each topic with both, as events.changes picks them, and,
+    where the break check applies (no `after` date, "after" the next fiscal year), the 10-K a year before "before"."""
+    out = []
+    for e in events().itertuples():
+        c = cells(e.items.split(";") if e.items else None)
+        c = c[c.topic.isin(e.topics.split(";"))].sort_values("filing_date")
+        a = c[c.report_date >= (e.after or e.date)].drop_duplicates(["ticker", "topic"], keep="first")
+        x = before_cells(c, e.date).merge(a, on=["ticker", "topic"], suffixes=("_b", "_a"))
+        fys = [x.fy_b, x.fy_a] + ([] if e.after else [(x.fy_b - 1)[x.fy_a == x.fy_b + 1]])
+        item = next((i for i in e.items.split(";") if i in ITEMS), None)  # AI: "7;mdna", MD&A (10-Q: mdna)
+        out += [pd.DataFrame({"ticker": x.ticker, "fy": f, "topic": x.topic, "item": item}).dropna(subset="fy")
+                .astype({"fy": int}).merge(c[["ticker", "fy", "topic"]]) for f in fys]  # a 10-K that exists (no FY2018)
+    return pd.concat(out).drop_duplicates(ignore_index=True)
+
+
+def retrieve_new() -> None:
+    need = needed()
+    print(need.groupby("topic", dropna=False).size().to_string(), f"\n{len(need):,} cells needed", flush=True)
+    if (n := need.groupby("topic")["item"].nunique(dropna=False))[n > 1].any():  # sections() ranks a topic within one item
+        raise SystemExit(f"events.csv reads {list(n[n > 1].index)} from more than one item; nothing retrieved")
+    new = set(pd.read_parquet(CARRYOVER, columns=["chunk_id", "share"]).query(f"share <= {NEW}").chunk_id)
+    items = {t: i if isinstance(i, str) else None for t, i in zip(need.topic, need["item"])}  # pandas may turn None into NaN
+    sections("new", items, new, need)
+    need.to_parquet(N_CELLS, index=False)
+
+
+def new_events() -> None:
+    """The planned event tests and the break check on the new-text cells, model only and word-checked, with each
+    test's companies beside the 10-K test's. Every cell the tests use must have been retrieved (N_CELLS): cells("new")
+    counts a cell with no passage as not discussed, so a cell never retrieved would count as that silently."""
+    missing = needed().merge(pd.read_parquet(N_CELLS), how="left", indicator=True).query("_merge == 'left_only'")
+    if len(missing):
+        raise SystemExit(f"{len(missing):,} cells the tests use weren't retrieved (events.csv changed?), e.g. "
+                         f"{missing.iloc[0, :4].to_dict()}; run `diff.py retrieve` again (move the n_ files first)")
+    ev = events()
+    for suffix, keep in [("", None), ("_named", named("new"))]:
+        print(f"\n=== new-text cells{suffix or ' (model only)'}")
+        event_report(ev, "new", OUT / f"n_events{suffix}.csv", keep=keep)
+        brk = pd.DataFrame([r for e in ev.itertuples() for r in break_rows(cells(e.items.split(";") if e.items else None,
+                                                                                   "new", keep), e)])
+        brk.to_csv(OUT / f"n_event_breaks{suffix}.csv", index=False)
+        print(f"\nbreak check{suffix}:\n" + brk.round(3).to_string(index=False))
+        cols = ["event", "measure", "n_affected", "n_others", "did", "did_lo", "did_hi"]
+        both = pd.read_csv(OUT / f"events{suffix}.csv")[cols].merge(pd.read_csv(OUT / f"n_events{suffix}.csv")[[*cols, "expected"]],
+                                                                    on=["event", "measure"], suffixes=("", "_new"))
+        print("\ncompanies kept, 10-K test -> new text:\n" + both[both.expected.notna()].round(2).to_string(index=False))
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Phase 8: carryover from the year before, and new vs carried-over text")
-    p.add_argument("command", choices=["carryover", "report"])
-    {"carryover": carryover, "report": report}[p.parse_args().command]()
+    p.add_argument("command", choices=["carryover", "report", "retrieve", "score", "events"])
+    p.add_argument("--budget", type=float, default=0.0, help="score: USD; nothing is submitted if the estimate is over it")
+    a = p.parse_args()
+    if a.command == "score":
+        score_cells(a.budget, form="new")
+    else:
+        {"carryover": carryover, "report": report, "retrieve": retrieve_new, "events": new_events}[a.command]()
 
 
 if __name__ == "__main__":
