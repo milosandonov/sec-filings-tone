@@ -27,6 +27,13 @@ def test_dimensions():
     assert E.DIMENSIONS == list(DIMENSIONS)  # explore.py keeps its own copy, so the Space needn't import sentiment
 
 
+def test_release_word_check():
+    # the passage view's "doesn't name the topic" uses these pids; section passages are numbered apart (-1 - row)
+    if not all(path.exists() for path, _ in SOURCES.values()):
+        pytest.skip("needs data/tone/ and data/release/ (gitignored)")
+    assert SOURCES["release"][1]().named() == E.local().named()
+
+
 @pytest.mark.parametrize("source", SOURCES)
 @pytest.mark.parametrize("item, group", [("1A", "Risk factors (Item 1A)"), ("7", "MD&A (Item 7)")])
 def test_matches_published_chart(source, item, group, monkeypatch):
