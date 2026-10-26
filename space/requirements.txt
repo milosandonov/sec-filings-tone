@@ -1,0 +1,6 @@
+# the versions in the project's uv.lock; gradio as sdk_version in README.md
+gradio==6.30.0
+pandas==3.0.6
+pyarrow==26.0.0
+# pandas' Styler.background_gradient colours the heatmap
+matplotlib==3.11.2
