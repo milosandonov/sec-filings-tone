@@ -632,7 +632,8 @@ Items 2 and 3 partly change what the judge sees (the titles and the cell header 
 item 3 shows the user and the judge facts the answer model already had.
 
 **Tuning, on development questions only.** `eval/qa_dev.jsonl`: 12 questions not in the eval set (8 written for
-this, 2 of the app's examples, 2 out of scope), no reference answers. Three rounds ($0.24 with their judging): the
+this, 2 of the app's examples, 2 out of scope), no reference answers. Three rounds ($0.41 with their judging and a
+smoke test; first written here as $0.24, corrected after the run): the
 first version of the check (list the unsupported sentences, effort low) removed well-cited sentences, so it now
 quotes evidence per sentence at effort medium; the opening and the cell header were changed after round two. The
 judge flagged 7 and then 5 of the 10 judged development answers, too few to tell apart.
@@ -653,12 +654,70 @@ metrics can't be put down to these changes, the decline rule included. Expected 
 unsupported claim and higher groundedness, fewer in-scope declines; the 5% bar still missed (the development
 answers were flagged half the time); accuracy and completeness may drop where the check removes sentences.
 
+### Results of the rerun (2026-10-26)
+
+**What it shows:** the share of answers with a claim the judge calls unsupported fell from 78% to 41%, and
+groundedness rose from 3.89 to 4.44, now over its bar. Both changes are far outside what the judge alone moves
+(above) and hold on the questions both runs answered. The sentence check is not what did it: grading the drafts
+it changed gives the same scores. The 5% bar is still missed by a wide margin.
+
+`uv run python eval/qa_eval.py report --name _v2` and `diff --name _v2` (answers $0.395 for 69 rows, $0.0057 a
+row, median 17 s; judge $0.436, including one answer, c05, that hit the judge's output limit and was resubmitted
+alone). Paired over the same questions, 95% bootstrap intervals in brackets:
+
+| Metric | Published | v2 | Difference [95%] | Bar |
+|---|---|---|---|---|
+| Planner tickers right (59) | 83% | 92% | +8 pts [0, +17] | ≥ 90%: met this run |
+| Planner fiscal years right (59) | 54% | 47% | −7 pts [−15, 0] | ≥ 90%: missed |
+| In-scope questions declined (64) | 7 | 1 | | |
+| Out-of-scope declined (5) | 5 of 5 | 5 of 5 | | ≥ 80%: met |
+| Keyword MRR / coverage in the passages (59) | 0.703 / 81% | 0.802 / 95% | +0.099 [+0.023, +0.186] / +15 pts [+6, +25] | |
+| Cited spans found in their passage | 417 of 417 | 388 of 388 | | |
+| Judge accuracy, 1–5 (64) | 4.09 | 4.69 | +0.59 [+0.31, +0.91] | |
+| Judge completeness | 4.08 | 4.39 | +0.31 [+0.02, +0.64] | |
+| Judge groundedness | 3.89 | 4.44 | +0.55 [+0.33, +0.78] | ≥ 4: met |
+| Answers with an unsupported claim | 78% | 41% | −38 pts [−52, −23] | ≤ 5%: missed |
+| Unsupported claims per answer | 1.63 | 0.73 | −0.89 [−1.20, −0.56] | |
+
+Where the gains come from, as far as this design can tell:
+
+- **The decline rule.** Six of the seven wrongly declined questions were searched this time (s30, Amazon's Rivian
+  loss, was declined again), which explains most of the coverage and MRR gains and some of the accuracy gain. On
+  the 57 judged questions neither run declined: accuracy 4.40 → 4.72 (+0.32 [+0.11, +0.54]), completeness 4.46 →
+  4.42 (−0.04 [−0.21, +0.16]), groundedness 4.04 → 4.44 (+0.40 [+0.19, +0.60]), answers with an unsupported claim
+  75% → 44% (−32 pts [−47, −16]). So the grounding gain holds without the declines, and completeness didn't drop.
+  The planner varies run to run, so how much of the ticker change is the rule and how much chance can't be told.
+- **Not the sentence check.** It removed 18 sentences from 15 answers. Their drafts, graded by the same judge
+  (`qa_judge_v2draft.jsonl`, $0.093), score the same: `diff --name _v2 --vs-draft _v2draft` gives groundedness
+  −0.05 [−0.11, +0.02] and the unsupported share +3 pts [−3, +9] for the check, so no effect can be seen (if
+  anything slightly worse). The gain is from the answer rules, the period ends in the titles and the cell header
+  (which this design can't separate from each other).
+- **What's left** (`eval/qa_claim_categories.csv`, run `v2`; sorted by Claude after the results, same categories):
+  of 47 claims, 20 are interpretations (17 answers), 9 the judge's own errors or omissions it lists as claims
+  (8; e.g. "the answer omits ..." or "supported by the cell table"), 8 real errors (8; e.g. a span labelled as
+  the FY2024 10-K that comes from the FY2025 one, two Exxon figures framed as conflicting), 3 context, 2 absence,
+  2 citation markers, 2 in the one wrong decline and 1 uncited. Against the published run: context 24 → 3,
+  absence 16 → 2, uncited 11 → 1, declines 12 → 2, interpretation 28 → 20, real errors 7 → 8. The rules removed
+  the categories they targeted; interpretations and real errors stay, and the check didn't catch them.
+
+Caveats: one run of each version, with a planner that varies (the published run's planner numbers moved by
+several points on a rerun of the same code); the judge and its strictness are unvalidated against a person,
+though it is the same judge, prompt and settings in both runs; the categories are one reader's (Claude's) sort.
+The answer cost rose from $0.0039 to $0.0057 a row, about $0.002 of it the check. The median time, 17 s, isn't
+comparable with the published run's 21 s (Chroma's search then, exact search now) or the 11 s answers-only
+rerun (no check, other prompts); the check's medium-effort call is likely part of the difference, not measured.
+The check stays on by default as run; since it shows no effect, turning it off is the owner's call.
+
 ## How to reproduce
 
 ```bash
 uv run python eval/qa_eval.py answers --budget 0.70       # Q&A eval answers; about $0.27
 uv run python eval/qa_eval.py judge --budget 1.25         # Claude Sonnet 5.5 judge, Batch API; about $0.41
 uv run python eval/qa_eval.py report                      # every metric; free
+uv run python eval/qa_eval.py answers --name _v2 --budget 0.70   # the 2026-10-26 rerun; about $0.40
+uv run python eval/qa_eval.py judge --name _v2 --budget 1.25     # about $0.44; then report --name _v2
+uv run python eval/qa_eval.py judge --name _v2 --judge-name _v2draft --draft --budget 0.60  # the drafts; about $0.09
+uv run python eval/qa_eval.py diff --name _v2              # paired differences from the published run; free
 uv run python tests/test_ingest.py                        # chunker fixes
 uv run python tests/test_retrieve.py                      # filters, BM25, RRF, rerank order
 uv run python eval/experiment.py --dry-run                # chunks, tokens, cost; free

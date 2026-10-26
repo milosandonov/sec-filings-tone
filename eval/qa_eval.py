@@ -257,7 +257,8 @@ def diff(base: str, draft_judged: Path | None = None, n_boot: int = 10_000) -> N
                "mrr": passage, "coverage": passage, "accuracy": None, "completeness": None, "groundedness": None,
                "unsupported": None, "claims": None, "secs": None}
     rng = np.random.default_rng(0)
-    print(f"| Metric | n | {base or 'published'} | {'draft' if draft_judged else 'new'} | new − old [95% CI] |\n|---|---|---|---|---|")
+    old = "draft" if draft_judged else base or "published"
+    print(f"| Metric | n | {old} | {ANSWERS.stem.removeprefix('qa_answers') or 'published'} | new − old [95% CI] |\n|---|---|---|---|---|")
     for m, keep in metrics.items():
         if m not in a or m not in b:
             continue
