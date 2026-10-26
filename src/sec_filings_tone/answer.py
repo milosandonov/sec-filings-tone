@@ -29,8 +29,8 @@ import pandas as pd
 from pydantic import BaseModel, Field
 
 from sec_filings_tone import events, retrieve
-from sec_filings_tone.budget import PRICES, Cap, CapReached, call_usd
-from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
+from sec_filings_tone.budget import PRICES, Cap, CapReached, call_usd, run_log
+from sec_filings_tone.ingest import CHUNKS, EMBED_MODEL, ITEM_NAMES
 from sec_filings_tone.sentiment import DIMENSIONS, TOPICS
 from sec_filings_tone.tone import FILES
 
@@ -497,28 +497,32 @@ def main() -> None:
     ap.add_argument("--plan-only", action="store_true", help="print each plan; no search or answer")
     a = ap.parse_args()
     cap, history = Cap(a.budget), []
-    for q in a.questions:
-        print(f"\n> {q}\n", flush=True)
-        if a.plan_only:
-            p, u = plan(q, history, cap, a.model, a.effort)
-            print(p.model_dump_json(indent=1, exclude_defaults=True))
-            print(f"tokens: {u.input_tokens} in, {u.cache_read_input_tokens} cache read, "
-                  f"{u.cache_creation_input_tokens} cache write, {u.output_tokens} out; session ${cap.spent():.4f}")
-            reply = "(plan only, no answer)"
-        else:
-            gen, reply = answer(q, history, cap, a.model, a.effort), ""
-            while True:
-                try:
-                    new = next(gen)
-                except StopIteration as e:
-                    out = e.value
-                    break
-                print(new[len(reply):] if new.startswith(reply) else "\n" + new, end="", flush=True)
-                reply = new
-            if out["plan"]:
-                print("\n\nplan: " + out["plan"].model_dump_json(exclude_defaults=True))
-        history += [{"role": "user", "content": q}, {"role": "assistant", "content": reply}]
-    print(f"\nspent ${cap.spent():.4f}")
+    models = [a.model] if a.plan_only else [a.model, retrieve.RERANK_MODEL, EMBED_MODEL]  # query embeddings: not costed
+    with run_log(models, lambda: {"usd": {"anthropic": cap.spent()}, "rows": len(history) // 2}, effort=a.effort) as rec:
+        for q in a.questions:
+            print(f"\n> {q}\n", flush=True)
+            if a.plan_only:
+                p, u = plan(q, history, cap, a.model, a.effort)
+                print(p.model_dump_json(indent=1, exclude_defaults=True))
+                print(f"tokens: {u.input_tokens} in, {u.cache_read_input_tokens} cache read, "
+                      f"{u.cache_creation_input_tokens} cache write, {u.output_tokens} out; session ${cap.spent():.4f}")
+                reply = "(plan only, no answer)"
+            else:
+                gen, reply = answer(q, history, cap, a.model, a.effort), ""
+                while True:
+                    try:
+                        new = next(gen)
+                    except StopIteration as e:
+                        out = e.value
+                        break
+                    print(new[len(reply):] if new.startswith(reply) else "\n" + new, end="", flush=True)
+                    reply = new
+                if out["plan"]:
+                    print("\n\nplan: " + out["plan"].model_dump_json(exclude_defaults=True))
+                if out["text"].startswith(("Stopped:", "The API call failed")):  # answer() caught it
+                    rec["status"], rec["error"] = ("stopped" if out["text"].startswith("Stopped:") else "failed"), out["text"]
+            history += [{"role": "user", "content": q}, {"role": "assistant", "content": reply}]
+        print(f"\nspent ${cap.spent():.4f}")
 
 
 if __name__ == "__main__":

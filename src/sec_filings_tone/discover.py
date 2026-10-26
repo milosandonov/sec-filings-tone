@@ -51,7 +51,7 @@ import pandas as pd
 from scipy import sparse
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import Cap, call_usd
+from sec_filings_tone.budget import Cap, call_usd, run_log
 from sec_filings_tone.sentiment import MODEL, TOPICS
 from sec_filings_tone.tone import FILES, LAST_FY, OUT, QUERIES
 
@@ -219,6 +219,17 @@ def main() -> None:
     a = p.parse_args()
     from sec_filings_tone.charts import FIGURES
 
+    if not a.name:
+        return run(None)
+    cap = Cap(a.budget)
+    with run_log([MODEL], lambda: {"usd": {"anthropic": cap.spent()}}, [TABLE, CLUSTERS, FIGURES / "discovered_topics.png"]):
+        run(cap)
+
+
+def run(cap: Cap | None) -> None:
+    """Everything main() prints and writes; with a cap, Haiku names the top clusters within it."""
+    from sec_filings_tone.charts import FIGURES
+
     meta, x = corpus()
     print(f"{len(meta):,} Item 1A chunks, FY{FIRST_FY}-FY{LAST_FY}, {meta.ticker.nunique()} companies")
     runs = {s: kmeans(x, K, s) for s in SEEDS}
@@ -258,8 +269,7 @@ def main() -> None:
     t["name"] = ""
     t = t.sort_values(["flagged", "change"], ascending=[False, False])
     top = t[t.flagged].head(N_NAMED)
-    if a.name:
-        cap = Cap(a.budget)
+    if cap is not None:
         names = name_clusters(top, meta, cap)
         t["name"] = t.cluster.map(names).fillna("")
         print(f"naming spent ${cap.spent():.4f} (Anthropic)")

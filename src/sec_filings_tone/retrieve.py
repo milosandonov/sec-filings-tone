@@ -201,8 +201,15 @@ def main() -> None:
     a = p.parse_args()
     import anthropic
 
+    from sec_filings_tone.budget import Cap, run_log
+
     try:
-        results = search(a.query, a.k, not a.no_rerank, a.date_from, a.date_to, **{f: getattr(a, f) for f in FILTERS})
+        args = (a.query, a.k, not a.no_rerank, a.date_from, a.date_to)
+        if a.no_rerank:  # free but for the query embedding
+            results = search(*args, **{f: getattr(a, f) for f in FILTERS})
+        else:
+            with run_log([RERANK_MODEL, EMBED_MODEL], lambda: {"usd": {"anthropic": Cap().spent()}}):  # a fresh Cap: the reranking
+                results = search(*args, **{f: getattr(a, f) for f in FILTERS})
     except anthropic.AuthenticationError:
         raise SystemExit("Anthropic rejected ANTHROPIC_API_KEY in .env (401). Keys start with sk-ant- and come from "
                          "https://console.anthropic.com/settings/keys. Use --no-rerank to skip reranking.")

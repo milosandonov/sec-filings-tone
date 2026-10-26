@@ -310,10 +310,14 @@ def not_embedded(col, ids: list[str]) -> list[str]:
     return [c for c in ids if c not in done]
 
 
-def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 5.0) -> None:
+def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 5.0, rec: dict | None = None) -> None:
     """Embed each chunk's plain text into Chroma. Chunk ids already in the collection are skipped,
-    so it can be stopped and rerun. Stops before any request if the estimate is over budget (USD)."""
+    so it can be stopped and rerun. Stops before any request if the estimate is over budget (USD).
+    rec (the run's budget.run_log record) gets the USD billed and the chunks embedded as they go."""
     from openai import OpenAI
+
+    rec = {} if rec is None else rec
+    rec |= {"usd": {"openai": 0.0}, "rows": 0}
 
     chunks = chunks.sort_values(["ticker", "form", "item", "report_date", "seq"]).set_index("chunk_id", drop=False)
     col = open_collection(collection)
@@ -332,7 +336,9 @@ def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: flo
         if len(batch) == 1000 or batch_tokens > 200_000 or j == len(todo) - 1:
             rows = todo.loc[batch]
             resp = client.embeddings.create(model=EMBED_MODEL, dimensions=EMBED_DIMS, input=rows.text.tolist())
+            rec["usd"]["openai"] += resp.usage.total_tokens / 1e6 * EMBED_PRICE_PER_M
             add_to_chroma(col, rows, [d.embedding for d in resp.data])
+            rec["rows"] += len(rows)
             print(f"  embedded {j + 1}/{len(todo)}")
             batch, batch_tokens = [], 0
     print(f"collection {collection}: {col.count()} chunks")
@@ -480,10 +486,28 @@ def main() -> None:
     if args.embed:
         if not os.environ.get("OPENAI_API_KEY"):
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")
-        if args.batch:
-            embed_batches(chunks, budget=args.budget, wait=args.wait)
-        else:
-            embed_chunks(chunks, budget=args.budget)
+        import json
+
+        from sec_filings_tone.budget import run_log
+
+        state = BATCHES / "state.json"
+
+        def jobs():
+            return json.loads(state.read_text())["jobs"] if state.exists() else []
+
+        before = {j["batch_id"]: j["status"] for j in jobs()}
+
+        def usage():  # --batch: what embed_batches counts as spent, for the batches this run submitted
+            new = [j for j in jobs() if j["batch_id"] not in before and j["status"] in ("submitted", "completed", "loaded")]
+            loaded = [j for j in jobs() if j["status"] == "loaded" and before.get(j["batch_id"]) != "loaded"]
+            return {"usd": {"openai": sum(j["usd"] for j in new)}, "batches_submitted": [j["batch_id"] for j in new],
+                    "rows": sum(j["loaded"] for j in loaded)} if args.batch else {}
+
+        with run_log([EMBED_MODEL], usage, collection=COLLECTION) as rec:
+            if args.batch:
+                embed_batches(chunks, budget=args.budget, wait=args.wait)
+            else:
+                embed_chunks(chunks, budget=args.budget, rec=rec)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ import argparse
 import json
 import random
 import time
+from contextlib import nullcontext
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Literal
@@ -27,7 +28,8 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from sec_filings_tone import answer, retrieve
-from sec_filings_tone.budget import Cap, call_usd
+from sec_filings_tone.budget import Cap, call_usd, run_log
+from sec_filings_tone.ingest import EMBED_MODEL
 
 from eval import contains
 
@@ -73,12 +75,12 @@ def run_row(row: dict, cap: Cap, model: str, effort: str) -> dict:
             "stopped": r["text"].startswith(("Stopped:", "The API call failed")), "model": model, "effort": effort}
 
 
-def answers(budget: float, model: str, effort: str) -> None:
+def answers(cap: Cap, model: str, effort: str) -> None:
     done = {a["id"] for a in load(ANSWERS) if not a["stopped"]}
     todo = [r for r in load(TESTS) if r["id"] not in done]
     print(f"{len(todo)} rows to answer ({len(done)} already saved); about ${0.007 * sum(len(r['turns']) for r in todo):.2f}")
     answer.warm()
-    cap, kept = Cap(budget), [a for a in load(ANSWERS) if not a["stopped"]]
+    kept = [a for a in load(ANSWERS) if not a["stopped"]]
     with ThreadPoolExecutor(WORKERS) as ex:
         for out in ex.map(lambda r: run_row(r, cap, model, effort), todo):
             kept.append(out)
@@ -235,10 +237,10 @@ def gpt_body(model: str, prompt: str) -> dict:
             "text": {"format": {"type": "json_schema", "name": "grade", "schema": to_strict_json_schema(Grade), "strict": True}}}
 
 
-def judge_gpt(model: str, budget: float, test: bool) -> None:
+def judge_gpt(model: str, budget: float, test: bool, rec: dict | None = None) -> None:
     """A second judge from another model family, on the answers the Claude judge graded: the same system
     prompt, user prompt and output schema, through OpenAI's Batch API (half price). --test sends one
-    request directly first, to check the model takes the request."""
+    request directly first, to check the model takes the request; its cost goes in `rec` (the run log's)."""
     from openai import OpenAI
 
     client, (pin, pout) = OpenAI(), GPT_PRICES[model]
@@ -247,7 +249,10 @@ def judge_gpt(model: str, budget: float, test: bool) -> None:
     prompts = {i: judge_prompt(rows[i], ans[i]) for i in ids}
     if test:
         r = client.responses.create(**gpt_body(model, prompts[ids[0]]))
-        print(ids[0], Grade.model_validate_json(r.output_text), f"${(r.usage.input_tokens * pin + r.usage.output_tokens * pout) / 1e6:.4f}")
+        usd = (r.usage.input_tokens * pin + r.usage.output_tokens * pout) / 1e6
+        if rec is not None:
+            rec["usd"] = {"openai": usd}
+        print(ids[0], Grade.model_validate_json(r.output_text), f"${usd:.4f}")
         return
     if not GPT_BATCH.exists():
         est = sum(((len(JUDGE_SYSTEM) + len(p)) / 3.5 * pin + GPT_MAX_OUTPUT * pout) / 1e6 for p in prompts.values()) / 2
@@ -324,5 +329,24 @@ if __name__ == "__main__":
     ap.add_argument("--test", action="store_true", help="judge-gpt: one direct request, no batch")
     a = ap.parse_args()
     gpt = a.model if a.model in GPT_PRICES else GPT_JUDGE
-    {"answers": lambda: answers(a.budget, a.model, a.effort), "judge": lambda: judge(a.budget), "report": report,
-     "judge-gpt": lambda: judge_gpt(gpt, a.budget, a.test), "compare": lambda: compare(gpt)}[a.step]()
+    cap = Cap(a.budget)
+
+    def collected(path: Path, pending: Path, provider: str):
+        """usage() for a batch judge: the grades saved during the run, their batch, and a batch still waiting."""
+        before = {j["id"] for j in load(path)}
+
+        def usage():
+            new = [j for j in load(path) if j["id"] not in before]
+            return {"usd": {provider: sum(j["usd"] for j in new)}, "rows": len(new),
+                    "batches_collected": sorted({j["batch"] for j in new}),
+                    "batch_pending": json.loads(pending.read_text())["id"] if pending.exists() else None}
+        return usage
+
+    # the paid steps write one line each to the run log
+    log = {"answers": lambda: run_log([a.model, retrieve.RERANK_MODEL, EMBED_MODEL],  # query embeddings: not costed
+                                      lambda: {"usd": {"anthropic": cap.spent()}}, [ANSWERS, RUNS], effort=a.effort),
+           "judge": lambda: run_log([JUDGE_MODEL], collected(JUDGED, BATCH, "anthropic"), [JUDGED]),
+           "judge-gpt": lambda: run_log([gpt], collected(gpt_judged(gpt), GPT_BATCH, "openai"), [gpt_judged(gpt)])}
+    with log.get(a.step, nullcontext)() as rec:
+        {"answers": lambda: answers(cap, a.model, a.effort), "judge": lambda: judge(a.budget), "report": report,
+         "judge-gpt": lambda: judge_gpt(gpt, a.budget, a.test, rec), "compare": lambda: compare(gpt)}[a.step]()

@@ -28,3 +28,5 @@ eval/qa_hand_grades.csv
 eval/qa_batch*.json
 # personal to-do list from the 2026-10-26 external review; not committed
 FUTURE_IMPROVEMENTS.md
+# the run log: one line per paid run (budget.run_log), local
+data/runs.jsonl

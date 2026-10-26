@@ -11,8 +11,9 @@ import argparse
 
 import gradio as gr
 
-from sec_filings_tone import answer
-from sec_filings_tone.budget import Cap
+from sec_filings_tone import answer, retrieve
+from sec_filings_tone.budget import Cap, run_log
+from sec_filings_tone.ingest import EMBED_MODEL
 
 EXAMPLES = [
     "How did NVIDIA describe the financial impact of the US license requirement for H20 exports to China, and when did it learn of it?",
@@ -46,17 +47,24 @@ def main() -> None:
     a = ap.parse_args()
     # browser session -> its cap. Reranking spend is counted process-wide (retrieve.usage), so with
     # several sessions open each cap also counts the others' reranking: a cap stops early, never late.
-    caps = {}
+    caps, asked = {}, []
 
     def chat(message: str, history: list[dict], request: gr.Request):
         cap = caps.setdefault(request.session_hash, Cap(a.budget))
+        asked.append(request.session_hash)
         history = [{"role": m["role"], "content": text(m["content"])} for m in history]
         yield from answer.answer(message, history, cap, a.model, a.effort)
 
+    def usage():  # every session's own calls, plus the process-wide reranking once (a fresh Cap holds only that)
+        return {"usd": {"anthropic": sum(c.other for c in caps.values()) + Cap().spent()}, "sessions": len(caps),
+                "rows": len(asked)}
+
     print("loading chunks, the BM25 index and the tone cells ...", flush=True)
     answer.warm()
-    gr.ChatInterface(chat, title="SEC Filings Tone: ask the filings", description=HEADER, examples=EXAMPLES,
-                     cache_examples=False, analytics_enabled=False).launch(server_name="127.0.0.1", share=False)
+    # one record per app run, written when the server stops (Ctrl-C): Gradio has no reliable end-of-session event
+    with run_log([a.model, retrieve.RERANK_MODEL, EMBED_MODEL], usage, effort=a.effort, budget_per_session=a.budget):
+        gr.ChatInterface(chat, title="SEC Filings Tone: ask the filings", description=HEADER, examples=EXAMPLES,
+                         cache_examples=False, analytics_enabled=False).launch(server_name="127.0.0.1", share=False)
 
 
 if __name__ == "__main__":
