@@ -364,7 +364,7 @@ def main() -> None:
         return
 
     paid = sorted({config(n)["model"] for n in a.variants} - {m for m, v in MODELS.items() if v.get("local")})
-    # embeddings are charged to CAP (OpenAI), reranking is counted in retrieve.usage (Anthropic)
+    # embeddings are charged to CAP (OpenAI), reranking is counted in budget.rerank_usage (Anthropic)
     with nullcontext() if a.score_only else run_log(
             paid + ([] if a.no_rerank else [RERANK_MODEL]),
             lambda: {"usd": {"openai": CAP.other, "anthropic": CAP.spent() - CAP.other}},

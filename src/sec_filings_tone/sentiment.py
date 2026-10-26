@@ -20,6 +20,8 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
 import random
 import re
 import urllib.request
@@ -117,6 +119,32 @@ def user_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
     # row["item"], not row.item: on a pandas row, .item is a method
     return (f"Topic: {topic}\nFiling: {row['ticker']} {row['form']} {period(row)}, {ITEM_NAMES[row['item']]}\n\n"
             f"Passage:\n{row['text']}\n\nScore: {', '.join(dims)}.")
+
+
+def masked_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
+    """user_prompt with the company and fiscal year taken out: the Filing line keeps only the form and
+    section ("Filing: a 10-K, Item 1A Risk Factors"). Every other character is the same. The masked check's
+    prompt (tone.masked)."""
+    p, hint = user_prompt(row, topic, dims), f"\nFiling: {row['ticker']} {row['form']} {period(row)}, "
+    if hint not in p:  # the production prompt changed: stop rather than send the hint
+        raise ValueError("sentiment.user_prompt's Filing line changed; update masked_prompt")
+    return p.replace(hint, f"\nFiling: a {row['form']}, ", 1)
+
+
+def scorer_hashes() -> dict:
+    """SHA-256 of what tone.score_cells sends: the system prompt, the output schema and the user prompt template
+    (a 10-K row with placeholders); prompt_key, a short key over those three; and the masked check's template.
+    provenance.json (export.py) and the run log (budget.run_log) both take them from here."""
+    from anthropic import transform_schema  # what messages.parse sends, as tone.score_cells does
+
+    def sha(s: str) -> str:
+        return hashlib.sha256(s.encode()).hexdigest()
+
+    row, dims = {"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"}, list(DIMENSIONS)
+    h = {"system_prompt_sha256": sha(system_prompt()), "output_schema_sha256": sha(json.dumps(transform_schema(schema(dims)))),
+         "user_prompt_template_sha256": sha(user_prompt(row, "{topic}", dims))}
+    return h | {"prompt_key": sha("".join(h.values()))[:12],
+                "masked_user_prompt_template_sha256": sha(masked_prompt(row, "{topic}", dims))}
 
 
 def score(row, topic: str, dims: list[str], cap: Cap, model: str = MODEL, with_off_topic: bool = True) -> dict:
@@ -627,8 +655,6 @@ def main() -> None:
     elif a.command == "gold":
         gold(n)
     elif a.command == "gold-report":
-        from sec_filings_tone.tone import scorer_hashes  # tone imports this module
-
         with run_log([a.model], usage, [SENTIMENT / f"gold_scores_{a.model}.parquet", ADJUDICATION], scorer=scorer_hashes()):
             gold_report(cap, a.model, a.adjudicated)
     elif a.command == "gold-baselines":

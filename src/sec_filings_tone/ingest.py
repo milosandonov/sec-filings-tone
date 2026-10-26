@@ -17,6 +17,7 @@ import pandas as pd
 import tiktoken
 from dotenv import load_dotenv
 
+from sec_filings_tone.budget import run_log
 from sec_filings_tone.config import (BATCH_MAX_INPUTS, CACHE, CHUNKS, COLLECTION, EMBED_BATCHES, EMBED_DIMS, EMBED_MODEL,
                                      EMBED_PRICE_PER_M, QUEUE_SHARE, REQUEST_INPUTS, SKIPPED, SUBSET, VECTOR_DB)
 from sec_filings_tone.fetch import FORMS, MIN_CHARS
@@ -477,8 +478,6 @@ def main() -> None:
         if not os.environ.get("OPENAI_API_KEY"):
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")
         import json
-
-        from sec_filings_tone.budget import run_log
 
         state = EMBED_BATCHES / "state.json"
 

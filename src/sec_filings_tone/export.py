@@ -37,14 +37,14 @@ import pyarrow.parquet as pq
 from sec_filings_tone import events, retrieve
 from sec_filings_tone.config import (CANDIDATES, CARRYOVER, CHUNKS, COMPANIES, EMBED_DIMS, EMBED_MODEL, EVENTS, EVENTS_QUARTERLY,
                                      FILES, FINBERT, KEY, LABELS, LM_PATH, MODEL, OUT, QUERIES, RELEASE, ROOT, RRF_K, SENTIMENT, K)
-from sec_filings_tone.sentiment import TOPICS
-from sec_filings_tone.tone import scorer_hashes, vectors
+from sec_filings_tone.retrieve import vectors
+from sec_filings_tone.sentiment import TOPICS, scorer_hashes
 
 META = ["item", "filing_date", "report_date", "accession"]  # chunk metadata the event tests need, kept without the text
 
 
 def write_embeddings(path: Path, ids: pd.Series, part: int = 50_000) -> None:
-    """Every chunk's embedding (tone.vectors: float32, unit length) beside its chunk_id, written a row
+    """Every chunk's embedding (retrieve.vectors: float32, unit length) beside its chunk_id, written a row
     group at a time so the 2.8 GB is never held in memory."""
     v = vectors()  # checks that its rows follow chunks.parquet's
     schema = pa.schema([("chunk_id", pa.string()), ("embedding", pa.list_(pa.float32(), EMBED_DIMS))])

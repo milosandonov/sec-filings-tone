@@ -45,7 +45,7 @@ def main() -> None:
     ap.add_argument("--model", default=ANSWER_MODEL)
     ap.add_argument("--effort", default=answer.EFFORT, choices=["low", "medium", "high"])
     a = ap.parse_args()
-    # browser session -> its cap. Reranking spend is counted process-wide (retrieve.usage), so with
+    # browser session -> its cap. Reranking spend is counted process-wide (budget.rerank_usage), so with
     # several sessions open each cap also counts the others' reranking: a cap stops early, never late.
     caps, asked = {}, []
 
