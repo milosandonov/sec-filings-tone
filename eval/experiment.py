@@ -26,6 +26,7 @@ import hashlib
 import json
 import pickle
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import nullcontext
 from functools import cache
 from pathlib import Path
 
@@ -34,7 +35,7 @@ import pandas as pd
 
 from eval import TESTS, Cap, CapReached, contains, score
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import PRICES, rerank_call_usd
+from sec_filings_tone.budget import PRICES, rerank_call_usd, run_log
 from sec_filings_tone.ingest import build_chunks, embed_text, n_tokens
 
 PILOT = ["AMAT", "AMD", "AVGO", "INTC", "KLAC", "LRCX", "MU", "NVDA", "QCOM", "TXN"]
@@ -361,20 +362,26 @@ def main() -> None:
               f"({len(tests)} questions x {RERANK_REPEATS} runs x {len(a.variants)} variants)")
         return
 
-    try:
-        if a.smoke:
-            check_apis({config(n)["model"] for n in a.variants})
-        for name in a.variants:
-            path = out / f"runs_{name}.parquet"
-            if path.exists() or a.score_only:
-                continue
-            df = tables[config(name)["table"]]
-            E = vectors(name, df, out)
-            Q = query_vectors(config(name)["model"], [t["question"] for t in tests], out)
-            rank(name, df, E, Q, tests, not a.no_rerank).to_parquet(path, index=False)
-            print(f"{name}: ranked, saved {path} (spent so far ${CAP.spent():.2f})", flush=True)
-    except CapReached as e:
-        raise SystemExit(f"stopped: {e}. Finished variants and embedded batches are saved; rerun to continue.")
+    paid = sorted({config(n)["model"] for n in a.variants} - {m for m, v in MODELS.items() if v.get("local")})
+    # embeddings are charged to CAP (OpenAI), reranking is counted in retrieve.usage (Anthropic)
+    with nullcontext() if a.score_only else run_log(
+            paid + ([] if a.no_rerank else [retrieve.RERANK_MODEL]),
+            lambda: {"usd": {"openai": CAP.other, "anthropic": CAP.spent() - CAP.other}},
+            [out / f"runs_{n}.parquet" for n in a.variants]):
+        try:
+            if a.smoke:
+                check_apis({config(n)["model"] for n in a.variants})
+            for name in a.variants:
+                path = out / f"runs_{name}.parquet"
+                if path.exists() or a.score_only:
+                    continue
+                df = tables[config(name)["table"]]
+                E = vectors(name, df, out)
+                Q = query_vectors(config(name)["model"], [t["question"] for t in tests], out)
+                rank(name, df, E, Q, tests, not a.no_rerank).to_parquet(path, index=False)
+                print(f"{name}: ranked, saved {path} (spent so far ${CAP.spent():.2f})", flush=True)
+        except CapReached as e:
+            raise SystemExit(f"stopped: {e}. Finished variants and embedded batches are saved; rerun to continue.")
     print(f"spent this run: ${CAP.spent():.2f}")
 
     if not (have := [n for n in a.variants if (out / f"runs_{n}.parquet").exists()]):

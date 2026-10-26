@@ -29,7 +29,7 @@ from sec_filings_tone.events import (DIMS, EVENTS, before_cells, break_rows, cel
                                      section)
 from sec_filings_tone.ingest import CHUNKS
 from sec_filings_tone.sentiment import sentences, spearman_ci
-from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES, score_cells, sections
+from sec_filings_tone.tone import BASELINES, FILES, OUT, PASSAGES, SCORES, score_cells, scoring_log, sections
 
 CARRYOVER = OUT / "carryover.parquet"  # one row per 10-K chunk of a company with the year before's 10-K
 RATIO = 0.9
@@ -218,7 +218,8 @@ def main() -> None:
     p.add_argument("--budget", type=float, default=0.0, help="score: USD; nothing is submitted if the estimate is over it")
     a = p.parse_args()
     if a.command == "score":
-        score_cells(a.budget, form="new")
+        with scoring_log("new"):  # one line in the run log
+            score_cells(a.budget, form="new")
     else:
         {"carryover": carryover, "report": report, "retrieve": retrieve_new, "events": new_events}[a.command]()
 

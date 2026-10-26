@@ -33,7 +33,7 @@ import pandas as pd
 from pydantic import Field, create_model
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import Cap, CapReached, call_usd, rerank_call_usd
+from sec_filings_tone.budget import Cap, CapReached, call_usd, rerank_call_usd, run_log
 from sec_filings_tone.ingest import CHUNKS, ITEM_NAMES
 
 GUIDELINES = Path(__file__).parents[2] / "labels" / "guidelines.md"
@@ -622,14 +622,24 @@ def main() -> None:
     p.add_argument("--adjudicated", action="store_true", help="gold-report: apply labels/gold_adjudication.csv")
     a = p.parse_args()
     n = a.n or (30 if a.command == "gold" else 100)
-    if a.command == "pilot":
-        pilot(n, Cap(a.budget, a.max_minutes), a.model)
+    cap = Cap(a.budget, a.max_minutes)
+
+    def usage():  # scoring and reranking calls, all Anthropic
+        return {"usd": {"anthropic": cap.spent()}}
+
+    if a.command == "pilot":  # its three call modes send different schemas, so no prompt hashes
+        with run_log([a.model, retrieve.RERANK_MODEL], usage, [OUT / f"pilot_sample_{n}_{SELECTION}.parquet",
+                                                               OUT / f"pilot_scores_{n}_{SELECTION}_{a.model}.parquet"]):
+            pilot(n, cap, a.model)
     elif a.command == "baselines":
         baselines(n, a.model)
     elif a.command == "gold":
         gold(n)
     elif a.command == "gold-report":
-        gold_report(Cap(a.budget, a.max_minutes), a.model, a.adjudicated)
+        from sec_filings_tone.tone import scorer_hashes  # tone imports this module
+
+        with run_log([a.model], usage, [OUT / f"gold_scores_{a.model}.parquet", ADJUDICATION], scorer=scorer_hashes()):
+            gold_report(cap, a.model, a.adjudicated)
     elif a.command == "gold-baselines":
         gold_baselines(a.model)
     else:

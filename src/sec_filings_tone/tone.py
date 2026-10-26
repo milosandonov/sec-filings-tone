@@ -39,7 +39,7 @@ from anthropic.types.message_create_params import MessageCreateParamsNonStreamin
 from anthropic.types.messages.batch_create_params import Request
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import call_usd
+from sec_filings_tone.budget import call_usd, run_log
 from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS
 from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
 
@@ -248,7 +248,8 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
         if len(copied):  # usd 0: nothing was paid for these
             pd.concat([pd.read_parquet(scores), copied] if scores.exists() else [copied]).to_parquet(scores, index=False)
         # only these chunks' texts, not all 674k
-        rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]).set_index("chunk_id", drop=False)
+        ids = p.chunk_id.unique().tolist()  # pyarrow rejects an empty "in" list
+        rows = pd.read_parquet(CHUNKS, filters=[("chunk_id", "in", ids)]).set_index("chunk_id", drop=False) if ids else None
         system, fmt = system_prompt(), transform_schema(schema(list(DIMENSIONS)))
         batch, size = [], 0
         for r in [*p.itertuples(), None]:  # None flushes the last batch
@@ -343,6 +344,20 @@ def masked_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
     if hint not in p:  # the production prompt changed: stop rather than send the hint
         raise ValueError("sentiment.user_prompt's Filing line changed; update masked_prompt")
     return p.replace(hint, f"\nFiling: a {row['form']}, ", 1)
+
+
+def scorer_hashes() -> dict:
+    """SHA-256 of what score_cells sends: the system prompt, the output schema and the user prompt template (a
+    10-K row with placeholders); prompt_key, a short key over those three; and the masked check's template.
+    provenance.json (export.py) and the run log (budget.run_log) both take them from here."""
+    def sha(s: str) -> str:
+        return hashlib.sha256(s.encode()).hexdigest()
+
+    row, dims = {"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"}, list(DIMENSIONS)
+    h = {"system_prompt_sha256": sha(system_prompt()), "output_schema_sha256": sha(json.dumps(transform_schema(schema(dims)))),
+         "user_prompt_template_sha256": sha(user_prompt(row, "{topic}", dims))}
+    return h | {"prompt_key": sha("".join(h.values()))[:12],
+                "masked_user_prompt_template_sha256": sha(masked_prompt(row, "{topic}", dims))}
 
 
 def masked_sample(p: pd.DataFrame, ev: pd.DataFrame, n: int = 340, seed: int = 0) -> pd.DataFrame:
@@ -511,6 +526,32 @@ def main() -> None:
     p.add_argument("--section", action="store_true", help="AI within each 10-K's MD&A (sections), in the s_ files")
     a = p.parse_args()
     form = "10-Q" if a.quarterly else "section" if a.section else "10-K"
+    if a.command in ("score", "rerun", "masked"):  # the paid ones: one line in the run log
+        with scoring_log(form if a.command == "score" else a.command):
+            run(a, form)
+    else:
+        run(a, form)
+
+
+def scoring_log(files: str):
+    """budget.run_log for a score_cells run on FILES[files]: the USD and rows of the scores saved during the run
+    (copied ones cost 0), the batches they came from and the batches still waiting, and the scorer's hashes."""
+    passages, scores, saved, _ = FILES[files]
+    cols = ["pid", "usd", "batch"]
+    before = pd.read_parquet(scores, columns=cols) if scores.exists() else pd.DataFrame(columns=cols)
+
+    def usage():
+        after = pd.read_parquet(scores, columns=cols) if scores.exists() else before
+        new = after[~after.pid.isin(before.pid)]
+        paid = new[new.usd > 0]
+        return {"usd": {"anthropic": float(new.usd.sum())}, "rows": len(new), "copied": len(new) - len(paid),
+                "batches_collected": sorted(set(paid.batch)),
+                "batches_pending": json.loads(saved.read_text()) if saved.exists() else []}
+
+    return run_log([MODEL], usage, [passages, scores], files=files, scorer=scorer_hashes())
+
+
+def run(a: argparse.Namespace, form: str) -> None:
     if a.command == "retrieve" and a.section:
         sections()
     elif a.command == "retrieve":

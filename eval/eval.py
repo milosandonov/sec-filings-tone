@@ -23,7 +23,7 @@ from pathlib import Path
 import pandas as pd
 
 from sec_filings_tone import retrieve
-from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd
+from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd, run_log
 from sec_filings_tone.retrieve import STAGES, chunks, search, subset
 
 TESTS = Path(__file__).parent / "tests.jsonl"
@@ -66,9 +66,15 @@ def main() -> None:
     p.add_argument("--budget", type=float, default=0.50, help="USD; stop before a call would pass it")
     p.add_argument("--max-minutes", type=float, default=15)
     a = p.parse_args()
-    tests = [json.loads(line) for line in TESTS.read_text().splitlines() if line.strip()]
     cap = Cap(a.budget, a.max_minutes)
+    if a.no_rerank:  # free but for the query embeddings
+        return evaluate(a, cap)
+    with run_log([retrieve.RERANK_MODEL, retrieve.EMBED_MODEL], lambda: {"usd": {"anthropic": cap.spent()}}):
+        evaluate(a, cap)
 
+
+def evaluate(a: argparse.Namespace, cap: Cap) -> None:
+    tests = [json.loads(line) for line in TESTS.read_text().splitlines() if line.strip()]
     if a.test is not None:
         t = tests[a.test]
         print(f"Q: {t['question']}\nfilters: {t['filters']}\nkeywords: {t['keywords']}\n")

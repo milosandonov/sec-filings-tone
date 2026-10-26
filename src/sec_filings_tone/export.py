@@ -33,23 +33,17 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from anthropic import transform_schema  # what tone.py sends, so the hash is of that
 
 from sec_filings_tone import events, retrieve
 from sec_filings_tone.diff import CARRYOVER
 from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS, EMBED_MODEL
 from sec_filings_tone.retrieve import CANDIDATES, RRF_K
-from sec_filings_tone.sentiment import (DIMENSIONS, FINBERT, LM_PATH, MODEL, OUT as SENTIMENT, TOPICS, schema,
-                                        system_prompt, user_prompt)
-from sec_filings_tone.tone import FILES, K, KEY, OUT, QUERIES, masked_prompt, vectors
+from sec_filings_tone.sentiment import FINBERT, LM_PATH, MODEL, OUT as SENTIMENT, TOPICS
+from sec_filings_tone.tone import FILES, K, KEY, OUT, QUERIES, scorer_hashes, vectors
 
 ROOT = Path(__file__).parents[2]
 RELEASE = ROOT / "data" / "release"
 META = ["item", "filing_date", "report_date", "accession"]  # chunk metadata the event tests need, kept without the text
-
-
-def sha(b: bytes) -> str:
-    return hashlib.sha256(b).hexdigest()
 
 
 def write_embeddings(path: Path, ids: pd.Series, part: int = 50_000) -> None:
@@ -112,21 +106,16 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
               | {f.name: f for f in (events.EVENTS, events.QUARTERLY[0], ROOT / "data" / "companies.csv")}  # definitions; sub-industries
               | {f"results/{f.name}": f for f in sorted(OUT.glob("*.csv"))})  # what events, diff and comove wrote
 
-    system, fmt = system_prompt(), json.dumps(transform_schema(schema(list(DIMENSIONS))))
-    row = {"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"}  # placeholders: the template
-    template = user_prompt(row, "{topic}", list(DIMENSIONS))
-    hashes = {"system_prompt_sha256": sha(system.encode()), "output_schema_sha256": sha(fmt.encode()),
-              "user_prompt_template_sha256": sha(template.encode())}
-    masked = sha(masked_prompt(row, "{topic}", list(DIMENSIONS)).encode())  # masked.parquet's prompt; not in prompt_key
+    hashes = scorer_hashes()  # the same hashes the run log records for tone.score_cells
+    masked = hashes.pop("masked_user_prompt_template_sha256")  # masked.parquet's prompt; not in prompt_key
     git = subprocess.run(["git", "describe", "--always", "--dirty"], cwd=ROOT, capture_output=True, text=True)
     prov = {
         "data_version": version,
         "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "code_commit": git.stdout.strip() or None,  # "-dirty": uncommitted changes in the tree at export time
         "text_included": text,
+        # prompt_key: one short key for this prompt, schema and template; stamp it on future score files
         "scorer": {"model": MODEL, **hashes,
-                   # one short key for this prompt, schema and template; stamp it on future score files
-                   "prompt_key": sha("".join(hashes.values()).encode())[:12],
                    "hash_of": {"system_prompt": "sentiment.system_prompt()",
                                "output_schema": "json.dumps(transform_schema(sentiment.schema(list(DIMENSIONS))))",
                                "user_prompt_template": "sentiment.user_prompt with {ticker} 10-K FY{fy} Item 1A, {topic}, {text}"},
