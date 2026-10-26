@@ -119,7 +119,8 @@ def top_words(texts: list[str], labels: np.ndarray, k: int, n: int = N_WORDS) ->
 
 def threshold(meta: pd.DataFrame, x: np.ndarray, q: np.ndarray) -> tuple[float, pd.Series, set]:
     """Per topic, the cosine between its query and the centroid of its scored on-topic Item 1A passages in
-    the corpus; the threshold is the lowest. Also returns the chunk ids retrieved for any topic."""
+    the corpus; the threshold is the lowest. Also returns the chunk ids retrieved for any topic and kept as
+    on topic by the scorer (passages retrieved but flagged off topic are left out)."""
     passages, scores, _, _ = FILES["10-K"]
     p = pd.read_parquet(passages).join(pd.read_parquet(scores, columns=["pid", "off_topic"]).set_index("pid"))
     p = p[p.off_topic == False]  # noqa: E712 (missing scores drop out too)
@@ -134,12 +135,14 @@ def threshold(meta: pd.DataFrame, x: np.ndarray, q: np.ndarray) -> tuple[float, 
 
 
 def growth(meta: pd.DataFrame, labels: np.ndarray, k: int, seed: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Per cluster: the share of companies filing that year with a chunk in it (by fiscal year), and the
-    FY2019 -> LAST_FY change over the companies in both years with a 95% bootstrap interval over companies."""
-    has = pd.crosstab([meta.ticker, meta.fy], labels).reindex(columns=range(k), fill_value=0) > 0
+    """Per cluster, over the companies with risk factors in both FY2019 and LAST_FY (so the columns subtract):
+    the share with a chunk in it by fiscal year (of those filing that year), and the FY2019 -> LAST_FY change
+    with a 95% bootstrap interval over companies."""
+    both = sorted(set(meta.ticker[meta.fy == FIRST_FY]) & set(meta.ticker[meta.fy == LAST_FY]))
+    keep = meta.ticker.isin(both).to_numpy()
+    has = pd.crosstab([meta.ticker[keep], meta.fy[keep]], labels[keep]).reindex(columns=range(k), fill_value=0) > 0
     share = has.groupby(level="fy").mean()
     a, b = has.xs(FIRST_FY, level="fy"), has.xs(LAST_FY, level="fy")
-    both = a.index.intersection(b.index)
     d = (b.loc[both].to_numpy(float) - a.loc[both].to_numpy(float))
     boot = np.stack([d[i].mean(0) for i in np.random.default_rng(seed).integers(0, len(d), (N_BOOT, len(d)))])
     lo, hi = np.percentile(boot, [2.5, 97.5], axis=0)
@@ -260,6 +263,9 @@ def main() -> None:
         names = name_clusters(top, meta, cap)
         t["name"] = t.cluster.map(names).fillna("")
         print(f"naming spent ${cap.spent():.4f} (Anthropic)")
+    elif TABLE.exists():  # keep the saved names of clusters whose example chunks haven't changed: no new calls
+        old = pd.read_csv(TABLE, keep_default_na=False).set_index("examples").name
+        t["name"] = t.examples.map(old).fillna("")
     t["label"] = np.where(t.name != "", t.name, t.words.str.split().str[:4].str.join(" "))
     t.to_csv(TABLE, index=False)
     print(f"wrote {TABLE} and {CLUSTERS}")

@@ -835,7 +835,9 @@ and marked.
   of the 13. A cluster below it matches every topic less well than the loosest topic matches its own
   scored passages. Taking the lowest errs toward calling clusters covered. As a check that the
   threshold isn't doing all the work, each cluster's share of chunks that the 13-topic retrieval
-  picked is reported next to the corpus-wide share.
+  picked is reported next to the corpus-wide share. (Wording made precise 2026-10-26 after review:
+  "picked" means retrieved for some topic and kept as on topic by the scorer, as the code always did.
+  Counting every retrieved passage, on topic or not, would cover 53.5% of chunks, not 48%.)
 - **Growth:** per cluster and fiscal year, the share of companies with at least one chunk in the
   cluster (companies, not chunks, so long filings don't dominate). The FY2019 → FY2025 change is over
   the companies with risk factors in both years, with a 95% bootstrap interval over companies. Filings
@@ -850,7 +852,8 @@ and marked.
   0.44–0.60) leaves only 13 of 80 clusters uncovered, mostly governance and securities boilerplate.
   Clusters plainly outside the 13 topics clear it by a hair: litigation (0.425), intellectual property
   (0.425), insurance underwriting (0.427). The retrieval check shows the same thing from the other
-  side. Across the corpus, 48% of chunks are among some topic's scored passages; for intellectual
+  side. Across the corpus, 48% of chunks are among the passages some topic retrieved and the scorer
+  kept as on topic; for intellectual
   property it is 15%, for acquisitions 16%. So a second flag was added: **rarely retrieved**, under
   half the corpus-wide share (the cut at half is post hoc). The table keeps the pre-registered
   `covered` column. The chart and names cover the 24 clusters that either rule flags.
@@ -860,24 +863,30 @@ and marked.
 
 **Results** (`data/tone/discovered_topics.csv`, one row per cluster; `figures/discovered_topics.png`):
 
-| Cluster (Haiku name) | Flag | Companies FY2019 → FY2025 | Change | Seed-1 match (cosine, change) |
+| Cluster (Haiku's name, exact) | Flag | Companies FY2019 → FY2025 | Change | Seed-1 match (cosine, change) |
 |---|---|---|---|---|
-| Risk-factor introductions and summaries | threshold | 25% → 55% | +29.5 pts [+24.9, +34.2] | 0.998, +28.4 |
-| Acquisition integration | retrieval | 46% → 53% | +7.1 [+2.2, +11.8] | 1.000, +8.6 |
-| Exclusive forum (Delaware) provisions | threshold | 6% → 12% | +6.9 [+4.5, +9.7] | 0.947, +3.9 |
-| Protecting intellectual property | retrieval | 33% → 38% | +4.9 [+1.3, +8.6] | 1.000, +4.7 |
-| Goodwill and intangible impairment | retrieval | 21% → 23% | +2.6 [−1.3, +6.5] | 1.000, +1.5 |
-| Alternative asset manager funds | retrieval | 4% → 6% | +1.7 [+0.2, +3.4] | 0.988, +1.9 |
-| Crypto regulation and compliance | threshold | 0.6% → 2.4% | +1.7 [+0.6, +3.0] | 1.000, +1.5 |
+| mixed: generic risk factor introductions and forward-looking statement cautions | threshold | 25% → 55% | +29.5 pts [+24.9, +34.2] | 0.998, +28.4 |
+| Acquisition integration risks | retrieval | 46% → 53% | +7.1 [+2.2, +11.8] | 1.000, +8.6 |
+| Exclusive forum selection provisions | threshold | 6% → 12% | +6.9 [+4.5, +9.7] | 0.947, +3.9 |
+| Protecting and enforcing intellectual property rights | retrieval | 33% → 38% | +4.9 [+1.3, +8.6] | 1.000, +4.7 |
+| Goodwill and intangible asset impairment risk | retrieval | 21% → 23% | +2.6 [−1.3, +6.5] | 1.000, +1.5 |
+| Alternative asset manager fund investment risks | retrieval | 4% → 6% | +1.7 [+0.2, +3.4] | 0.988, +1.9 |
+| Crypto regulatory compliance risk | threshold | 0.6% → 2.4% | +1.7 [+0.6, +3.0] | 1.000, +1.5 |
 
-465 companies filed risk factors in both years. Over all 80 clusters the median change is +1.3
-points; 59 rose, 27 with an interval above zero. That is the drift from longer filings to compare
-against.
+465 companies filed risk factors in both years; every share in this section, the chart and
+`figures/discovered_topics.csv` is over those companies, so the two years' shares subtract to the
+change. (The yearly shares in the figure's CSV first used every company filing that year; fixed
+2026-10-26 after review. No number in the table moved.) Over all 80 clusters the median change is
++1.3 points; 59 rose, 27 with an interval above zero. That is the drift from longer filings to
+compare against.
 
 - **The 13 topics already hold the big growers.** The fastest-growing clusters overall are AI
   (+44.5 pts), cybersecurity (+31.2), ESG and sustainability (+29.7), physical climate risk (+19.1)
   and talent (+15.9). All of them match a topic query well (0.49–0.66) and are mostly retrieved
-  (61–94%).
+  (61–94%). The AI cluster goes from 0.4% to 44.9% of companies, far below the 8% → 93% of risk
+  factors naming AI in section 7. The two measure different things: the cluster counts companies
+  with a chunk whose main theme is AI. The word-checked figure counts companies whose top AI passages
+  name AI at all, even in passing.
 - **What they miss and grew is mostly form, not new risk.** The one large mover is the opening of
   Item 1A: introductory caveats and, from FY2020, a risk-factor summary. The SEC's 2020 amendments
   to Regulation S-K Item 105 require that summary when the section runs over 15 pages. Chunks with a

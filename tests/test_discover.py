@@ -19,13 +19,14 @@ def test_kmeans_recovers_planted_clusters():
 
 def test_growth_counts_companies_not_chunks():
     # A: cluster 1 in both years (no change), five chunks in cluster 0 in the last year only;
-    # B: cluster 1 only in the last year; C files only the first year, so it's out of the change
+    # B: cluster 1 only in the last year; C files only the first year, so it's out of the shares and the change
     rows = [("A", FIRST_FY, 1), *[("A", LAST_FY, 0)] * 5, ("A", LAST_FY, 1), ("B", FIRST_FY, 0), ("B", LAST_FY, 1),
             ("C", FIRST_FY, 1)]
     meta = pd.DataFrame(rows, columns=["ticker", "fy", "cluster"])
     share, ch = growth(meta, meta.cluster.to_numpy(), 3)
-    assert share.loc[FIRST_FY].tolist() == [1 / 3, 2 / 3, 0] and share.loc[LAST_FY].tolist() == [0.5, 1, 0]
-    assert ch.change.tolist() == [0, 0.5, 0] and (ch.companies == 2).all(), ch
+    assert share.loc[FIRST_FY].tolist() == [0.5, 0.5, 0] and share.loc[LAST_FY].tolist() == [0.5, 1, 0]
+    assert ch.change.tolist() == (share.loc[LAST_FY] - share.loc[FIRST_FY]).tolist() == [0, 0.5, 0], ch
+    assert (ch.companies == 2).all(), ch
     assert (ch.lo <= ch.change).all() and (ch.change <= ch.hi).all()
 
 
