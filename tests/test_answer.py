@@ -128,8 +128,29 @@ def test_reply_and_footer():
     docs = pd.DataFrame({"ticker": ["NVDA", "NVDA"], "form": ["10-Q", "10-K"], "fy": [2026, 2025],
                          "report_date": ["2025-04-27", "2025-01-26"], "item": ["mdna", "1A"]})
     assert A.title(next(docs.itertuples())) == "NVDA 10-Q quarter ending 2025-04-27, MD&A"
+    assert A.title(list(docs.itertuples())[1]) == "NVDA 10-K FY2025 (year ended 2025-01-26), Item 1A Risk Factors"
     out = {"docs": docs, "citations": [(1, "Export  controls\nmay hurt."), (0, "H20")], "cells": "", "profile": None, "usd": 0.002}
     f = A.footer(out, A.Cap(0.5), "claude-haiku-5-5", "low")
-    assert "1. NVDA 10-K FY2025, Item 1A Risk Factors: “Export controls may hurt.”" in f and "2. NVDA 10-Q" in f
+    assert "1. NVDA 10-K FY2025 (year ended 2025-01-26), Item 1A Risk Factors: “Export controls may hurt.”" in f
+    assert "2. NVDA 10-Q" in f
     assert f.startswith(A.FOOTER) and "$0.0020" in f and "of $0.50" in f
     assert A.md(pd.DataFrame({"a": [1], "b": ["x"]})) == "| a | b |\n|---|---|\n| 1 | x |"
+
+
+
+def test_plan_invalid_output(monkeypatch):
+    # a truncated or invalid plan becomes a decline, charged at the upper bound, instead of an exception
+    try:
+        A.Plan.model_validate({})
+    except A.ValidationError as e:
+        err = e
+
+    class Messages:
+        def parse(self, **kw):
+            raise err
+
+    monkeypatch.setattr(A, "client", lambda: type("C", (), {"messages": Messages()})())
+    monkeypatch.setattr(A, "planner_system", lambda: "rules")
+    cap = A.Cap(1.0)
+    p, usage = A.plan("What did NVIDIA say?", [], cap)
+    assert p.kind == "decline" and "incomplete" in p.message and usage is None and cap.spent() > 0

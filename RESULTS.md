@@ -767,6 +767,128 @@ MD&A text is slightly more positive than copied text (+0.13 n.s. before the fisc
   on-topic passages are new and a company needs one in both 10-Ks.
 - **Not done:** the planned "what changed" summary per filing, an LLM call; it fits the Q&A layer.
 
+### The event tests on new text only (2026-10-26, exploratory)
+
+**Why, and why it is exploratory.** The planned event tests (section 3) detect 0 of 11 expected
+changes. One explanation, a guess not yet tested: a cell's 3 passages come from the whole 10-K, and
+most of a 10-K is copied from the year before, so a reaction would be averaged with unchanged text.
+The rerun above, on the scored passages that happen to be new, kept too few companies to tell. This
+section retrieves passages for that purpose instead. It is a new test run, decided on 2026-10-26
+after the planned run found nothing, so **any pass here is exploratory, not confirmatory**. This plan
+was written and committed before any of these passages were scored.
+
+**The cells** (`diff.py retrieve`, `data/tone/n_passages.parquet`). For each cell the tests below
+use, its top 3 among the 10-K's *new* chunks only (carryover share at most 0.2, as above), ranked
+exactly as a Phase 9 cell (hybrid: the stored vectors and query vectors, BM25 over the whole corpus,
+top 20 of each fused with RRF; `tone.within` with a chunk filter). As a check, the same code with no
+filter reproduces every passage of `passages.parquet` for each of the 7 topics. The cells: each event's
+"before" and "after" 10-K per company on the event's topics (the fiscal-year rule of section 3), for
+both the affected and the comparison companies, and for the break check the 10-K a year before
+"before": 7,444 cells. AI is searched within MD&A, since its test reads MD&A (section 3); the other
+topics within the whole 10-K, which for new text means Item 1A and Item 7, the only items carryover
+is measured on. Of the 7,444 cells, 6,389 have at least one new chunk: 18,746 passages. A cell whose
+10-K has no new chunk, or no new passage the model calls on topic, counts as not discussing the topic
+in new text, and the company drops out of that dimension's test.
+
+**Who can be in each test.** Carryover exists only for a 10-K whose company has the year before's
+10-K, so no FY2019 10-K has new-text cells. COVID's "before" 10-K is FY2019 for 446 of its 468
+companies, so at most 20 (whose fiscal year ended in early 2020) stay, and its break check, which
+needs the 10-K before that, can't run. Companies with new chunks in both 10-Ks, an upper bound before
+the on-topic flag: COVID 20 of 468, export controls 465 of 481 (17 of 19 chipmakers), rate hikes 468
+of 481 (101 of 104 affected), SVB 73 of 75, AI 458 of 478 (84 of 88 affected), tariffs 474 of 494
+(190 of 201 affected). The results will give each test's companies beside the original test's.
+
+**The scoring.** The production prompt, unchanged (`tone.score_cells`: Claude Haiku 5.5, the same
+system prompt, schema and user prompt, whose hashes match `data/release/provenance.json`; Batch API).
+2,703 passages were already scored for the same cell (2,007 in `scores.parquet`, 696 in the MD&A AI
+cells' `s_scores.parquet`), so their scores are copied; 16,043 are scored, estimated at $2.41 (at
+$0.00015 a passage; the code's cap uses $0.0002, $3.21). Cap: $6.
+
+**The tests, fixed now.** The same events, topics, items, expected directions and decision rule as
+[`events.csv`](events.csv) and section 3, with the fiscal-year rule for "before" and "after":
+- **The planned test, 11 tests:** the change where the event hit minus the change elsewhere, passing
+  if its 95% bootstrap interval (over companies) is on the expected side of zero, that is one-sided
+  at 2.5%: export controls (polarity down; magnitude, realization, specificity up), rate hikes
+  (magnitude, realization, specificity up), AI boom in MD&A (polarity, specificity up), tariffs
+  (realization, uncertainty up). Chance alone would pass about 0.3 of 11 (11 × 0.025), more if the
+  versions are counted together.
+- **The break check, at most 11 tests** (13 in section 3, less COVID's 2): the change before → after
+  minus the change in the year before, on the affected companies, same rule; about 0.3 by chance.
+- **Before-after where the event hit, 15** (with COVID and SVB), reported as in section 3 but not a
+  test of the event, since it picks up drift.
+- **Both versions:** model only, and word-checked (AI, China and tariff passages count only if they
+  name the topic, `events.TOPIC_WORDS`), as for every other event result.
+- **What would support the dilution guess:** passes, or differences clearly larger than section 3's
+  on the same events. With fewer companies per test, a failure here can't rule the guess out.
+
+Code: `diff.py retrieve`, `diff.py score`, `diff.py events`; results in `data/tone/n_events*.csv` and
+`n_event_breaks*.csv`.
+
+**Results (2026-10-26, after the plan above was committed).** In plain words: **one of the 11
+planned tests passes in each version, about what chance alone gives (0.3 per version), and a
+different test in each.** The break check passes 1 of 11 in both versions (the same test), again
+about chance. No expected change passes both the planned test and the break check. So new text
+doesn't rescue the event tests. With far fewer, self-selected companies per test and intervals 2–4
+times wider, it neither supports nor rules out the guess that copied text hides a reaction.
+
+- **Scoring:** all 18,746 passages, none failed: 16,043 scored for **$1.77** (Anthropic Batch API,
+  $0.00011 a passage; a 3-passage smoke test included) and 2,703 copied. No OpenAI spend.
+- **New text is mostly off topic for the rare topics.** The model flags as off topic 92% of the new
+  AI passages (62% in the 10-K cells), China 83% (60%), tariffs 84% (53%), interest rates 55% (21%),
+  deposits 39% (5%), supply chain 24% (14%), demand 10% (4%). In most companies' new text there is
+  nothing about these topics, so the top 3 there is whatever comes closest.
+- **Companies kept** (where the event hit / elsewhere; model only, word-checked in brackets):
+  COVID 19 of 468; export controls 7 / 85 (4 / 68) against 19 / 232 (19 / 191); rate hikes 80 / 217
+  against 103 / 361; SVB 60 of 75; AI in MD&A 7 / 8 (5 / 3) against 38 / 40 (23 / 11); tariffs
+  34 / 47 (27 / 37) against 182 / 222 (173 / 198). A company stays only if it wrote new text on the
+  topic in both 10-Ks, so these are selected groups, not the original test's companies.
+
+| Event | Dimension | Expected | Difference, new text (planned test) | Word-checked | Section 3 (all text) |
+|---|---|---|---|---|---|
+| Export controls | polarity | down | +0.35 [−0.01, +0.67] ✗ | +0.32 [−0.20, +0.76] ✗ | −0.13 n.s. |
+| | magnitude | up | **+0.63** [+0.02, +1.09] ✓ | +0.70 [−0.39, +1.38] ✗ | +0.12 n.s. |
+| | realization | up | +0.62 [−0.28, +1.50] ✗ | +0.13 [−0.87, +0.93] ✗ | +0.02 n.s. |
+| | specificity | up | +0.20 [−0.15, +0.58] ✗ | +0.12 [−0.34, +0.51] ✗ | +0.06 n.s. |
+| Rate hikes | magnitude | up | +0.15 [−0.03, +0.34] ✗ | same | +0.09 n.s. |
+| | realization | up | +0.07 [−0.13, +0.28] ✗ | same | +0.02 n.s. |
+| | specificity | up | +0.03 [−0.12, +0.19] ✗ | same | +0.10 n.s. |
+| AI boom, MD&A | polarity | up | −0.40 [−0.81, −0.00] ✗ (wrong side) | +0.03 [−0.30, +0.40] ✗ | +0.11 n.s. |
+| | specificity | up | −0.09 [−0.92, +0.75] ✗ | +0.10 [−0.40, +0.60] ✗ | +0.09 n.s. |
+| Tariffs 2025 | realization | up | +0.33 [−0.10, +0.72] ✗ | **+0.50** [+0.04, +0.94] ✓ | +0.00 n.s. |
+| | uncertainty | up | +0.01 [−0.40, +0.40] ✗ | −0.07 [−0.45, +0.29] ✗ | +0.06 n.s. |
+
+- **The two passes are fragile.** Export-control magnitude rests on 7 chipmakers and disappears when
+  word-checked (4 chipmakers). Tariff realization passes only word-checked. Added after the results
+  (2026-10-26), not in the plan: over 5 seeds of 10,000 resamples the lower bounds are +0.016 to
+  +0.041 (export controls) and +0.044 to +0.059 (tariffs), and Welch's one-sided p is 0.038 and 0.018
+  (tariffs model only, 0.063). Where the tariffs hit, new tariff text became much
+  more realized (+0.80 [+0.43, +1.17], 27 companies), more than elsewhere (+0.29).
+- **The break check: 1 of 11 in both versions:** rate-hike magnitude +0.43 [+0.14, +0.72] on 76
+  companies (all text: +0.09 n.s. on 101). Its planned difference fails (+0.15 n.s.), since the
+  other companies' new rate text also rose (+0.10 [0.00, +0.19]). The others: export controls on
+  6 chipmakers (4 word-checked), SVB on 53 banks, tariffs on 15 companies (7 word-checked), all n.s.
+  COVID can't be checked (FY2019 has no new text).
+- **Before-after where the event hit:** 3 of 15 (word-checked 2), against 9 (6) on all text:
+  rate-hike magnitude +0.25 [+0.10, +0.41], AI specificity in MD&A +0.79 [+0.19, +1.43] (not
+  word-checked), tariff realization +0.77 [+0.45, +1.06].
+- **Larger differences, not more passes.** Some differences are larger than on all text
+  (export-control magnitude and realization, tariff realization), others smaller or on the wrong side
+  (rate-hike specificity; export-control polarity +0.35, as the other companies' new China text
+  turned negative, −0.50; AI polarity −0.40 on 7 against 8 companies). The intervals are mostly 2 to 4
+  times wider than in section 3, so no difference on new text can be told apart from the same
+  difference on all text.
+- **Checks.** Rate-hike magnitude and specificity and tariff realization and uncertainty (both
+  versions) were recomputed with separate code (10-Ks from `chunks.parquet`, tone straight from
+  the `n_` files): every estimate and company count matches. Read by hand: 10 passages. All 10 meet
+  the definition of new. Compared sentence by sentence with the previous year's 10-K, 4 share no
+  sentence with it (EFX's COVID demand risk, TER's October 2022 export rules, HAL, UNP); the rest
+  keep a few lightly edited sentences with new figures (KIM, ETR, Loews, PACCAR, JPMorgan, Qualcomm).
+  Of 5 rank-1 passages drawn at random, 1 is clearly on topic (EFX); the model flagged the 3 clearly
+  off topic (KIM for supply chain, HAL for AI, ETR's utility rate "tariffs"); Loews' climate-financing
+  risk counted as deposits and liquidity is doubtful. Of 5 the model called on topic in the tested
+  groups, 4 are (TER, Qualcomm's Chinese OEMs, PACCAR's tariff costs, JPMorgan's net interest income).
+  UNP's merger risk, counted as tariffs, never names one, and the word check drops it.
+
 ## 9. Do companies in the same sector move together? (research question 4)
 
 **Method** ([`comove.py`](src/sec_filings_tone/comove.py), fixed in PLAN.md before computing): for

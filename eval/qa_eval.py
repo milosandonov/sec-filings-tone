@@ -4,6 +4,11 @@ Usage:
     uv run python eval/qa_eval.py answers --budget 0.70   # paid: every row through answer.run, resumable
     uv run python eval/qa_eval.py judge --budget 1.00     # paid: Claude Sonnet 5.5 grades them, Batch API
     uv run python eval/qa_eval.py report                  # free: every metric, against the pass bars
+    uv run python eval/qa_eval.py answers --name _v2      # a new run, in qa_answers_v2.jsonl (judge, report the same)
+    uv run python eval/qa_eval.py judge --name _v2 --judge-name _v2draft --draft  # drafts saved before a (dropped) check
+    uv run python eval/qa_eval.py judge --judge-name _rejudge --sample 15  # regrade 15 published answers: judge noise
+    uv run python eval/qa_eval.py diff --name _v2         # free: paired differences from the published run
+    uv run python eval/qa_eval.py answers --tests eval/qa_dev.jsonl --name _dev  # the dev questions
 
 Free metrics: planner accuracy (the tickers, fiscal years and forms over a plan's sub-queries against the
 expected ones; the plan kind), keywords in the passages given to the answer model, citation validity
@@ -20,6 +25,7 @@ from pathlib import Path
 from typing import Literal
 
 import anthropic
+import numpy as np
 import pandas as pd
 from anthropic import transform_schema
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
@@ -94,7 +100,9 @@ def answers(cap: Cap, model: str, effort: str) -> None:
     print(f"spent ${cap.spent():.3f}")
 
 
-def judge_prompt(row: dict, a: dict) -> str:
+def judge_prompt(row: dict, a: dict, draft: bool = False) -> str:
+    """draft: grade the saved draft instead (qa_answers_v2.jsonl: the answer before a sentence check, since
+    removed, dropped sentences; same citations and passages)."""
     texts = retrieve.chunks().text
     turns = "\n".join(f"Turn {i}: {q}" for i, q in enumerate(row["turns"], 1))
     cited = "\n".join(f"[{n}] {a['docs'][d]['title']}: “{span}”" for n, (d, span) in enumerate(a["citations"], 1))
@@ -102,17 +110,22 @@ def judge_prompt(row: dict, a: dict) -> str:
     passages = "\n\n".join(f"<passage title=\"{a['docs'][d]['title']}\">\n{texts[a['docs'][d]['chunk_id']]}\n</passage>" for d in docs)
     cells = f"\n\n<cell_table>\n{a['cells']}\n</cell_table>" if a["cells"] else ""
     return (f"<question>\n{turns}\n</question>\n\n<reference_answer>\n{row['reference_answer']}\n</reference_answer>\n\n"
-            f"<answer>\n{a['text']}\n</answer>\n\n<cited_spans>\n{cited or '(none)'}\n</cited_spans>\n\n"
+            f"<answer>\n{a['draft'] if draft else a['text']}\n</answer>\n\n<cited_spans>\n{cited or '(none)'}\n</cited_spans>\n\n"
             f"<cited_passages>\n{passages or '(none)'}\n</cited_passages>{cells}\n\nGrade the answer to the last turn.")
 
 
-def judge(budget: float) -> None:
+def judge(budget: float, sample: int = 0, draft: bool = False) -> None:
+    """sample: grade only a random `sample` of the answers (seed 0), e.g. to regrade them and measure the judge's
+    own noise. draft: grade the saved drafts of the answers the check changed (qa_answers_v2.jsonl only)."""
     client = anthropic.Anthropic()
     rows = {r["id"]: r for r in load(TESTS)}
     graded = {j["id"] for j in load(JUDGED)}
-    todo = [a for a in load(ANSWERS) if not a["stopped"] and rows[a["id"]]["type"] != "out_of_scope" and a["id"] not in graded]
+    todo = [a for a in load(ANSWERS) if not a["stopped"] and rows[a["id"]]["type"] != "out_of_scope" and a["id"] not in graded
+            and (not draft or a.get("dropped"))]
+    if sample:
+        todo = random.Random(0).sample(todo, min(sample, len(todo)))
     if not BATCH.exists():
-        prompts = {a["id"]: judge_prompt(rows[a["id"]], a) for a in todo}
+        prompts = {a["id"]: judge_prompt(rows[a["id"]], a, draft) for a in todo}
         # upper bound: ~3.5 characters a token, 3,000 output tokens each, at the batch's half price
         est = sum(call_usd(JUDGE_MODEL, (len(JUDGE_SYSTEM) + len(p)) / 3.5, 3000) for p in prompts.values()) / 2
         print(f"{len(prompts)} answers to judge, at most about ${est:.2f}")
@@ -153,9 +166,10 @@ def plan_sets(p: dict | None) -> dict[str, set]:
             "form": {q["form"] for q in qs if q["form"]}}
 
 
-def report() -> None:
+def records(answers_path: Path, judged_path: Path) -> pd.DataFrame:
+    """One row per answered question: planner, retrieval and citation checks, and the judge's scores."""
     rows = {r["id"]: r for r in load(TESTS)}
-    ans = {a["id"]: a for a in load(ANSWERS) if not a["stopped"]}
+    ans = {a["id"]: a for a in load(answers_path) if not a["stopped"]}
     texts = retrieve.chunks().text
     recs = []
     for i, a in ans.items():
@@ -176,10 +190,17 @@ def report() -> None:
         rec |= {"citations": len(valid), "citations_valid": sum(valid)}
         recs.append(rec)
     df = pd.DataFrame(recs)
-    for j in load(JUDGED):
+    for j in load(judged_path):
         for k in ("accuracy", "completeness", "groundedness"):
             df.loc[df.id == j["id"], k] = j[k]
         df.loc[df.id == j["id"], "unsupported"] = bool(j["unsupported_claims"])
+        df.loc[df.id == j["id"], "claims"] = len(j["unsupported_claims"])
+    return df
+
+
+def report() -> None:
+    rows, ans = {r["id"]: r for r in load(TESTS)}, {a["id"]: a for a in load(ANSWERS) if not a["stopped"]}
+    df = records(ANSWERS, JUDGED)
     p = df[df.type.isin(["single", "conversation", "multi_part"])]
     oos = df[df.type == "out_of_scope"]
     usd, judge_usd = sum(x["usd"] for x in load(RUNS)), sum(j["usd"] for j in load(JUDGED))
@@ -211,11 +232,37 @@ def report() -> None:
     misses = df[(df.get("ticker_ok") == False) | (df.get("fy_ok") == False)] if "ticker_ok" in df else df[:0]  # noqa: E712
     for i in misses.id:
         print(f"  planner miss {i}: expected {rows[i]['expected']}, got {plan_sets(ans[i]['plan'])}")
-    if not HAND.exists() and "accuracy" in df and df.accuracy.notna().any():
+    if ANSWERS == HERE / "qa_answers.jsonl" and not HAND.exists() and "accuracy" in df and df.accuracy.notna().any():
         pick = random.Random(0).sample(sorted(df[df.accuracy.notna()].id), 10)
         pd.DataFrame({"id": pick, "question": [rows[i]["turns"][-1] for i in pick], "accuracy": "", "completeness": "",
                       "groundedness": "", "unsupported": ""}).to_csv(HAND, index=False)
         print(f"\nwrote {HAND}: 10 answers to grade by hand, to check the judge")
+
+
+def diff(base: str, base_judge: str | None = None, n_boot: int = 10_000) -> None:
+    """Each metric for the run named `base` (its answers, and judge file base_judge or its own) and the current
+    one, on the questions both have, with a 95% bootstrap interval (resampling questions) for the paired difference."""
+    bj = base if base_judge is None else base_judge
+    a, b = records(HERE / f"qa_answers{base}.jsonl", HERE / f"qa_judge{bj}.jsonl"), records(ANSWERS, JUDGED)
+    a, b = a.set_index("id"), b.set_index("id")
+    passage = b.type.isin(["single", "conversation", "multi_part"])
+    metrics = {"ticker_ok": passage, "fy_ok": passage, "form_ok": passage, "kind_ok": None,
+               "mrr": passage, "coverage": passage, "accuracy": None, "completeness": None, "groundedness": None,
+               "unsupported": None, "claims": None, "secs": None}
+    rng = np.random.default_rng(0)
+    print(f"| Metric | n | {bj or 'published'} | {JUDGED.stem.removeprefix('qa_judge') or 'published'} | new − old [95% CI] |"
+          "\n|---|---|---|---|---|")
+    for m, keep in metrics.items():
+        if m not in a or m not in b:
+            continue
+        ids = b.index[keep if keep is not None else slice(None)]
+        x = pd.DataFrame({"old": a[m].reindex(ids), "new": b[m].reindex(ids)}).dropna().astype(float)
+        if x.empty:
+            continue
+        d = (x.new - x.old).to_numpy()
+        boot = d[rng.integers(0, len(d), (n_boot, len(d)))].mean(axis=1)
+        lo, hi = np.percentile(boot, [2.5, 97.5])
+        print(f"| {m} | {len(x)} | {x.old.mean():.3f} | {x.new.mean():.3f} | {d.mean():+.3f} [{lo:+.3f}, {hi:+.3f}] |")
 
 
 GPT_JUDGE = "gpt-6-sol"  # OpenAI's middle tier, priced like Claude Sonnet 5.5
@@ -322,12 +369,23 @@ def compare(model: str) -> None:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["answers", "judge", "report", "judge-gpt", "compare"])
+    ap.add_argument("step", choices=["answers", "judge", "report", "diff", "judge-gpt", "compare"])
     ap.add_argument("--budget", type=float, default=0.70)
     ap.add_argument("--model", default=answer.MODEL, help="answers: the answer model; judge-gpt and compare: the OpenAI judge")
     ap.add_argument("--effort", default=answer.EFFORT)
     ap.add_argument("--test", action="store_true", help="judge-gpt: one direct request, no batch")
+    ap.add_argument("--tests", type=Path, default=TESTS, help="the questions (e.g. eval/qa_dev.jsonl)")
+    ap.add_argument("--name", default="", help="run name: writes qa_answers{name}.jsonl, qa_judge{name}.jsonl, "
+                    "qa_runs{name}.jsonl instead of the published files (e.g. _v2)")
+    ap.add_argument("--judge-name", help="judge, report, diff: the judge file's name, if not --name's")
+    ap.add_argument("--sample", type=int, default=0, help="judge: only a random N of the answers (seed 0)")
+    ap.add_argument("--draft", action="store_true", help="judge: grade the saved drafts the check changed (_v2 only)")
+    ap.add_argument("--base", default="", help="diff: the run to compare with (default the published one)")
+    ap.add_argument("--base-judge", help="diff: the base run's judge file name, if not --base's")
     a = ap.parse_args()
+    jn = a.name if a.judge_name is None else a.judge_name
+    TESTS, ANSWERS, RUNS = a.tests, HERE / f"qa_answers{a.name}.jsonl", HERE / f"qa_runs{a.name}.jsonl"
+    JUDGED, BATCH = HERE / f"qa_judge{jn}.jsonl", HERE / f"qa_batch{jn}.json"
     gpt = a.model if a.model in GPT_PRICES else GPT_JUDGE
     cap = Cap(a.budget)
 
@@ -348,5 +406,6 @@ if __name__ == "__main__":
            "judge": lambda: run_log([JUDGE_MODEL], collected(JUDGED, BATCH, "anthropic"), [JUDGED]),
            "judge-gpt": lambda: run_log([gpt], collected(gpt_judged(gpt), GPT_BATCH, "openai"), [gpt_judged(gpt)])}
     with log.get(a.step, nullcontext)() as rec:
-        {"answers": lambda: answers(cap, a.model, a.effort), "judge": lambda: judge(a.budget), "report": report,
+        {"answers": lambda: answers(cap, a.model, a.effort), "judge": lambda: judge(a.budget, a.sample, a.draft),
+         "report": report, "diff": lambda: diff(a.base, a.base_judge),
          "judge-gpt": lambda: judge_gpt(gpt, a.budget, a.test, rec), "compare": lambda: compare(gpt)}[a.step]()

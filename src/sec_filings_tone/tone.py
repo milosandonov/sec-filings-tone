@@ -55,7 +55,8 @@ FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
          "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),
          "rerun": (*(OUT / f"rerun_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # B6: a sample scored again
          "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # masked check: event-test passages, no company or year
-         "section": tuple(OUT / f"s_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}  # S_TOPICS within S_ITEM (sections)
+         "section": tuple(OUT / f"s_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),  # S_TOPICS within S_ITEM (sections)
+         "new": tuple(OUT / f"n_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}  # the event tests' cells on new text only (diff.py)
 KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
@@ -160,24 +161,31 @@ def retrieve_cells(form: str = "10-K") -> None:
           f"{len(c):,} cells")
 
 
-def within(df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, topic: str, item: str | None) -> list[dict]:
+def within(df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, topic: str, item: str | None,
+           keep: set | None = None) -> list[dict]:
     """Each 10-K's top K for `topic` among its chunks of `item` (None: the whole 10-K, as retrieve_cells ranks
-    it). Scores `vs` and `bs` are over all of df's rows, so BM25 keeps the whole corpus's word weights."""
+    it), and only those in `keep` (chunk ids), if given. Scores `vs` and `bs` are over all of df's rows, so BM25
+    keeps the whole corpus's word weights."""
     m = np.ones(len(df), bool) if item is None else (df["item"] == item).to_numpy()
+    if keep is not None:
+        m = m & df.chunk_id.isin(keep).to_numpy()
     c = cell_grid("10-K", df[m])  # only 10-Ks that have the item
     return top(c[c.topic == topic], df[m], vs[m], bs[m], "10-K")
 
 
-def sections() -> None:
+def sections(form: str = "section", items: dict | None = None, keep: set | None = None,
+             need: pd.DataFrame | None = None) -> None:
     """Section-level cells (PLAN.md Phase 7, 2026-10-18): for S_TOPICS, each 10-K's top K within S_ITEM, ranked
     as retrieve_cells ranks the whole 10-K, with the query vectors passages.parquet was ranked with (QUERIES),
-    so nothing is embedded. First, the same code grouped by 10-K must reproduce passages.parquet."""
-    passages, scores, state, _ = FILES["section"]
+    so nothing is embedded. First, the same code grouped by 10-K must reproduce passages.parquet.
+    diff.py's new-text cells (2026-10-26) use it too: `items` maps each topic to its item (None: the whole 10-K),
+    only chunks in `keep` are ranked, and only the cells in `need` (ticker, fy, topic) are written to FILES[form]."""
+    passages, scores, state, _ = FILES[form]
     if scores.exists() or state.exists():  # as in retrieve_cells: scores point at row numbers
         raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
     df, vec, old = retrieve.chunks(), vectors(), pd.read_parquet(PASSAGES)
     q, rows = dict(zip(TOPICS, np.load(QUERIES))), []
-    for topic in S_TOPICS:
+    for topic, item in (items or dict.fromkeys(S_TOPICS, S_ITEM)).items():
         vs = vec @ (q[topic] / np.linalg.norm(q[topic]))
         bs = retrieve.bm25_index().get_scores(bm25s.tokenize([TOPICS[topic]], stopwords="en", return_ids=False,
                                                              show_progress=False)[0])
@@ -185,9 +193,11 @@ def sections() -> None:
         same = len(mine) == len(want) and (mine[want.columns].to_numpy() == want.to_numpy()).all()
         if not same:
             raise SystemExit(f"{topic}: grouped by 10-K, this code doesn't reproduce {PASSAGES}; nothing written")
-        rows += within(df, vs, bs, topic, S_ITEM)
-        print(f"{topic}: {len(want):,} passages of {PASSAGES} reproduced exactly; {len(rows):,} within Item {S_ITEM}")
-    out = pd.DataFrame(rows)
+        got = pd.DataFrame(within(df, vs, bs, topic, item, keep))
+        rows.append(got if need is None else got.merge(need[["ticker", "fy", "topic"]].drop_duplicates()))
+        print(f"{topic}: {len(want):,} passages of {PASSAGES} reproduced exactly; {len(rows[-1]):,} within "
+              f"{'Item ' + item if item else 'the 10-K'}", flush=True)
+    out = pd.concat(rows, ignore_index=True)
     out.to_parquet(passages, index=False)
     print(f"{passages}: {len(out):,} passages for {out.groupby(['ticker', 'fy', 'topic']).ngroups:,} cells")
 
@@ -214,7 +224,7 @@ def check(n: int, form: str = "10-K", seed: int = 0) -> None:
 def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10-K", prompt=user_prompt) -> None:
     """Submit every passage not yet scored, in batches, then wait and collect. Failed requests aren't
     stored, so running again resubmits just those. `prompt` writes each user message (the masked check: masked_prompt).
-    A passage whose (ticker, fy, topic, chunk_id) SCORES already has would be the same request: its score is copied."""
+    A passage whose (ticker, fy, topic, chunk_id) SCORES or the section scores already have would be the same request: its score is copied."""
     passages, scores, saved, _ = FILES[form]
     client = anthropic.Anthropic()
     state = json.loads(saved.read_text()) if saved.exists() else []
@@ -226,11 +236,13 @@ def score_cells(budget: float, tickers: list[str] | None = None, form: str = "10
             p = p[~p.pid.isin(pd.read_parquet(scores, columns=["pid"]).pid)]
         key, copied = ["ticker", "fy", "topic", "chunk_id"], pd.DataFrame()
         if prompt is user_prompt and form != "rerun" and SCORES.exists():  # B6 scores the same requests again on purpose
-            done = pd.read_parquet(PASSAGES, columns=key).reset_index(names="pid").merge(pd.read_parquet(SCORES), on="pid")
+            done = pd.concat([pd.read_parquet(f[0], columns=key).reset_index(names="pid").merge(pd.read_parquet(f[1]), on="pid")
+                              for f in (FILES["10-K"], FILES["section"]) if f[1].exists()]
+                             ).drop_duplicates(key)  # a section passage also in SCORES copied its score from there
             copied = p[["pid", *key]].merge(done.drop(columns="pid"), on=key, validate="1:1").drop(columns=key).assign(usd=0.0)
             p = p[~p.pid.isin(copied.pid)]
         est = len(p) * USD_PER_REQUEST
-        print(f"{len(p):,} passages to score, about ${est:.2f}; {len(copied):,} scores copied from {SCORES}")
+        print(f"{len(p):,} passages to score, about ${est:.2f}; {len(copied):,} scores copied from earlier runs (SCORES, section scores)")
         if est > budget:
             raise SystemExit(f"over --budget ${budget:.2f}; nothing submitted or copied")
         if len(copied):  # usd 0: nothing was paid for these
@@ -514,23 +526,28 @@ def main() -> None:
     a = p.parse_args()
     form = "10-Q" if a.quarterly else "section" if a.section else "10-K"
     if a.command in ("score", "rerun", "masked"):  # the paid ones: one line in the run log
-        files = form if a.command == "score" else a.command
-        passages, scores, saved, _ = FILES[files]
-        cols = ["pid", "usd", "batch"]
-        before = pd.read_parquet(scores, columns=cols) if scores.exists() else pd.DataFrame(columns=cols)
-
-        def usage():  # scores saved during the run (copied ones cost 0) and batches still waiting
-            after = pd.read_parquet(scores, columns=cols) if scores.exists() else before
-            new = after[~after.pid.isin(before.pid)]
-            paid = new[new.usd > 0]
-            return {"usd": {"anthropic": float(new.usd.sum())}, "rows": len(new), "copied": len(new) - len(paid),
-                    "batches_collected": sorted(set(paid.batch)),
-                    "batches_pending": json.loads(saved.read_text()) if saved.exists() else []}
-
-        with run_log([MODEL], usage, [passages, scores], files=files, scorer=scorer_hashes()):
+        with scoring_log(form if a.command == "score" else a.command):
             run(a, form)
     else:
         run(a, form)
+
+
+def scoring_log(files: str):
+    """budget.run_log for a score_cells run on FILES[files]: the USD and rows of the scores saved during the run
+    (copied ones cost 0), the batches they came from and the batches still waiting, and the scorer's hashes."""
+    passages, scores, saved, _ = FILES[files]
+    cols = ["pid", "usd", "batch"]
+    before = pd.read_parquet(scores, columns=cols) if scores.exists() else pd.DataFrame(columns=cols)
+
+    def usage():
+        after = pd.read_parquet(scores, columns=cols) if scores.exists() else before
+        new = after[~after.pid.isin(before.pid)]
+        paid = new[new.usd > 0]
+        return {"usd": {"anthropic": float(new.usd.sum())}, "rows": len(new), "copied": len(new) - len(paid),
+                "batches_collected": sorted(set(paid.batch)),
+                "batches_pending": json.loads(saved.read_text()) if saved.exists() else []}
+
+    return run_log([MODEL], usage, [passages, scores], files=files, scorer=scorer_hashes())
 
 
 def run(a: argparse.Namespace, form: str) -> None:
