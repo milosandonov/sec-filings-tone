@@ -3,7 +3,7 @@ miss, and which of them grew most from FY2019 to FY2025. Found by looking, not a
 the design below was written down and committed before any clustering was run.
 
 - Corpus: every 10-K Item 1A chunk of FY2019-FY2025 (92,120 chunks, 466-496 companies a year; FY2026 is
-  partial), with its stored embedding (tone.vectors, unit length). Nothing is embedded.
+  partial), with its stored embedding (retrieve.vectors, unit length). Nothing is embedded.
 - Clusters: spherical k-means (cosine) with k = 80, k-means++ start, seed 0, until no chunk moves (at
   most 100 rounds). k = 80 gives ~1,150 chunks a cluster on average: fine enough to split the 13 topics'
   ground into narrower themes, coarse enough that most clusters reach many companies each year.
