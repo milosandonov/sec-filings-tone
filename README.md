@@ -23,6 +23,11 @@ Full results: [RESULTS.md](RESULTS.md). Design log, with every decision and its 
 (archived in git history; the working tree no longer carries it).
 Retrieval eval: [eval/FINDINGS.md](eval/FINDINGS.md).
 
+[![A 90-second demo: the cell explorer and the cited Q&A app (click to play)](figures/demo_poster.png)](figures/demo.mp4)
+
+*90-second demo ([video](figures/demo.mp4)): the explorer's heatmaps, a click through to the passages and
+evidence behind one cell, and a cited answer from the Q&A app. Recorded 2026-10-27 with a scripted browser.*
+
 ## Research questions
 
 1. How well do an LLM, FinBERT and the Loughran-McDonald dictionary score 10-K text, against

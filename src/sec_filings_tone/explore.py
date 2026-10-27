@@ -104,6 +104,7 @@ def heatmap(topic: str, dim: str, item: str | None, sector: str | None):
     years, (lo, hi) = t.columns[1:], RANGES[dim]
     fmt = "{:.0%}" if dim == "discussed" else "{:+.2f}" if dim == "polarity" else "{:.2f}"
     return (t.style.background_gradient(cmap="RdBu" if dim == "polarity" else "Blues", vmin=lo, vmax=hi, subset=years)
+            .highlight_null(props="background-color: transparent; color: inherit")  # the gradient paints NaN black
             .format(fmt, subset=years, na_rep="–"))
 
 

@@ -48,3 +48,18 @@ def test_matches_published_chart(source, item, group, monkeypatch):
     for r in pub.itertuples():
         x = c[c.fy == r.fy][r.measure]
         assert x.count() == r.n and abs(x.mean() - r.mean) < 1e-9, r
+
+
+def test_missing_cells_not_black(monkeypatch):
+    # pandas' background_gradient paints NaN #000000; empty cells ("–") must stay transparent
+    path, load = SOURCES["local"]
+    if not path.exists():
+        pytest.skip(f"needs {path} (gitignored)")
+    monkeypatch.setattr(E, "D", load())
+    s = E.heatmap("AI", "realization", "1A", "Information Technology")
+    ctx = s._compute().ctx
+    empty = [(r, c) for r in range(len(s.data)) for c in range(1, s.data.shape[1]) if pd.isna(s.data.iat[r, c])]
+    assert empty, "the IT company view has empty cells to check"
+    for rc in empty:
+        bg = [v for k, v in ctx[rc] if k == "background-color"]
+        assert bg[-1] == "transparent", (rc, ctx[rc])
