@@ -21,6 +21,7 @@ import re
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 
 from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd, run_log
 from sec_filings_tone.config import CANDIDATES, EMBED_MODEL, RERANK_MODEL
@@ -60,6 +61,7 @@ def run(test: dict, rerank: bool) -> tuple[dict, dict]:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("test", nargs="?", type=int, help="row number in tests.jsonl (0-based)")
     p.add_argument("--no-rerank", action="store_true")

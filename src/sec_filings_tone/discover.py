@@ -48,6 +48,7 @@ from textwrap import shorten
 import bm25s
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
 from scipy import sparse
 
 from sec_filings_tone import retrieve
@@ -211,6 +212,7 @@ def chart(t: pd.DataFrame, drift: float, path) -> None:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("--name", action="store_true", help=f"name the top {N_NAMED} uncovered clusters with Claude Haiku")
     p.add_argument("--budget", type=float, default=0.10, help="USD cap for --name (Anthropic)")

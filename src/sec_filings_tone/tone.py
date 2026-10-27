@@ -36,6 +36,7 @@ import pandas as pd
 from anthropic import transform_schema  # what messages.parse sends, so both paths share one schema
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
+from dotenv import load_dotenv
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import call_usd, run_log
@@ -423,6 +424,7 @@ def baselines(form: str = "10-K", part: int = 5000) -> None:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("command", choices=["retrieve", "check", "score", "baselines", "rerun", "masked"])
     p.add_argument("--n", type=int, default=50)

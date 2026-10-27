@@ -11,6 +11,7 @@ Usage:
 import argparse
 import os
 import re
+from functools import cache
 from pathlib import Path
 
 import pandas as pd
@@ -29,13 +30,18 @@ HEADING_MIN_TOKENS = 100  # a heading starts a new chunk only once the current o
 MIN_TAIL_TOKENS = 50  # a smaller last chunk of a section joins the one before it
 ITEM_NAMES = {"1A": "Item 1A Risk Factors", "7": "Item 7 MD&A", "mdna": "MD&A"}
 
-ENC = tiktoken.get_encoding("cl100k_base")
 # Lowercase/digit before the period keeps "U.S. Government" together
 SENTENCE_END = re.compile(r"(?<=[a-z0-9%)”\"][.!?])\s+(?=[A-Z“\"])")
 
 
+@cache
+def enc() -> tiktoken.Encoding:
+    """The tokenizer, loaded on first use (tiktoken reads it from its cache, or downloads it)."""
+    return tiktoken.get_encoding("cl100k_base")
+
+
 def n_tokens(text: str) -> int:
-    return len(ENC.encode(text))
+    return len(enc().encode(text))
 
 
 def clean_line(line: str) -> str:
@@ -127,8 +133,8 @@ def split_long(para: str, max_tokens: int) -> list[str]:
     """Sentences for a paragraph over max_tokens; a sentence still over it is cut by tokens."""
     pieces = []
     for sent in SENTENCE_END.split(para):
-        toks = ENC.encode(sent)
-        pieces += [ENC.decode(toks[i:i + max_tokens]) for i in range(0, len(toks), max_tokens)]
+        toks = enc().encode(sent)
+        pieces += [enc().decode(toks[i:i + max_tokens]) for i in range(0, len(toks), max_tokens)]
     return pieces
 
 
@@ -252,7 +258,7 @@ def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences
         overlap = ""
         if overlap_tokens and section in prev and prev[section][0] == r.seq - 1:
             last = " ".join(SENTENCE_END.split(prev[section][1])[-overlap_sentences:])
-            overlap = ENC.decode(ENC.encode(last)[-overlap_tokens:]) + " "
+            overlap = enc().decode(enc().encode(last)[-overlap_tokens:]) + " "
         prev[section] = (r.seq, r.text)
         out.append(f"{overlap}{r.text}" if header == "none" else f"{head}\n\n{overlap}{r.text}")
     return out

@@ -32,6 +32,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
 from pydantic import Field, create_model
 
 from sec_filings_tone import retrieve
@@ -632,6 +633,7 @@ def report(n: int, model: str) -> None:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("command", choices=["pilot", "report", "baselines", "gold", "gold-report", "gold-baselines"])
     p.add_argument("--n", type=int, help="items; default 100 (pilot), 30 (gold)")

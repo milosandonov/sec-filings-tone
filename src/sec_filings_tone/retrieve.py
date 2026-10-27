@@ -23,8 +23,6 @@ from sec_filings_tone.config import (BM25_DIR, CANDIDATES, CHUNKS, COLLECTION, E
                                      VECTOR_DB, VECTOR_ORDER, VECTORS)
 from sec_filings_tone.ingest import embed_text
 
-load_dotenv()
-
 RERANK_TIMEOUT = 60  # seconds per call, so a stuck request fails instead of hanging (the SDK retries twice)
 FILTERS = ("ticker", "sector", "form", "item", "fy")
 STAGES = ("vector", "bm25", "hybrid", "rerank")
@@ -226,6 +224,7 @@ def search(query: str, k: int = 10, rerank: bool = True, date_from: str | None =
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("query")
     for f in FILTERS:

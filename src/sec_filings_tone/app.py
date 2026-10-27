@@ -10,6 +10,7 @@ Local only: no share link, since anyone with the link could spend the API key.
 import argparse
 
 import gradio as gr
+from dotenv import load_dotenv
 
 from sec_filings_tone import answer
 from sec_filings_tone.budget import Cap, run_log
@@ -40,6 +41,7 @@ def text(content) -> str:
 
 
 def main() -> None:
+    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=float, default=0.50, help="USD per chat session")
     ap.add_argument("--model", default=ANSWER_MODEL)

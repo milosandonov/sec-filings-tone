@@ -24,6 +24,7 @@ from concurrent.futures import ProcessPoolExecutor
 from difflib import SequenceMatcher
 
 import pandas as pd
+from dotenv import load_dotenv
 
 from sec_filings_tone.config import (BASELINES, CARRYOVER, CHUNKS, EVENTS, FILES, LAST_FY, N_CELLS, OUT, PASSAGES,
                                      SCORES)
@@ -211,6 +212,7 @@ def new_events() -> None:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser(description="Phase 8: carryover from the year before, and new vs carried-over text")
     p.add_argument("command", choices=["carryover", "report", "retrieve", "score", "events"])
     p.add_argument("--budget", type=float, default=0.0, help="score: USD; nothing is submitted if the estimate is over it")

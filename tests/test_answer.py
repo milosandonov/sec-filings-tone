@@ -154,3 +154,8 @@ def test_plan_invalid_output(monkeypatch):
     cap = A.Cap(1.0)
     p, usage = A.plan("What did NVIDIA say?", [], cap)
     assert p.kind == "decline" and "incomplete" in p.message and usage is None and cap.spent() > 0
+
+
+def test_sectors_match_companies_csv():
+    # the planner's sector list is written out in answer.py; it must stay the sorted sectors of companies.csv
+    assert A.SECTORS == tuple(sorted(pd.read_csv(A.COMPANIES).sector.unique()))

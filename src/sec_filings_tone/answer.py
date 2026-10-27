@@ -26,6 +26,7 @@ from typing import Literal
 import anthropic
 import openai
 import pandas as pd
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field, ValidationError
 
 from sec_filings_tone import events, retrieve
@@ -46,7 +47,9 @@ EXAMPLES = 6  # passages quoted for an aggregate answer
 FYS = range(FIRST_FY, LAST_FY + 2)  # FY2026 too: the companies whose fiscal year doesn't end in December
 DIMS = list(DIMENSIONS)
 FOOTER = "\n\n---\n"  # starts the sources, tables and cost under an answer; cut off before it goes back to the model
-SECTORS = tuple(sorted(pd.read_csv(COMPANIES).sector.unique()))
+# the GICS sectors of data/companies.csv, sorted (tests/test_answer.py checks); written out so importing reads no file
+SECTORS = ("Communication Services", "Consumer Discretionary", "Consumer Staples", "Energy", "Financials", "Health Care",
+           "Industrials", "Information Technology", "Materials", "Real Estate", "Utilities")
 
 Sector = Literal[SECTORS]
 Topic = Literal[tuple(TOPICS)]
@@ -498,6 +501,7 @@ def warm() -> None:
 
 
 def main() -> None:
+    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("questions", nargs="+", help="one question, or several asked in turn as one conversation")
     ap.add_argument("--model", default=ANSWER_MODEL, choices=list(PRICES))
