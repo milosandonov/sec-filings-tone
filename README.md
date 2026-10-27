@@ -1,5 +1,7 @@
 # SEC Filings Tone
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23683010.svg)](https://doi.org/10.5281/zenodo.23683010)
+
 **In short:** this project measures how S&P 500 companies write about 13 topics, such as AI, China
 and tariffs, in their annual reports (10-Ks) from FY2019 to FY2026, and its 126,051 scored passages
 will be released as a dataset. Two parts of the measurement hold up against one person's labels:
