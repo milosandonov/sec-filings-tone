@@ -23,7 +23,8 @@ Full results: [RESULTS.md](RESULTS.md). Design log, with every decision and its 
 (archived in git history; the working tree no longer carries it).
 Retrieval eval: [eval/FINDINGS.md](eval/FINDINGS.md).
 
-[![A 90-second demo: the cell explorer and the cited Q&A app (click to play)](figures/demo_poster.png)](figures/demo.mp4)
+https://github.com/user-attachments/assets/c9b0b72c-593c-4c9d-bc81-25b5074d4377
+
 
 *90-second demo ([video](figures/demo.mp4)): the explorer's heatmaps, a click through to the passages and
 evidence behind one cell, and a cited answer from the Q&A app. Recorded 2026-10-27 with a scripted browser.*
