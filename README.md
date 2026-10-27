@@ -397,8 +397,8 @@ runs. Results are written to `data/tone/`, which is not in git. The 10-Q command
 | 7 | Event tests, robustness, 10-Q follow-up (`events.py`) | Done; 10-Q follow-up parked |
 | 8 | Boilerplate vs new text (`diff.py`) | Done |
 | 9 | Topic tone across years and sectors, co-movement (`tone.py`, `charts.py`, `comove.py`) | Done |
-| 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: 1 of 4 bars met |
-| 11 | Publishing: README, data release, paper | v1.0.0 released; paper next |
+| 10 | Q&A layer over the retrieval (`answer.py`, `app.py`) | Built and evaluated: first run 1 of 4 bars met; rerun (2026-10-26) also meets groundedness |
+| 11 | Publishing: README, data release, paper | v1.1.0 released; paper next |
 
 ## License
 

@@ -1,6 +1,6 @@
 [project]
 name = "sec-filings-tone"
-version = "1.0.0"
+version = "1.1.0"
 description = "Topic tone profiles of S&P 500 10-K filings: hybrid retrieval, LLM scoring, FinBERT and Loughran-McDonald baselines, event tests"
 readme = "README.md"
 license = "MIT"
