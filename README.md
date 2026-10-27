@@ -25,8 +25,7 @@ Retrieval eval: [eval/FINDINGS.md](eval/FINDINGS.md).
 
 https://github.com/user-attachments/assets/c9b0b72c-593c-4c9d-bc81-25b5074d4377
 
-
-*90-second demo ([video](figures/demo.mp4)): the explorer's heatmaps, a click through to the passages and
+*90-second demo: the explorer's heatmaps, a click through to the passages and
 evidence behind one cell, and a cited answer from the Q&A app. Recorded 2026-10-27 with a scripted browser.*
 
 ## Research questions
