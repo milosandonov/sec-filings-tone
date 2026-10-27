@@ -26,15 +26,16 @@ from typing import Literal
 import anthropic
 import openai
 import pandas as pd
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field, ValidationError
 
 from sec_filings_tone import events, retrieve
-from sec_filings_tone.budget import PRICES, Cap, CapReached, call_usd, run_log
-from sec_filings_tone.ingest import CHUNKS, EMBED_MODEL, ITEM_NAMES
+from sec_filings_tone.budget import Cap, CapReached, call_usd, run_log
+from sec_filings_tone.config import (ANSWER_MODEL, CANDIDATES, CHUNKS, COMPANIES, EMBED_MODEL, FILES, FIRST_FY, LAST_FY, PRICES,
+                                     RERANK_MODEL)
+from sec_filings_tone.ingest import ITEM_NAMES
 from sec_filings_tone.sentiment import DIMENSIONS, TOPICS
-from sec_filings_tone.tone import FILES
 
-MODEL = "claude-haiku-5-5"
 EFFORT = "low"
 TIMEOUT = 120  # seconds per call
 PLAN_TOKENS, ANSWER_TOKENS = 8000, 8000  # thinking counts toward both
@@ -43,10 +44,12 @@ K = 6  # passages kept per sub-query
 MAX_PASSAGES = 24
 MAX_ROWS = 30  # rows of a cell table
 EXAMPLES = 6  # passages quoted for an aggregate answer
-FYS = range(2019, 2027)
+FYS = range(FIRST_FY, LAST_FY + 2)  # FY2026 too: the companies whose fiscal year doesn't end in December
 DIMS = list(DIMENSIONS)
 FOOTER = "\n\n---\n"  # starts the sources, tables and cost under an answer; cut off before it goes back to the model
-SECTORS = tuple(sorted(pd.read_csv(events.COMPANIES).sector.unique()))
+# the GICS sectors of data/companies.csv, sorted (tests/test_answer.py checks); written out so importing reads no file
+SECTORS = ("Communication Services", "Consumer Discretionary", "Consumer Staples", "Energy", "Financials", "Health Care",
+           "Industrials", "Information Technology", "Materials", "Real Estate", "Utilities")
 
 Sector = Literal[SECTORS]
 Topic = Literal[tuple(TOPICS)]
@@ -139,7 +142,7 @@ def client():
 def companies() -> pd.DataFrame:
     """companies.csv rows for the tickers that have filings in the data."""
     have = set(pd.read_parquet(CHUNKS, columns=["ticker"]).ticker)
-    c = pd.read_csv(events.COMPANIES)
+    c = pd.read_csv(COMPANIES)
     return c[c.ticker.isin(have)].sort_values("ticker").reset_index(drop=True)
 
 
@@ -189,7 +192,7 @@ def check(p: Plan, tickers: set[str]) -> Plan:
     return p.model_copy(update={"queries": qs})
 
 
-def plan(question: str, history: list[dict], cap: Cap, model: str = MODEL, effort: str = EFFORT) -> tuple[Plan, object]:
+def plan(question: str, history: list[dict], cap: Cap, model: str = ANSWER_MODEL, effort: str = EFFORT) -> tuple[Plan, object]:
     """The checked plan and the call's usage."""
     cap.check(call_usd(model, 25_000, PLAN_TOKENS))  # upper bound: the 15,740-token system prompt and history, full output
     convo = "\n\n".join(f"{m['role'].title()}: {m['content'][:1500]}" for m in history)
@@ -216,7 +219,7 @@ def filters(q: SubQuery) -> dict:
 
 def passages(qs: list[SubQuery], cap: Cap) -> list[pd.DataFrame]:
     """Each sub-query's reranked top K, tagged with its topic. Searches run in parallel."""
-    cap.check(len(qs) * call_usd(retrieve.RERANK_MODEL, retrieve.CANDIDATES * 800, 8000))  # upper bound per rerank
+    cap.check(len(qs) * call_usd(RERANK_MODEL, CANDIDATES * 800, 8000))  # upper bound per rerank
     with ThreadPoolExecutor(len(qs)) as ex:
         return list(ex.map(lambda q: retrieve.search(q.query, K, True, exact=True, **filters(q))["rerank"].assign(topic=q.topic), qs))
 
@@ -274,7 +277,7 @@ def rank(c: pd.DataFrame, a: Aggregate, names: pd.Series) -> tuple[pd.DataFrame,
     or with by_change on the last year minus the first; ties go to the more specific (concrete) cells,
     then alphabetically. Companies with no value are left out."""
     c = c[(c.topic == a.topic) & (c.sector.isin(a.sectors) if a.sectors else True)
-          & (c.fy.isin(a.fy) if a.fy else c.fy.le(2025))]
+          & (c.fy.isin(a.fy) if a.fy else c.fy.le(LAST_FY))]
     if c.empty:
         return pd.DataFrame(), "No cells match."
     by = "sector" if a.unit == "sectors" else "ticker"
@@ -310,7 +313,7 @@ def rank(c: pd.DataFrame, a: Aggregate, names: pd.Series) -> tuple[pd.DataFrame,
 def top_cells(c: pd.DataFrame, ids: list[str], a: Aggregate, n: int = 3) -> list[tuple[str, int]]:
     """(ticker, fy) of the cells to quote: the top n companies in the last fiscal year asked, or for
     sectors, the company with the highest (lowest_first: lowest) value in each of the top n sectors."""
-    fy = max(a.fy) if a.fy else 2025
+    fy = max(a.fy) if a.fy else LAST_FY
     c = c[(c.topic == a.topic) & (c.fy == fy) & c[a.dimension].notna()]
     if a.unit == "companies":
         return [(t, fy) for t in ids if t in set(c.ticker)][:n]
@@ -430,7 +433,7 @@ def footer(out: dict, cap: Cap, model: str, effort: str) -> str:
     return FOOTER + "\n\n".join(parts)
 
 
-def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = MODEL, effort: str = EFFORT):
+def answer(question: str, history: list[dict] = (), cap: Cap | None = None, model: str = ANSWER_MODEL, effort: str = EFFORT):
     """Yields the reply as markdown, longer each time: the answer as it streams, then with the footer.
     Returns a dict with the plan, the passages given to the model, the citations, the text and the cost.
     history: earlier {"role", "content"} turns; anything after FOOTER in them is dropped."""
@@ -498,15 +501,16 @@ def warm() -> None:
 
 
 def main() -> None:
+    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("questions", nargs="+", help="one question, or several asked in turn as one conversation")
-    ap.add_argument("--model", default=MODEL, choices=list(PRICES))
+    ap.add_argument("--model", default=ANSWER_MODEL, choices=list(PRICES))
     ap.add_argument("--effort", default=EFFORT, choices=["low", "medium", "high"])
     ap.add_argument("--budget", type=float, default=0.10, help="USD for the whole run")
     ap.add_argument("--plan-only", action="store_true", help="print each plan; no search or answer")
     a = ap.parse_args()
     cap, history = Cap(a.budget), []
-    models = [a.model] if a.plan_only else [a.model, retrieve.RERANK_MODEL, EMBED_MODEL]  # query embeddings: not costed
+    models = [a.model] if a.plan_only else [a.model, RERANK_MODEL, EMBED_MODEL]  # query embeddings: not costed
     with run_log(models, lambda: {"usd": {"anthropic": cap.spent()}, "rows": len(history) // 2}, effort=a.effort) as rec:
         for q in a.questions:
             print(f"\n> {q}\n", flush=True)

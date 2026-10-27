@@ -9,8 +9,8 @@ import pytest
 
 pytest.importorskip("gradio")  # the app extra: uv sync --extra app
 from sec_filings_tone import explore as E  # noqa: E402
+from sec_filings_tone.config import FILES  # noqa: E402
 from sec_filings_tone.sentiment import DIMENSIONS  # noqa: E402
-from sec_filings_tone.tone import FILES  # noqa: E402
 
 RELEASE = Path("data/release")  # the files uploaded to the dataset repo, as the Space reads them
 SOURCES = {"local": (FILES["10-K"][1], E.local), "release": (RELEASE / "passages.parquet", cache(lambda: E.release(str(RELEASE))))}

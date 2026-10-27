@@ -10,10 +10,10 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-# USD per 1M input and output tokens (claude.com pricing, checked 2026-10-12)
-PRICES = {"claude-haiku-5-5": (0.10, 0.50), "claude-sonnet-5-5": (2.00, 10.00), "claude-opus-5-5": (4.00, 20.00)}
-ROOT = Path(__file__).parents[2]
-RUNS = ROOT / "data" / "runs.jsonl"  # one JSON line per paid run; local, git-ignored
+from sec_filings_tone.config import PRICES, RERANK_MODEL, ROOT, RUNS
+
+rerank_usage = {"input_tokens": 0, "output_tokens": 0}  # summed over retrieve.llm_rerank calls, for cost caps
+rerank_lock = threading.Lock()
 
 
 class CapReached(RuntimeError):
@@ -22,16 +22,14 @@ class CapReached(RuntimeError):
 
 class Cap:
     """Stops a run before a paid call would push spending past `usd`, or once `minutes` have passed.
-    Reranker spend comes from retrieve.usage; callers add anything else with charge()."""
+    Reranker spend comes from rerank_usage; callers add anything else with charge()."""
 
     def __init__(self, usd: float = float("inf"), minutes: float = float("inf")):
         self.usd, self.deadline, self.other = usd, time.monotonic() + minutes * 60, 0.0
         self._lock = threading.Lock()
 
     def spent(self) -> float:
-        from sec_filings_tone import retrieve
-
-        u, (pin, pout) = retrieve.usage, PRICES[retrieve.RERANK_MODEL]
+        u, (pin, pout) = rerank_usage, PRICES[RERANK_MODEL]
         return self.other + (u["input_tokens"] * pin + u["output_tokens"] * pout) / 1e6
 
     def charge(self, usd: float) -> None:
@@ -53,9 +51,7 @@ def call_usd(model: str, input_tokens: float, output_tokens: float) -> float:
 
 def rerank_call_usd(n_input_tokens: float) -> float:
     """Upper bound for one rerank call: its input plus the 8,000-token output limit."""
-    from sec_filings_tone import retrieve
-
-    return call_usd(retrieve.RERANK_MODEL, n_input_tokens, 8000)
+    return call_usd(RERANK_MODEL, n_input_tokens, 8000)
 
 
 def git_state() -> tuple[str | None, bool | None]:

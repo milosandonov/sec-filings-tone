@@ -35,19 +35,16 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from sec_filings_tone import events, retrieve
-from sec_filings_tone.diff import CARRYOVER
-from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS, EMBED_MODEL
-from sec_filings_tone.retrieve import CANDIDATES, RRF_K
-from sec_filings_tone.sentiment import FINBERT, LM_PATH, MODEL, OUT as SENTIMENT, TOPICS
-from sec_filings_tone.tone import FILES, K, KEY, OUT, QUERIES, scorer_hashes, vectors
+from sec_filings_tone.config import (CANDIDATES, CARRYOVER, CHUNKS, COMPANIES, EMBED_DIMS, EMBED_MODEL, EVENTS, EVENTS_QUARTERLY,
+                                     FILES, FINBERT, KEY, LABELS, LM_PATH, MODEL, OUT, QUERIES, RELEASE, ROOT, RRF_K, SENTIMENT, K)
+from sec_filings_tone.retrieve import vectors
+from sec_filings_tone.sentiment import TOPICS, scorer_hashes
 
-ROOT = Path(__file__).parents[2]
-RELEASE = ROOT / "data" / "release"
 META = ["item", "filing_date", "report_date", "accession"]  # chunk metadata the event tests need, kept without the text
 
 
 def write_embeddings(path: Path, ids: pd.Series, part: int = 50_000) -> None:
-    """Every chunk's embedding (tone.vectors: float32, unit length) beside its chunk_id, written a row
+    """Every chunk's embedding (retrieve.vectors: float32, unit length) beside its chunk_id, written a row
     group at a time so the 2.8 GB is never held in memory."""
     v = vectors()  # checks that its rows follow chunks.parquet's
     schema = pa.schema([("chunk_id", pa.string()), ("embedding", pa.list_(pa.float32(), EMBED_DIMS))])
@@ -102,8 +99,8 @@ def export(version: str, text: bool = True, out: Path = RELEASE) -> None:
     if not text:
         del tables["chunks"]
         tables = {n: t.drop(columns=t.filter(like="_evidence").columns) for n, t in tables.items()}
-    copies = ({f"labels/{f.name}": f for f in sorted((ROOT / "labels").glob("*")) if f.suffix in (".csv", ".md")}
-              | {f.name: f for f in (events.EVENTS, events.QUARTERLY[0], ROOT / "data" / "companies.csv")}  # definitions; sub-industries
+    copies = ({f"labels/{f.name}": f for f in sorted(LABELS.glob("*")) if f.suffix in (".csv", ".md")}
+              | {f.name: f for f in (EVENTS, EVENTS_QUARTERLY, COMPANIES)}  # definitions; sub-industries
               | {f"results/{f.name}": f for f in sorted(OUT.glob("*.csv"))})  # what events, diff and comove wrote
 
     hashes = scorer_hashes()  # the same hashes the run log records for tone.score_cells

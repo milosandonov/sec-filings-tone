@@ -35,7 +35,7 @@ from pydantic import BaseModel
 
 from sec_filings_tone import answer, retrieve
 from sec_filings_tone.budget import Cap, call_usd, run_log
-from sec_filings_tone.ingest import EMBED_MODEL
+from sec_filings_tone.config import ANSWER_MODEL, EMBED_MODEL, GPT_JUDGE, GPT_PRICES, JUDGE_MODEL, RERANK_MODEL
 
 from eval import contains
 
@@ -44,7 +44,7 @@ HERE = Path(__file__).parent
 TESTS, ANSWERS, JUDGED, BATCH, RUNS = (HERE / f for f in ("qa_tests.jsonl", "qa_answers.jsonl", "qa_judge.jsonl",
                                                           "qa_batch.json", "qa_runs.jsonl"))
 HAND = HERE / "qa_hand_grades.csv"
-JUDGE_MODEL, JUDGE_EFFORT = "claude-sonnet-5-5", "medium"
+JUDGE_EFFORT = "medium"
 WORKERS = 4
 
 JUDGE_SYSTEM = """You grade answers from a question-answering system over SEC filings (10-K and 10-Q text). You get the question (with any earlier turns of the conversation), a reference answer written from the filing text, the system's answer, the passages it cites (its [n] markers number the cited spans) and, for questions about many companies, the table of model-scored tone cells it was given.
@@ -273,8 +273,6 @@ def diff(base: str, base_judge: str | None = None, n_boot: int = 10_000) -> None
         print(f"| {m} | {len(x)} | {x.old.mean():.3f} | {x.new.mean():.3f} | {d.mean():+.3f} [{lo:+.3f}, {hi:+.3f}] |")
 
 
-GPT_JUDGE = "gpt-6-sol"  # OpenAI's middle tier, priced like Claude Sonnet 5.5
-GPT_PRICES = {"gpt-6-sol": (2.00, 10.00)}  # USD per 1M input and output tokens (OpenAI pricing page, checked 2026-10-18)
 GPT_BATCH = HERE / "qa_batch_gpt.json"
 GPT_MAX_OUTPUT = 1500  # reasoning included; bounds the cost a batch can reach, since a running batch can't be capped
 SCORES = ("accuracy", "completeness", "groundedness")
@@ -381,7 +379,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("step", choices=["answers", "judge", "report", "diff", "judge-gpt", "compare"])
     ap.add_argument("--budget", type=float, default=0.70)
-    ap.add_argument("--model", default=answer.MODEL, help="answers: the answer model; judge-gpt and compare: the OpenAI judge")
+    ap.add_argument("--model", default=ANSWER_MODEL, help="answers: the answer model; judge-gpt and compare: the OpenAI judge")
     ap.add_argument("--effort", default=answer.EFFORT)
     ap.add_argument("--test", action="store_true", help="judge-gpt: one direct request, no batch")
     ap.add_argument("--tests", type=Path, default=TESTS, help="the questions (e.g. eval/qa_dev.jsonl)")
@@ -411,7 +409,7 @@ if __name__ == "__main__":
         return usage
 
     # the paid steps write one line each to the run log
-    log = {"answers": lambda: run_log([a.model, retrieve.RERANK_MODEL, EMBED_MODEL],  # query embeddings: not costed
+    log = {"answers": lambda: run_log([a.model, RERANK_MODEL, EMBED_MODEL],  # query embeddings: not costed
                                       lambda: {"usd": {"anthropic": cap.spent()}}, [ANSWERS, RUNS], effort=a.effort),
            "judge": lambda: run_log([JUDGE_MODEL], collected(JUDGED, BATCH, "anthropic"), [JUDGED]),
            "judge-gpt": lambda: run_log([gpt], collected(gpt_judged(gpt), GPT_BATCH, "openai"), [gpt_judged(gpt)])}

@@ -92,19 +92,19 @@ def test_vectors_order(monkeypatch, tmp_path):
 
     monkeypatch.setattr(retrieve, "chunks", lambda: pd.DataFrame({"chunk_id": current["ids"]}))
     monkeypatch.setattr(retrieve, "collection", FakeChroma)
-    monkeypatch.setattr(tone, "EMBED_DIMS", 8)
-    monkeypatch.setattr(tone, "VECTORS", tmp_path / "vectors.npy")
-    monkeypatch.setattr(tone, "VECTOR_ORDER", tmp_path / "vectors_order.sha256")
-    v = tone.vectors()  # built from Chroma: unit rows in chunks() order, order recorded
-    assert np.allclose(v[5], emb["c5"] / np.linalg.norm(emb["c5"])) and tone.VECTOR_ORDER.exists()
-    tone.VECTOR_ORDER.unlink()  # a file saved before the order was recorded
-    assert tone.vectors().shape == (300, 8) and tone.VECTOR_ORDER.exists()  # matches Chroma: order recorded
+    monkeypatch.setattr(retrieve, "EMBED_DIMS", 8)
+    monkeypatch.setattr(retrieve, "VECTORS", tmp_path / "vectors.npy")
+    monkeypatch.setattr(retrieve, "VECTOR_ORDER", tmp_path / "vectors_order.sha256")
+    v = retrieve.vectors()  # built from Chroma: unit rows in chunks() order, order recorded
+    assert np.allclose(v[5], emb["c5"] / np.linalg.norm(emb["c5"])) and retrieve.VECTOR_ORDER.exists()
+    retrieve.VECTOR_ORDER.unlink()  # a file saved before the order was recorded
+    assert retrieve.vectors().shape == (300, 8) and retrieve.VECTOR_ORDER.exists()  # matches Chroma: order recorded
     current["ids"] = ids[::-1].reset_index(drop=True)  # chunks.parquet rebuilt in another order
     for unlink in (False, True):  # with the recorded order, and for an older file without it
         if unlink:
-            tone.VECTOR_ORDER.unlink()
+            retrieve.VECTOR_ORDER.unlink()
         with pytest.raises(SystemExit, match="doesn't follow"):  # vectors in another order must stop the run
-            tone.vectors()
+            retrieve.vectors()
 
 
 @pytest.fixture

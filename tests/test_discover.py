@@ -3,7 +3,8 @@
 import numpy as np
 import pandas as pd
 
-from sec_filings_tone.discover import FIRST_FY, LAST_FY, growth, kmeans, top_words
+from sec_filings_tone.config import FIRST_FY, LAST_FY
+from sec_filings_tone.discover import growth, kmeans, top_words
 
 
 def test_kmeans_recovers_planted_clusters():

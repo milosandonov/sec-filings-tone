@@ -8,7 +8,7 @@ Usage:
 """
 
 import argparse
-import threading
+import hashlib
 from contextlib import nullcontext
 from functools import cache
 
@@ -18,26 +18,18 @@ import pandas as pd
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from sec_filings_tone.budget import Cap, run_log
-from sec_filings_tone.ingest import CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, VECTOR_DB, embed_text
+from sec_filings_tone.budget import Cap, rerank_lock, rerank_usage, run_log
+from sec_filings_tone.config import (BM25_DIR, CANDIDATES, CHUNKS, COLLECTION, EMBED_DIMS, EMBED_MODEL, OUT, RERANK_MODEL, RRF_K,
+                                     VECTOR_DB, VECTOR_ORDER, VECTORS)
+from sec_filings_tone.ingest import embed_text
 
-load_dotenv()
-
-RERANK_MODEL = "claude-haiku-5-5"
 RERANK_TIMEOUT = 60  # seconds per call, so a stuck request fails instead of hanging (the SDK retries twice)
-CANDIDATES = 20  # each search's top n; the fused top n goes to the reranker
-RRF_K = 60
 FILTERS = ("ticker", "sector", "form", "item", "fy")
 STAGES = ("vector", "bm25", "hybrid", "rerank")
-BM25_DIR = CHUNKS.parent / "bm25"  # saved BM25 indexes, one folder per chunk count
 
 RERANK_PROMPT = """You rerank passages from SEC filings (10-K and 10-Q) by relevance to a question.
 The passages arrive roughly in order from a search; you may be able to improve on that order.
 Put the passage that best answers the question first. Reply with every passage id exactly once."""
-
-
-usage = {"input_tokens": 0, "output_tokens": 0}  # summed over llm_rerank calls, for cost caps
-_usage_lock = threading.Lock()
 
 
 class RankOrder(BaseModel):
@@ -110,11 +102,51 @@ def vector_search(query: str, where: dict | None, n: int) -> tuple[list[str], li
     return res["ids"][0], [1 - d for d in res["distances"][0]]  # cosine similarity
 
 
+def order_hash(ids: pd.Series) -> str:
+    return hashlib.sha256("\n".join(ids).encode()).hexdigest()
+
+
+def matches_chroma(v: np.ndarray, ids: pd.Series, n: int = 200, seed: int = 0) -> bool:
+    """Whether n random rows of v are the Chroma embeddings of the chunks in those rows of chunks()."""
+    pick = np.sort(np.random.default_rng(seed).choice(len(ids), min(n, len(ids)), replace=False))
+    want = ids.iloc[pick].tolist()
+    got = collection().get(ids=want, include=["embeddings"])
+    if sorted(got["ids"]) != sorted(want):
+        return False
+    e = pd.DataFrame(np.asarray(got["embeddings"], np.float32), index=got["ids"]).loc[want].to_numpy()
+    return bool(np.allclose((e / np.linalg.norm(e, axis=1, keepdims=True) * v[pick]).sum(axis=1), 1, atol=1e-4))
+
+
+def vectors() -> np.ndarray:
+    """Read from Chroma once, then from disk. Rows follow chunks()'s order, which moves if chunks.parquet is
+    rebuilt from a changed manifest, so the order is recorded (VECTOR_ORDER) and checked on every load."""
+    ids = chunks().chunk_id
+    if VECTORS.exists():
+        v = np.load(VECTORS, mmap_mode="r")
+        if not VECTOR_ORDER.exists() and len(v) == len(ids) and matches_chroma(v, ids):
+            VECTOR_ORDER.write_text(order_hash(ids))  # saved before the order was recorded: checked against Chroma first
+        if not VECTOR_ORDER.exists() or VECTOR_ORDER.read_text() != order_hash(ids):
+            raise SystemExit(f"{VECTORS} doesn't follow the rows of {CHUNKS}; delete it and {VECTOR_ORDER.name} "
+                             "to rebuild it from Chroma")
+        return v
+    pos = pd.Series(np.arange(len(ids)), index=ids.to_numpy())
+    v = np.zeros((len(ids), EMBED_DIMS), np.float32)
+    col, page = collection(), 20_000
+    for off in range(0, col.count(), page):
+        got = col.get(include=["embeddings"], limit=page, offset=off)
+        v[pos.loc[got["ids"]].to_numpy()] = got["embeddings"]
+    norms = np.linalg.norm(v, axis=1, keepdims=True)
+    if (norms == 0).any():
+        raise SystemExit(f"{int((norms == 0).sum())} chunks have no vector in Chroma; re-embed them first")
+    OUT.mkdir(parents=True, exist_ok=True)
+    np.save(VECTORS, v / norms)
+    VECTOR_ORDER.write_text(order_hash(ids))
+    return np.load(VECTORS, mmap_mode="r")
+
+
 @cache
 def stored_vectors() -> np.ndarray:
-    """Every chunk's embedding in chunks() order (data/tone/vectors.npy, memory-mapped; tone.vectors checks the order)."""
-    from sec_filings_tone.tone import vectors
-
+    """Every chunk's embedding in chunks() order (data/tone/vectors.npy, memory-mapped; vectors() checks the order)."""
     return vectors()
 
 
@@ -161,9 +193,9 @@ def llm_rerank(query: str, rows: pd.DataFrame) -> pd.DataFrame:
         messages=[{"role": "user", "content": f"Question: {query}\n\n{passages}\n\n"
                                               f"Rank all {len(rows)} passage ids, most relevant first."}],
         output_format=RankOrder)
-    with _usage_lock:
-        usage["input_tokens"] += resp.usage.input_tokens
-        usage["output_tokens"] += resp.usage.output_tokens
+    with rerank_lock:
+        rerank_usage["input_tokens"] += resp.usage.input_tokens
+        rerank_usage["output_tokens"] += resp.usage.output_tokens
     if resp.parsed_output is None:
         raise RuntimeError(f"rerank returned no order (stop_reason={resp.stop_reason})")
     return rows.iloc[fix_order(resp.parsed_output.order, len(rows))].reset_index(drop=True)
@@ -192,6 +224,7 @@ def search(query: str, k: int = 10, rerank: bool = True, date_from: str | None =
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("query")
     for f in FILTERS:
@@ -203,7 +236,7 @@ def main() -> None:
     a = p.parse_args()
     import anthropic
 
-    # reranking goes in the run log (a fresh Cap counts just retrieve.usage); without it, only the query embedding is paid
+    # reranking goes in the run log (a fresh Cap counts just budget.rerank_usage); without it, only the query embedding is paid
     log = nullcontext() if a.no_rerank else run_log([RERANK_MODEL, EMBED_MODEL], lambda: {"usd": {"anthropic": Cap().spent()}})
     try:
         with log:

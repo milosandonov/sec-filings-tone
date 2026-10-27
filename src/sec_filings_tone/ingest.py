@@ -11,22 +11,18 @@ Usage:
 import argparse
 import os
 import re
+from functools import cache
 from pathlib import Path
 
 import pandas as pd
 import tiktoken
 from dotenv import load_dotenv
 
-from sec_filings_tone.fetch import CACHE, DATA, FORMS, MIN_CHARS
+from sec_filings_tone.budget import run_log
+from sec_filings_tone.config import (BATCH_MAX_INPUTS, CACHE, CHUNKS, COLLECTION, EMBED_BATCHES, EMBED_DIMS, EMBED_MODEL,
+                                     EMBED_PRICE_PER_M, QUEUE_SHARE, REQUEST_INPUTS, SKIPPED, SUBSET, VECTOR_DB)
+from sec_filings_tone.fetch import FORMS, MIN_CHARS
 
-CHUNKS = DATA / "chunks.parquet"
-SUBSET = DATA / "chunks_subset.parquet"  # --tickers: never CHUNKS, which every later phase reads for all companies
-SKIPPED = DATA / "ingest_skipped.csv"
-VECTOR_DB = str(DATA.parent / "vector_db")
-EMBED_MODEL = "text-embedding-3-large"
-EMBED_DIMS = 1024
-EMBED_PRICE_PER_M = 0.13  # USD per 1M tokens (OpenAI pricing page, checked 2026-10-12)
-COLLECTION = "filings_v2"  # v1 embedded a context header and overlap; Phase 4 found both hurt (eval/FINDINGS.md)
 CUT_STATEMENTS_OVER = 400_000  # an MD&A longer than this is checked for run-on financial statements (Citi 10-Q at 1.28M)
 MAX_SECTION_CHARS = 500_000  # still longer after that cut means extraction went wrong; JPM's real 10-K MD&A is about 404k
 MAX_MEDIAN_RATIO = 3
@@ -34,13 +30,18 @@ HEADING_MIN_TOKENS = 100  # a heading starts a new chunk only once the current o
 MIN_TAIL_TOKENS = 50  # a smaller last chunk of a section joins the one before it
 ITEM_NAMES = {"1A": "Item 1A Risk Factors", "7": "Item 7 MD&A", "mdna": "MD&A"}
 
-ENC = tiktoken.get_encoding("cl100k_base")
 # Lowercase/digit before the period keeps "U.S. Government" together
 SENTENCE_END = re.compile(r"(?<=[a-z0-9%)”\"][.!?])\s+(?=[A-Z“\"])")
 
 
+@cache
+def enc() -> tiktoken.Encoding:
+    """The tokenizer, loaded on first use (tiktoken reads it from its cache, or downloads it)."""
+    return tiktoken.get_encoding("cl100k_base")
+
+
 def n_tokens(text: str) -> int:
-    return len(ENC.encode(text))
+    return len(enc().encode(text))
 
 
 def clean_line(line: str) -> str:
@@ -132,8 +133,8 @@ def split_long(para: str, max_tokens: int) -> list[str]:
     """Sentences for a paragraph over max_tokens; a sentence still over it is cut by tokens."""
     pieces = []
     for sent in SENTENCE_END.split(para):
-        toks = ENC.encode(sent)
-        pieces += [ENC.decode(toks[i:i + max_tokens]) for i in range(0, len(toks), max_tokens)]
+        toks = enc().encode(sent)
+        pieces += [enc().decode(toks[i:i + max_tokens]) for i in range(0, len(toks), max_tokens)]
     return pieces
 
 
@@ -257,7 +258,7 @@ def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences
         overlap = ""
         if overlap_tokens and section in prev and prev[section][0] == r.seq - 1:
             last = " ".join(SENTENCE_END.split(prev[section][1])[-overlap_sentences:])
-            overlap = ENC.decode(ENC.encode(last)[-overlap_tokens:]) + " "
+            overlap = enc().decode(enc().encode(last)[-overlap_tokens:]) + " "
         prev[section] = (r.seq, r.text)
         out.append(f"{overlap}{r.text}" if header == "none" else f"{head}\n\n{overlap}{r.text}")
     return out
@@ -265,10 +266,6 @@ def embed_text(chunks: pd.DataFrame, overlap_tokens: int = 60, overlap_sentences
 
 META_COLS = ["ticker", "sector", "form", "item", "fy", "report_date", "filing_date",
              "accession", "period_quarter", "heading", "seq", "n_tokens"]
-BATCHES = DATA / "embed_batches"  # Batch API state, request files and downloaded results
-BATCH_MAX_INPUTS = 50_000  # OpenAI's cap on embedding inputs per batch
-REQUEST_INPUTS = 100  # inputs per request line in a batch file
-QUEUE_SHARE = 0.9  # use at most this share of the account's queued-token limit (20M for ours)
 
 
 def take(tokens: list[int], max_inputs: int, max_tokens: float) -> int:
@@ -345,7 +342,7 @@ def embed_chunks(chunks: pd.DataFrame, collection: str = COLLECTION, budget: flo
 
 
 def embed_batches(chunks: pd.DataFrame, collection: str = COLLECTION, budget: float = 15.0,
-                  wait: bool = False, poll_minutes: float = 1, state_dir: Path = BATCHES) -> None:
+                  wait: bool = False, poll_minutes: float = 1, state_dir: Path = EMBED_BATCHES) -> None:
     """Embed through OpenAI's Batch API: half the price, results within 24 hours. Safe to stop and
     rerun at any point: the state is in data/embed_batches/state.json, batches keep running on
     OpenAI's side, finished ones are loaded into Chroma on the next run, and chunks from failed
@@ -488,9 +485,7 @@ def main() -> None:
             raise SystemExit("OPENAI_API_KEY is not set (add it to .env)")
         import json
 
-        from sec_filings_tone.budget import run_log
-
-        state = BATCHES / "state.json"
+        state = EMBED_BATCHES / "state.json"
 
         def jobs():
             return json.loads(state.read_text())["jobs"] if state.exists() else []

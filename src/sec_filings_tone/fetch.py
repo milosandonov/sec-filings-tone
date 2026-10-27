@@ -12,22 +12,18 @@ import sys
 import urllib.request
 from datetime import date, timedelta
 from io import StringIO
-from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
 from edgar import Company, set_identity
 
-DATA = Path(__file__).parents[2] / "data"
-CACHE = DATA / "cache"
-COMPANIES = DATA / "companies.csv"
-SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-FIRST_FY = 2019
+from sec_filings_tone.config import CACHE, COMPANIES, DATA, FILINGS, FILINGS_10Q, FIRST_FY, SP500_URL
+
 MIN_CHARS = 5_000  # shorter than this means extraction failed
 # form -> (manifest, {item: how to get it from the parsed report})
 FORMS = {
-    "10-K": (DATA / "filings.csv", {"1A": lambda r: r.risk_factors, "7": lambda r: r.management_discussion}),
-    "10-Q": (DATA / "filings_10q.csv", {"mdna": lambda r: r["Part I, Item 2"]}),
+    "10-K": (FILINGS, {"1A": lambda r: r.risk_factors, "7": lambda r: r.management_discussion}),
+    "10-Q": (FILINGS_10Q, {"mdna": lambda r: r["Part I, Item 2"]}),
 }
 
 

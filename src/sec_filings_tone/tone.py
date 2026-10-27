@@ -25,7 +25,6 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import re
 import time
@@ -37,34 +36,18 @@ import pandas as pd
 from anthropic import transform_schema  # what messages.parse sends, so both paths share one schema
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
+from dotenv import load_dotenv
 
 from sec_filings_tone import retrieve
 from sec_filings_tone.budget import call_usd, run_log
-from sec_filings_tone.ingest import CHUNKS, EMBED_DIMS
-from sec_filings_tone.sentiment import DIMENSIONS, MODEL, TOPICS, finbert, lm, period, proxies, schema, system_prompt, user_prompt
+from sec_filings_tone.config import (BATCH_BYTES, BATCH_REQUESTS, CANDIDATES, CHUNKS, COMPANIES, EVENTS, FILES, KEY, MODEL,
+                                     PASSAGES, QUERIES, SCORES, USD_PER_REQUEST, K)
+from sec_filings_tone.events import affected, changes, did
+from sec_filings_tone.sentiment import (DIMENSIONS, TOPICS, finbert, kappa_ci, lm, masked_prompt, proxies, schema, scorer_hashes,
+                                        system_prompt, user_prompt)
 
-OUT = CHUNKS.parent / "tone"
-PASSAGES = OUT / "passages.parquet"
-VECTORS = OUT / "vectors.npy"  # every chunk's stored embedding, unit length, in chunks() order (2.8 GB)
-VECTOR_ORDER = OUT / "vectors_order.sha256"  # hash of the chunk ids in VECTORS' row order
-SCORES = OUT / "scores.parquet"  # one row per scored passage, keyed by its row number in PASSAGES (pid)
-STATE = OUT / "batches.json"  # submitted batches not yet collected
-BASELINES = OUT / "baselines.parquet"  # FinBERT, LM and rule-based counts per distinct chunk
-# form -> passages, scores, batch state, baselines; the 10-Q cells (B5) get their own q_ files
-FILES = {"10-K": (PASSAGES, SCORES, STATE, BASELINES),
-         "10-Q": tuple(OUT / f"q_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),
-         "rerun": (*(OUT / f"rerun_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # B6: a sample scored again
-         "masked": (*(OUT / f"masked_{f.name}" for f in (PASSAGES, SCORES, STATE)), None),  # masked check: event-test passages, no company or year
-         "section": tuple(OUT / f"s_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES)),  # S_TOPICS within S_ITEM (sections)
-         "new": tuple(OUT / f"n_{f.name}" for f in (PASSAGES, SCORES, STATE, BASELINES))}  # the event tests' cells on new text only (diff.py)
-KEY = {"10-K": ["ticker", "fy"], "10-Q": ["ticker", "report_date"]}  # one filing: a fiscal year's 10-K, a quarter's 10-Q
 Q_TOPICS = ["Deposits and liquidity", "Interest rates"]  # B5 scores 10-Qs for Financials on these only
 S_TOPICS, S_ITEM = ["AI"], "7"  # section-level cells: AI's top 3 within each 10-K's MD&A (PLAN.md Phase 7, 2026-10-18)
-QUERIES = OUT / "queries.npy"  # the query vectors passages.parquet was ranked with, in TOPICS order
-K = 3
-LAST_FY = 2025  # FY2026: only companies whose fiscal year doesn't end in December had filed
-BATCH_REQUESTS, BATCH_BYTES = 100_000, 200e6  # the API's limits are 100,000 requests and 256 MB
-USD_PER_REQUEST = 0.0002  # gold run: $0.016 for 40 calls at full price, halved; the smoke test measures it
 # the masked check leaves these out: their fiscal-year labels are being fixed (2026-10-17)
 MASK_SKIP = ["AVY", "CDNS", "DPZ", "ILMN", "JNJ", "LDOS", "LHX", "RVTY", "SNA", "SWK", "TDY", "TRMB", "TXT"]
 
@@ -86,54 +69,12 @@ def top(c: pd.DataFrame, df: pd.DataFrame, vs: np.ndarray, bs: np.ndarray, form:
     rows = []
     for r in c.to_dict("records"):
         idx = groups[(form, *[r[x] for x in KEY[form]])]
-        n = min(retrieve.CANDIDATES, len(idx))
+        n = min(CANDIDATES, len(idx))
         v = idx[np.argsort(-vs[idx], kind="stable")[:n]]
         b = idx[np.argsort(-bs[idx], kind="stable")[:n]]
         fused = retrieve.rrf(list(ids[v]), list(ids[b[bs[b] > 0]]))  # BM25 drops chunks with no query word
         rows += [{**r, "rank": i, "chunk_id": cid, "rrf": s} for i, (cid, s) in enumerate(list(fused.items())[:K], 1)]
     return rows
-
-
-def order_hash(ids: pd.Series) -> str:
-    return hashlib.sha256("\n".join(ids).encode()).hexdigest()
-
-
-def matches_chroma(v: np.ndarray, ids: pd.Series, n: int = 200, seed: int = 0) -> bool:
-    """Whether n random rows of v are the Chroma embeddings of the chunks in those rows of chunks()."""
-    pick = np.sort(np.random.default_rng(seed).choice(len(ids), min(n, len(ids)), replace=False))
-    want = ids.iloc[pick].tolist()
-    got = retrieve.collection().get(ids=want, include=["embeddings"])
-    if sorted(got["ids"]) != sorted(want):
-        return False
-    e = pd.DataFrame(np.asarray(got["embeddings"], np.float32), index=got["ids"]).loc[want].to_numpy()
-    return bool(np.allclose((e / np.linalg.norm(e, axis=1, keepdims=True) * v[pick]).sum(axis=1), 1, atol=1e-4))
-
-
-def vectors() -> np.ndarray:
-    """Read from Chroma once, then from disk. Rows follow chunks()'s order, which moves if chunks.parquet is
-    rebuilt from a changed manifest, so the order is recorded (VECTOR_ORDER) and checked on every load."""
-    ids = retrieve.chunks().chunk_id
-    if VECTORS.exists():
-        v = np.load(VECTORS, mmap_mode="r")
-        if not VECTOR_ORDER.exists() and len(v) == len(ids) and matches_chroma(v, ids):
-            VECTOR_ORDER.write_text(order_hash(ids))  # saved before the order was recorded: checked against Chroma first
-        if not VECTOR_ORDER.exists() or VECTOR_ORDER.read_text() != order_hash(ids):
-            raise SystemExit(f"{VECTORS} doesn't follow the rows of {CHUNKS}; delete it and {VECTOR_ORDER.name} "
-                             "to rebuild it from Chroma")
-        return v
-    pos = pd.Series(np.arange(len(ids)), index=ids.to_numpy())
-    v = np.zeros((len(ids), EMBED_DIMS), np.float32)
-    col, page = retrieve.collection(), 20_000
-    for off in range(0, col.count(), page):
-        got = col.get(include=["embeddings"], limit=page, offset=off)
-        v[pos.loc[got["ids"]].to_numpy()] = got["embeddings"]
-    norms = np.linalg.norm(v, axis=1, keepdims=True)
-    if (norms == 0).any():
-        raise SystemExit(f"{int((norms == 0).sum())} chunks have no vector in Chroma; re-embed them first")
-    OUT.mkdir(parents=True, exist_ok=True)
-    np.save(VECTORS, v / norms)
-    VECTOR_ORDER.write_text(order_hash(ids))
-    return np.load(VECTORS, mmap_mode="r")
 
 
 def retrieve_cells(form: str = "10-K") -> None:
@@ -146,7 +87,7 @@ def retrieve_cells(form: str = "10-K") -> None:
         raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
     start = time.time()
     df = retrieve.chunks()
-    vec, c = vectors(), cell_grid(form, df)
+    vec, c = retrieve.vectors(), cell_grid(form, df)
     rows = []
     for topic in c.topic.unique():
         q = np.asarray(retrieve.embed_query(TOPICS[topic]), np.float32)
@@ -183,7 +124,7 @@ def sections(form: str = "section", items: dict | None = None, keep: set | None 
     passages, scores, state, _ = FILES[form]
     if scores.exists() or state.exists():  # as in retrieve_cells: scores point at row numbers
         raise SystemExit(f"{scores} or {state} exists; move them before retrieving again")
-    df, vec, old = retrieve.chunks(), vectors(), pd.read_parquet(PASSAGES)
+    df, vec, old = retrieve.chunks(), retrieve.vectors(), pd.read_parquet(PASSAGES)
     q, rows = dict(zip(TOPICS, np.load(QUERIES))), []
     for topic, item in (items or dict.fromkeys(S_TOPICS, S_ITEM)).items():
         vs = vec @ (q[topic] / np.linalg.norm(q[topic]))
@@ -320,8 +261,6 @@ def rerun(budget: float, n: int = 5000, seed: int = 0) -> None:
     if not passages.exists():
         pd.read_parquet(PASSAGES).reset_index(names="orig_pid").sample(n, random_state=seed).to_parquet(passages, index=False)
     score_cells(budget, form="rerun")
-    from sec_filings_tone.sentiment import kappa_ci
-
     a = pd.read_parquet(passages).reset_index(names="pid").merge(pd.read_parquet(scores), on="pid")
     b = pd.read_parquet(SCORES).rename(columns={"pid": "orig_pid"})
     m = a.merge(b, on="orig_pid", suffixes=("", "_first"))
@@ -337,29 +276,6 @@ def rerun(budget: float, n: int = 5000, seed: int = 0) -> None:
     print("scorer noise variance per passage: " + ", ".join(f"{d} {v:.3f}" for d, v in noise.items()))
 
 
-def masked_prompt(row: pd.Series, topic: str, dims: list[str]) -> str:
-    """sentiment.user_prompt with the company and fiscal year taken out: the Filing line keeps only the
-    form and section ("Filing: a 10-K, Item 1A Risk Factors"). Every other character is the same."""
-    p, hint = user_prompt(row, topic, dims), f"\nFiling: {row['ticker']} {row['form']} {period(row)}, "
-    if hint not in p:  # the production prompt changed: stop rather than send the hint
-        raise ValueError("sentiment.user_prompt's Filing line changed; update masked_prompt")
-    return p.replace(hint, f"\nFiling: a {row['form']}, ", 1)
-
-
-def scorer_hashes() -> dict:
-    """SHA-256 of what score_cells sends: the system prompt, the output schema and the user prompt template (a
-    10-K row with placeholders); prompt_key, a short key over those three; and the masked check's template.
-    provenance.json (export.py) and the run log (budget.run_log) both take them from here."""
-    def sha(s: str) -> str:
-        return hashlib.sha256(s.encode()).hexdigest()
-
-    row, dims = {"ticker": "{ticker}", "form": "10-K", "fy": "{fy}", "item": "1A", "text": "{text}"}, list(DIMENSIONS)
-    h = {"system_prompt_sha256": sha(system_prompt()), "output_schema_sha256": sha(json.dumps(transform_schema(schema(dims)))),
-         "user_prompt_template_sha256": sha(user_prompt(row, "{topic}", dims))}
-    return h | {"prompt_key": sha("".join(h.values()))[:12],
-                "masked_user_prompt_template_sha256": sha(masked_prompt(row, "{topic}", dims))}
-
-
 def masked_sample(p: pd.DataFrame, ev: pd.DataFrame, n: int = 340, seed: int = 0) -> pd.DataFrame:
     """The masked check's passages. For each event in `ev` (events.csv): each company's "before" and "after" cell on the
     event's topics, picked as events.changes picks them, with only the passages its test uses (the
@@ -367,8 +283,6 @@ def masked_sample(p: pd.DataFrame, ev: pd.DataFrame, n: int = 340, seed: int = 0
     are drawn at random until the event has about n passages: up to two thirds from the affected group
     (all of it if that's fewer), the rest from the others, or all n from the affected group if there are
     no others. `p` is the annual passages with orig_pid, item, filing_date and report_date."""
-    from sec_filings_tone.events import affected
-
     p, key, out = p[~p.ticker.isin(MASK_SKIP)], ["ticker", "fy", "topic"], []
     for e in ev.itertuples():
         c = p[p.topic.isin(e.topics.split(";"))]
@@ -391,8 +305,6 @@ def leaks(p: pd.DataFrame) -> pd.DataFrame:
     """Per passage of `p`, whether its own text gives away what the masked header hides: its company (the
     ticker, if two letters or more, or the name in data/companies.csv without Inc., Group and the like,
     as written there or in capitals), a year from 2019 to 2026, COVID, or another word dated to the period."""
-    from sec_filings_tone.events import COMPANIES
-
     text = pd.read_parquet(CHUNKS, columns=["chunk_id", "text"], filters=[("chunk_id", "in", p.chunk_id.unique().tolist())]
                            ).set_index("chunk_id").text.loc[p.chunk_id].reset_index(drop=True)
     name = pd.read_csv(COMPANIES).set_index("ticker").name.str.replace(
@@ -413,8 +325,6 @@ def masked(budget: float, n: int = 340, seed: int = 0) -> None:
     (masked_sample, drawn once and kept, so a stopped run resumes) are scored again with masked_prompt
     and compared with their original scores (masked_report). The sample, how often its text names the
     company or the period anyway, and the cost are printed first; with --budget 0 nothing is sent."""
-    from sec_filings_tone.events import EVENTS
-
     passages = FILES["masked"][0]
     if not passages.exists():
         p = pd.read_parquet(PASSAGES).reset_index(names="orig_pid").merge(
@@ -436,9 +346,6 @@ def masked_report() -> None:
     B6's second run against the first (the noise floor: the hint matters only if masking agrees clearly
     less). Then each event's change where it hit, and its difference from the others, with each scoring,
     on the companies whose change exists with both."""
-    from sec_filings_tone.events import EVENTS, affected, changes, did
-    from sec_filings_tone.sentiment import kappa_ci
-
     dims, first = list(DIMENSIONS), pd.read_parquet(SCORES).rename(columns={"pid": "orig_pid"})
 
     def paired(form):  # a sample's new scores beside its original ones (suffix _orig)
@@ -517,6 +424,7 @@ def baselines(form: str = "10-K", part: int = 5000) -> None:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("command", choices=["retrieve", "check", "score", "baselines", "rerun", "masked"])
     p.add_argument("--n", type=int, default=50)

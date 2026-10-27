@@ -41,13 +41,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from sec_filings_tone.ingest import CHUNKS
+from sec_filings_tone.config import CHUNKS, COMPANIES, EVENT_RESULTS, EVENTS, EVENTS_QUARTERLY, FILES, KEY, LAST_FY, OUT
 from sec_filings_tone.sentiment import DIMENSIONS
-from sec_filings_tone.tone import FILES, KEY, OUT
 
-EVENTS = Path(__file__).parents[2] / "events.csv"
-RESULTS = OUT / "events.csv"
-QUARTERLY = (EVENTS.with_name("events_quarterly.csv"), "10-Q", OUT / "q_events.csv")  # report()'s arguments for B5
+QUARTERLY = (EVENTS_QUARTERLY, "10-Q", OUT / "q_events.csv")  # report()'s arguments for B5
 # topics with a clear vocabulary; added 2026-10-17 after the model was found calling passages on topic that name none of it
 TOPIC_WORDS = {
     "AI": r"(?i:artificial intelligence|machine learning|deep learning|neural network|large language model|genai)|\bA\.?I\.?\b",
@@ -56,7 +53,6 @@ TOPIC_WORDS = {
 }
 DIMS = list(DIMENSIONS)
 MEASURES = [*DIMS, "discussed"]
-COMPANIES = Path(__file__).parents[2] / "data" / "companies.csv"
 # baseline -> the dimension whose expected direction it's tested against
 BASELINE_FOR = {"finbert_polarity": "polarity", "lm_polarity": "polarity", "lm_uncertainty": "uncertainty",
                 "details_per_100w": "specificity"}
@@ -152,7 +148,7 @@ def affected(e, sector: pd.Series) -> pd.Series:
     return hit
 
 
-def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Path = RESULTS,
+def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Path = EVENT_RESULTS,
            keep: set | None = None, filed: bool = False) -> None:
     ev = events if isinstance(events, pd.DataFrame) else pd.read_csv(events, dtype=str, keep_default_na=False)
     rows = []
@@ -191,7 +187,7 @@ def report(events: Path | pd.DataFrame = EVENTS, form: str = "10-K", results: Pa
 def study(c: pd.DataFrame, e) -> pd.DataFrame:
     """Per company and event year k (fiscal year minus that of its "before" 10-K, before_cells): each
     measure's change from that 10-K, averaged over the event's topics. FY2019-FY2025."""
-    c = c[c.topic.isin(e.topics.split(";")) & (c.fy <= 2025)]
+    c = c[c.topic.isin(e.topics.split(";")) & (c.fy <= LAST_FY)]
     before = before_cells(c, e.date)
     x = c.merge(before[["ticker", "topic", "fy", *MEASURES]], on=["ticker", "topic"], suffixes=("", "_b"))
     x = x.assign(k=x.fy - x.fy_b, **{m: x[m] - x[f"{m}_b"] for m in MEASURES})

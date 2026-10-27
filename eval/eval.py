@@ -21,9 +21,10 @@ import re
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 
-from sec_filings_tone import retrieve
 from sec_filings_tone.budget import Cap, CapReached, rerank_call_usd, run_log
+from sec_filings_tone.config import CANDIDATES, EMBED_MODEL, RERANK_MODEL
 from sec_filings_tone.retrieve import STAGES, chunks, search, subset
 
 TESTS = Path(__file__).parent / "tests.jsonl"
@@ -60,6 +61,7 @@ def run(test: dict, rerank: bool) -> tuple[dict, dict]:
 
 
 def main() -> None:
+    load_dotenv()
     p = argparse.ArgumentParser()
     p.add_argument("test", nargs="?", type=int, help="row number in tests.jsonl (0-based)")
     p.add_argument("--no-rerank", action="store_true")
@@ -69,7 +71,7 @@ def main() -> None:
     cap = Cap(a.budget, a.max_minutes)
     if a.no_rerank:  # free but for the query embeddings
         return evaluate(a, cap)
-    with run_log([retrieve.RERANK_MODEL, retrieve.EMBED_MODEL], lambda: {"usd": {"anthropic": cap.spent()}}):
+    with run_log([RERANK_MODEL, EMBED_MODEL], lambda: {"usd": {"anthropic": cap.spent()}}):
         evaluate(a, cap)
 
 
@@ -89,7 +91,7 @@ def evaluate(a: argparse.Namespace, cap: Cap) -> None:
     rows = []
     for i, t in enumerate(tests):
         try:
-            cap.check(rerank_call_usd(retrieve.CANDIDATES * 800) if not a.no_rerank else 0)
+            cap.check(rerank_call_usd(CANDIDATES * 800) if not a.no_rerank else 0)
         except CapReached as e:
             raise SystemExit(f"stopped before test {i}: {e}")
         metrics, _ = run(t, not a.no_rerank)
